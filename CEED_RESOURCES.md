@@ -336,3 +336,95 @@ site:ocw.mit.edu product design OR user interface
 ---
 
 *Round 2 additions. Reachability of official/institutional PDFs (BIS anthropometry, ALLEN optics, HFES, NCSU, Gestalt handout, UXPin color, Toprankers UCEED, IxDF UX basics) was HTTP-verified. Third-party mirrors (⚠️) and Scribd links may require login or be user-uploaded — verify licensing/authenticity before use. Museum/university pages (Smithsonian, Met, MoMA, MIT, IITG) are authoritative. Indexed/rephrased for compliance.*
+
+
+---
+---
+
+# 🕳️🕳️ DEEPER DIG — Expanded Vault (Round 3)
+
+Even more, into fresh territory. Same legend.
+
+---
+
+## 26. ⭐ D'Source (e-kalpa) — Govt-funded free Indian design library (goldmine)
+
+Built by **IDC IIT Bombay + NID Ahmedabad**, sponsored by Govt of India (MHRD). 160+ design courses, 400+ craft/design resources, video lectures, galleries — the single most CEED-aligned free Indian source.
+
+- ⭐ 🔗 D'Source home (verified ✅): https://dsource.in/
+- 🔗 D'Source about / e-kalpa: https://dsource.in/about/us
+- 🔗 D'Source courses index (design fundamentals, product, visual, UX): https://dsource.in/courses
+- 🔗 D'Source resources & galleries (crafts, case studies): https://dsource.in/resource
+- 📱 D'Source Android app: https://play.google.com/store/apps/details?id=com.ekalpa.dsource
+- 📱 D'Source iOS app: https://apps.apple.com/us/app/dsource/id1460246419
+- 🔗 IDC School of Design (IIT Bombay) — academics/projects: https://www.idc.iitb.ac.in/academic
+- 🔗 IDC IIT Bombay main: https://www.idc.iitb.ac.in/
+
+## 27. Design Thinking & Human-Centered Design (free toolkits)
+
+- ⭐ 🔗 Stanford d.school — Design Thinking Bootleg (free method deck, verified ✅): https://dschool.stanford.edu/resources/the-bootcamp-bootleg
+- 🔗 Stanford d.school — all free resources/tools: https://dschool.stanford.edu/resources
+- 🔗 Stanford d.school — Starter Kit: https://dschool.stanford.edu/tools/starter-kit
+- 🔗 Stanford d.school — Design Thinking Artifacts: https://dschool.stanford.edu/resources/design-thinking-artifacts
+- 🔗 IDEO — Design Kit (HCD methods): https://www.designkit.org/methods
+- 🔗 IDEO — Field Guide to Human-Centered Design: https://www.designkit.org/resources/1
+- 🔗 UNICEF — Human-Centered Design: https://www.unicef.org/innovation/hcd
+- 📄 Design Thinking primer (UC Berkeley CASN, verified ✅): https://casn.berkeley.edu/wp-content/uploads/resource_files/S1_Design_Thinking.pdf
+- 🔗 Task-Centered Design process (Lewis & Rieman free HCI book): https://cspages.ucalgary.ca/~tam/2001/hci_topics/papers/LewisRiemanBook/chap-1.html
+
+## 28. Sustainability, Circular Economy & Biomimicry
+
+- 📄 Ellen MacArthur Foundation — Designing for Circularity guide (verified ✅): https://content.ellenmacarthurfoundation.org/m/3268bbe2a9ed6283/original/EN-Designing-for-Circularity-D-03-26.pdf
+- 🔗 EMF — Circular economy intro/overview: https://www.ellenmacarthurfoundation.org/topics/circular-economy-introduction/overview
+- 🔗 EMF — design tools hub: https://ellenmacarthurfoundation.org/resources/design/tools/
+- 🔗 EMF — adaptive strategy for circular design: https://ellenmacarthurfoundation.org/an-adaptive-strategy-for-circular-design
+- 🔗 AskNature (biomimicry database): https://asknature.org/
+- 🔗 Cradle to Cradle Products Innovation Institute: https://c2ccertified.org/
+
+## 29. Indian Crafts, Textiles & GI Tags (Environmental & Social Awareness)
+
+- 📄 Govt GI brochure — Geographical Indications of India (PIB, verified ✅): https://static.pib.gov.in/WriteReadData/specificdocs/documents/2021/nov/doc2021112441.pdf
+- 📄 DPIIT — GI tags granted across states since 2021: https://www.dpiit.gov.in/static/uploads/2026/03/3dee535ef7ed198fd79d7745fe1205da.pdf
+- 🔗 Office of Development Commissioner (Handicrafts), Govt of India: https://handicrafts.nic.in/
+- 🔗 State-wise GI tag list (Vajiram, updated): https://vajiramandravi.com/upsc-exam/gi-tag/
+- 🔗 India GI tags 2025 list (Guidely): https://guidely.in/blog/list-of-geographical-indication-tags-in-india
+- 📄 GI & handicrafts legal paper (NISCPR/JIPR): https://nopr.niscpr.res.in/bitstream/123456789/13056/1/JIPR%2016(6)%20463-469.pdf
+- 🔗 D'Source craft galleries (see section 26) — best visual craft documentation
+
+## 30. Materials & Manufacturing (CMF, plastics, processes)
+
+- 🔗 Princeton "Materials" mech-design notes (properties/selection): https://www.princeton.edu/~maelabs/hpt/materials/mater_41.htm
+- 🔗 UNSW — thermoforming plastics (process explainer): https://www.making.unsw.edu.au/learn/thermoforming-plastics/
+- 🔗 Plastics Technology — materials (commodity vs engineering): https://www.ptonline.com/topics/materials
+- 🔗 Plastics Technology — additives: https://www.ptonline.com/topics/additives
+- 🔗 Sustainable Design Studio — plastic types/recycling: https://www.sustainabledesign.studio/resources/plastic-types
+- 🔗 Bamboo-fiber composites review (open PMC paper): https://pmc.ncbi.nlm.nih.gov/articles/PMC10647463/
+- 📚 Ashby — *Materials and Design* (Archive.org search): https://archive.org/search?query=ashby+materials+and+design
+
+## 31. Free MOOCs & University Design Courses
+
+- 🎥 Coursera — Fundamentals of Graphic Design (CalArts, audit free): https://www.coursera.org/learn/fundamentals-of-graphic-design
+- 🎥 Coursera — Microsoft Product Design & UX/UI Fundamentals: https://www.coursera.org/lecture/microsoft-product-design-and-ux-ui-fundamentals/the-power-of-visual-communication-hHCMg
+- 🔗 UC Berkeley Library — elements & principles of design guide: https://guides.lib.berkeley.edu/design
+- 🔗 University of Edinburgh — Product Design 1A fundamentals (syllabus): https://www.drps.ed.ac.uk/current/dpt/cxdesi08083.htm
+- 🔗 OER Commons (open educational design resources): https://www.oercommons.org/
+- 🔗 NN/g — visual design free article library: https://www.nngroup.com/articles/
+
+---
+
+## 32. Power Search Queries (round 3)
+
+```
+site:dsource.in course OR resource OR gallery
+"design thinking" bootleg OR toolkit filetype:pdf
+"GI tag" OR "geographical indication" India handicrafts list filetype:pdf site:gov.in
+CMF "color material finish" product design guide filetype:pdf
+injection moulding OR "sheet metal" DFM guidelines filetype:pdf
+"circular economy" OR "cradle to cradle" design principles filetype:pdf
+biomimicry design strategy site:asknature.org
+elements and principles of design filetype:pdf site:edu
+```
+
+---
+
+*Round 3 additions. HTTP-verified (200): D'Source home, Stanford d.school Bootleg, Berkeley design-thinking primer, Ellen MacArthur circularity guide, PIB GI brochure. handicrafts.nic.in is an official govt site but responded slowly on check — use DPIIT PDF as a faster alternative. D'Source (IDC IITB + NID) and d.school are top-tier authoritative free sources. Indexed/rephrased for compliance.*
