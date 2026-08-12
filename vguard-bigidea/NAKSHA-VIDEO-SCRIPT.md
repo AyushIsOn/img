@@ -1,79 +1,79 @@
-# NAKSHA, Video Script
+# NAKSHA — Video Script
 
-Slide numbers match `NAKSHA-Slides.pdf`. Everything in `>` is spoken. `//` = pause / next beat.
-**Measured: 3:15 at 150 wpm.** Count is at the bottom.
+**Show `NAKSHA-Diagram.pdf` full screen the whole time.** Point at each box as you reach it.
+Everything in `>` is spoken. `//` = pause. Measured length is at the bottom.
 
 ---
 
-### 1 · Title, 0:00
+### Opening, nothing on screen yet or the title showing
 
-> Wire is the most commoditised thing V-Guard sells. It competes on price, brand recall, and whatever the electrician happens to have in his van.
-> // We want to change what's being sold.
+> Wire is the most commoditised product V-Guard sells. It competes on price, on brand recall, and on whatever the electrician happens to be carrying in his bag.
+> // We want to change what is being sold.
 
-### 2 · The problem, 0:12
+### The problem
 
-> Indian homes are wired from memory. No drawing, improvised conduit routes, and no record left behind.
-> // And the consequence is measurable: roughly forty-two percent of building fires in India are attributed to electrical short circuits, a phrase that hides ageing wiring, overloaded circuits and substandard material.
+> Indian homes are wired from memory. The electrician works without a drawing, improvises the conduit routes, and leaves nothing behind.
+> // Roughly forty-two percent of building fires in India are attributed to electrical short circuits, and that phrase hides ageing wiring, overloaded circuits and substandard material.
+> // Here is the frustrating part. The codes already exist. Regulations already require a licensed contractor. **But nothing turns those rules into a drawing anyone on an Indian site will actually use.** And with no drawing, there is no record.
 
-### 3 · The standards exist, 0:32
+### Now walk the diagram, left to right
 
-> Here's the frustrating part. The rules already exist. India has a national wiring code and a national earthing code.
-> // So the gap isn't the code. **Nothing turns it into a drawing anyone on an Indian site will actually use.**
-> // And with no drawing, there's no record. That's why people drill into live cables.
+> So here is NAKSHA.
+> // On the left, you upload the architect's plan. That is the only thing you have to give it.
+> // In the middle, the engine generates the whole electrical design against the national wiring and earthing codes. Circuit split, where the distribution board goes, how the conduits route, where every point sits.
+> // And then three outputs.
 
-### 4 · What NAKSHA does, 0:53
+**Point at the top box**
 
-> So: upload the architect's plan, answer a few questions about appliances.
-> // NAKSHA generates the whole design, circuits, board placement, conduit routing, against those codes.
-> // Three outputs: an exact wire schedule in metres by size, on-site marking so the conduits go where the design says, and a permanent record of where every cable lives.
-> // The first one is a purchase order. The third one never leaves the house.
+> First, a wire schedule. Exact metres, by size. **That output is effectively a purchase order for V-Guard wire.**
 
-### 5 · The channel insight, 1:18
+**Point at the middle box**
 
-> Now here's what convinced us.
-> // Every major Indian wire brand has already digitised its electrician relationship. RR Kabel, Finolex, Havells. Polycab's Experts platform reaches about two and a half lakh electricians and retailers.
-> // Every single one is a loyalty scheme. Scan a QR code, collect points, redeem a gift.
-> // The channel is already built. The electricians are already on smartphones. **And nobody has put a tool in it that does any actual work.**
+> Second, site marking. A phone based AR overlay puts the design on the actual wall, so the conduits go where the design says. No equipment, no expensive kit, works on any modern handset.
 
-### 6 · What he actually wants, 1:44
+**Point at the bottom box**
 
-> An electrician doesn't want points.
-> // He wants the load calculation done, the wire sizes decided, the material list totalled, and a defensible answer when the owner asks why it costs that much.
+> Third, and this is the one we like most. As the electrician lays each run, he confirms it. Before the plaster goes on. What you end up with is a permanent map of where every cable in that house lives.
+> // Nobody in India has that today. It is why people drill into live cables, and why renovating means guessing.
 
-### 7 · Honest about prior art, 1:56
+### The channel insight
 
-> Be clear about what's new. Automated takeoff exists, drawer dot A-I turns drawings into wire lengths with routing. Dusty Robotics has printed layouts onto three hundred million square feet of slab.
-> // But all of it serves Western commercial contractors. None encodes Indian standards, and none is distributed by the company that sells the wire.
+> Now, the thing that convinced us this is a business and not just a nice tool.
+> // Every major Indian wire brand has already digitised its electrician relationship. Polycab's platform alone reaches about two and a half lakh electricians and retailers.
+> // Every single one of them is a loyalty scheme. Scan a code, collect points, redeem a gift.
+> // The channel is already built. The electricians are already on smartphones. **And nobody has put a tool in that channel that does any actual work.**
+> // An electrician does not want points. He wants the load calculation done, the wire sizes decided, the material list totalled, and a defensible answer when the owner asks why it costs what it costs.
 
-### 8 · The business, 2:19
+### Honest about what exists
 
-> Every design NAKSHA produces is a purchase order, because the output is a wire schedule in metres.
-> // Specifying the material beats advertising to whoever walks into a shop. That's the Asian Paints move, escape commodity competition by selling the service.
-> // And wiring is decided during construction, before the owner has a brand opinion. You cannot rewire a finished house.
+> We should be clear about what is new. Automated electrical takeoff already exists. Dusty Robotics has printed layouts onto three hundred million square feet of slab.
+> // But all of it serves Western commercial contractors bidding large projects. None of it encodes Indian codes, none of it is built for a 3BHK, and none of it is distributed by the company that sells the wire.
 
-### 9 · On scale, 2:41
+### Why it is a better business
 
-> A national service business is hard, so we don't propose one.
-> // The engine scales at software cost. Only marking needs people, so we separate them: a free app nationally, assisted service in metros, and a robotic flagship built to be photographed, not to make margin.
+> Wiring is specified during construction, before the owner has any brand opinion, and it is never re-shopped. You cannot rewire a finished house.
+> // That is the Asian Paints move. They escaped commodity paint competition by selling the service instead of the tin.
 
-### 10 · Honest risk, 2:57
+### Close on the honest risk
 
-> The real risk isn't the technology, it's adoption. It has to visibly save an electrician time on load calculation and estimating on day one, or it gets ignored.
-> // That's what we'd test first.
+> The real risk is not the technology, it is adoption. This has to visibly save an electrician time on load calculation and estimating on day one, or it gets ignored.
+> // That is what we would test first.
 
 ---
 
 ## Recording notes
 
-- **Screen-record the slides PDF full-screen** and talk over it. Ten short clips, one per slide.
-- Say **"drawer dot A-I"**.
-- **Slide 5 is the punchline of the entire pitch.** Pause before *"nobody has put a tool in it that does any actual work."*
-- Export **1080p MP4, H.264.** Slides are exact 16:9.
+- **Open `NAKSHA-Diagram.pdf` full screen** and screen-record. One diagram for the whole video, so no slide changes to manage.
+- Use your cursor to point at each of the three output boxes as you describe them.
+- Record in short takes, one per section heading above, then stitch. Much easier than one long take.
+- Say **"drawer dot A-I"** if you mention it. Say **"three B-H-K"**.
+- **Pause before** *"nobody has put a tool in that channel that does any actual work."* That is the line the judges should remember.
+- Export **1080p MP4**.
 
-## Trimming
+## If you need it shorter
 
-**Need 2:00?** Slides 1, 2, 4, 5, 8, problem, solution, the channel insight, the business. That's the spine.
+Cut *Honest about what exists* and *Why it is a better business*. Keep: opening, problem, the diagram walk, the channel insight, and the closing risk. That is the complete argument.
 
 ## Measured length
 
-**490 spoken words.**  140 wpm = 3:30  |  150 wpm = 3:15  |  160 wpm = 3:03
+**546 spoken words.**  140 wpm = 3:53  |  150 wpm = 3:38  |  160 wpm = 3:24
