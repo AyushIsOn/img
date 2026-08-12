@@ -127,7 +127,7 @@ box(M, 150, 300, 96, "42%", "of building fires in India", fill=ACCENT,
     stroke=ACCENT, size=52)
 tag(M + 330, 214, "attributed to electrical short circuits", INK, 18,
     font="Helvetica-Bold")
-body(["And \u201cshort circuit\u201d hides the real causes \u2014 ageing",
+body(["And \u201cshort circuit\u201d hides the real causes, ageing",
       "wiring, overloaded circuits, substandard material,",
       "quietly accumulating behind the plaster."], 188, 15, 22, MUTED,
      M + 330)
@@ -138,11 +138,11 @@ bg(3)
 kicker("the frustrating part")
 head(["The rules already exist."])
 y = 300
-for code, desc in [("IS 732", "Code of practice for electrical wiring installation"),
-                   ("IS 3043", "Code of practice for earthing"),
-                   ("CEA 2023", "Work must be done by a licensed contractor")]:
-    box(M, y, 120, 34, code, fill=FILL, size=15)
-    tag(M + 136, y + 11, desc, MUTED, 15)
+for code, desc in [("WIRING CODE", "national code of practice for wiring installation"),
+                   ("EARTHING CODE", "national code of practice for earthing"),
+                   ("REGULATION", "work must be done by a licensed contractor")]:
+    box(M, y, 168, 34, code, fill=FILL, size=13)
+    tag(M + 184, y + 11, desc, MUTED, 14)
     y -= 50
 c.setFillColor(ACCENT)
 c.setFont("Helvetica-Bold", 21)
@@ -158,7 +158,7 @@ kicker("what naksha does")
 head(["One upload. Three outputs."], H - 132, 32, 40)
 box(M, 236, 150, 66, "ARCHITECT'S PLAN", "PDF or DWG", fill=FILL, size=13)
 arrow(M + 158, 269, M + 190)
-box(M + 198, 226, 180, 86, "NAKSHA ENGINE", "IS 732 / IS 3043", fill=ACCENT,
+box(M + 198, 226, 180, 86, "NAKSHA ENGINE", "national wiring codes", fill=ACCENT,
     stroke=ACCENT, size=16)
 tag(M + 288, 210, "circuits \u00b7 DB siting \u00b7 routing", MUTED, 12,
     anchor="c")
@@ -255,7 +255,7 @@ body(["The output is a wire schedule in metres, by size.",
 box(M, 176, W - 2 * M, 72, "THE ASIAN PAINTS MOVE",
     "escape commodity competition by selling the service, not the tin",
     fill=ACCENT, stroke=ACCENT, size=19)
-body(["Wiring is decided during construction \u2014 before the owner has a "
+body(["Wiring is decided during construction, before the owner has a "
       "brand opinion.",
       "Nobody re-shops it. You cannot rewire a finished house."], 148, 17, 25,
      INK)
@@ -266,14 +266,14 @@ bg(9)
 kicker("on scale")
 head(["We don't propose a", "national service business."], H - 132, 32, 40)
 body(["The design engine scales at software cost. Only the marking needs "
-      "people \u2014 so we separate them."], H - 218, 16, 24, MUTED)
+      "people, so we separate them."], H - 218, 16, 24, MUTED)
 rows = [("TIER 1  \u00b7  APP", "Free, all-India",
          "phone AR marking \u00b7 zero hardware \u00b7 infinitely scalable",
          FILL, INK),
         ("TIER 2  \u00b7  ASSISTED", "Metro cities",
          "trained V-Guard marking partner \u00b7 paid service", FILL, INK),
         ("TIER 3  \u00b7  FLAGSHIP", "Showcase only",
-         "robotic / laser layout \u2014 built for marketing, not margin",
+         "robotic or laser layout, built for marketing, not margin",
          ACCENT, colors.white)]
 y = 216
 for name, scope, note, fill, tc in rows:
@@ -293,10 +293,10 @@ head(["The risk isn't the technology.", "It's adoption."], H - 132, 32, 40)
 body(["Experienced electricians may read this as a challenge to their "
       "judgment."], 300, 18, 26, MUTED)
 box(M, 190, W - 2 * M, 86, "IT MUST SAVE HIM TIME ON DAY ONE",
-    "load calculation and estimating \u2014 visibly faster, or it gets ignored",
+    "load calculation and estimating, visibly faster, or it gets ignored",
     fill=ACCENT, stroke=ACCENT, size=20)
 body(["Also honest: Indian residential plans are often scanned, hand-marked or "
-      "dimensionally unreliable \u2014",
+      "dimensionally unreliable,",
       "so the first release assumes human confirmation of every inferred room."],
      150, 14, 21, MUTED)
 c.showPage()

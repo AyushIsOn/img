@@ -53,7 +53,7 @@ def P(t, s="body"):
 
 
 def B(t):
-    return Paragraph(t, S["bullet"], bulletText="\u2013")
+    return Paragraph(t, S["bullet"], bulletText="\u2022")
 
 
 class Diagram(Flowable):
@@ -128,7 +128,7 @@ class DiagPipeline(Diagram):
         self.box(0, 96, 96, 40, "ARCHITECT'S", "plan (PDF/DWG)", fill=FILL)
         self.arrow(100, 116, 122)
         self.box(126, 88, 130, 56, "NAKSHA ENGINE",
-                 "IS 732 / IS 3043 rules", fill=ACCENT, stroke=ACCENT,
+                 "national wiring codes", fill=ACCENT, stroke=ACCENT,
                  size=8.4)
         self.tag(191, 78, "circuits \u00b7 DB siting \u00b7 routing", MUTED,
                  6.6, anchor="c")
@@ -186,8 +186,8 @@ class DiagTiers(Diagram):
                  "zero hardware, infinitely scalable", FILL, INK),
                 ("Tier 2 \u00b7 Assisted", "Metro cities", "trained V-Guard "
                  "marking partner, paid service", FILL, INK),
-                ("Tier 3 \u00b7 Flagship", "Showcase only", "robotic / laser "
-                 "layout \u2014 built for marketing, not margin", ACCENT,
+                ("Tier 3 \u00b7 Flagship", "Showcase only", "robotic or laser "
+                 "layout, built for marketing, not margin", ACCENT,
                  colors.white)]
         y = 74
         for name, scope, note, fill, tc in rows:
@@ -213,9 +213,9 @@ A(P("Wire is the most commoditised thing V-Guard sells. It competes on price, "
 
 A(P("An owner, contractor or electrician uploads the architect's floor plan and "
     "answers a few questions about appliances. NAKSHA returns a complete "
-    "residential electrical design \u2014 circuit split, distribution board "
-    "siting, conduit routing, point placement \u2014 generated against "
-    "<b>IS 732</b> and <b>IS 3043</b>. It produces three outputs: an exact "
+    "residential electrical design: circuit split, distribution board "
+    "siting, conduit routing and point placement, all generated against "
+    "the national wiring and earthing codes. It produces three outputs: an exact "
     "<b>wire schedule in metres by size</b>, on-site <b>marking guidance</b> so "
     "the conduits actually go where the design says, and a permanent "
     "<b>as-built digital record</b> of where every cable in the house lives."))
@@ -233,15 +233,15 @@ A(P("Indian homes are wired from memory. The electrician works without a "
     "attributed to electrical short circuits</b>, and fire officials note that "
     "the phrase conceals ageing wiring, overloaded circuits, substandard "
     "material and years of neglect accumulating behind plaster."))
-A(P("The standards already exist. BIS publishes <b>IS 732</b> for wiring "
-    "installation and <b>IS 3043</b> for earthing, and the CEA (Measures "
-    "relating to Safety and Electric Supply) Regulations, 2023 require "
-    "installation work to be carried out by a licensed electrical contractor "
-    "under competent supervision. In February 2025 Parliament was asked why "
-    "periodic household electrical safety checks are still not mandated."))
+A(P("The standards already exist. India has published codes of practice for "
+    "both wiring installation and earthing, and current safety regulations "
+    "require installation work to be carried out by a licensed electrical "
+    "contractor under competent supervision. In February 2025 Parliament was "
+    "asked why periodic household electrical safety checks are still not "
+    "mandated."))
 A(P("<b>So the gap is not the code. It is that nothing translates the code into "
     "a drawing anyone on an Indian residential site will actually use.</b> And "
-    "because there is no drawing, there is no as-built record \u2014 which is "
+    "because there is no drawing, there is no as-built record, which is "
     "why people drill into live cables and why renovation means guessing."))
 
 A(P("The channel insight", "h2"))
@@ -267,8 +267,9 @@ A(P("Technology", "h2"))
 A(B("<b>Plan understanding.</b> Vectorise the uploaded plan; segment rooms, "
     "walls, doors and openings. Room-type inference from dimensions, adjacency "
     "and labels, with human confirmation rather than blind trust."))
-A(B("<b>Rule engine.</b> IS 732 and IS 3043 encoded as explicit, auditable "
-    "constraints \u2014 separate lighting and power circuits, dedicated ways "
+A(B("<b>Rule engine.</b> The national wiring and earthing codes encoded as "
+    "explicit, auditable "
+    "constraints: separate lighting and power circuits, dedicated ways "
     "for heavy loads, points-per-circuit limits, earthing requirements, "
     "diversity factors for load estimation. Deterministic and inspectable, not "
     "a language model guessing at safety rules."))
@@ -289,12 +290,12 @@ A(B("<b>As-built capture.</b> The electrician confirms or corrects each run "
 
 A(P("Novelty, stated honestly", "h2"))
 A(P("The components are not new and the proposal is stronger for saying so. "
-    "Automated electrical takeoff is a mature commercial category \u2014 tools "
+    "Automated electrical takeoff is a mature commercial category. Tools "
     "such as drawer.ai already accept PDF drawings and export quantities, "
     "device properties and <b>wire lengths with marked-up routing</b>, and "
     "Kreo, Trimble Accubid and PlanSwift serve the same market. Academic work "
     "presented at ISARC 2026 automates outlet-to-circuit and "
-    "circuit-to-panelboard assignment in a CAD\u2013BIM workflow. Robotic "
+    "circuit-to-panelboard assignment in a CAD and BIM workflow. Robotic "
     "site layout is also solved: Dusty Robotics' FieldPrinter has printed "
     "coordinated models on more than <b>300 million square feet</b> of slab."))
 A(P("All of that serves <b>Western commercial contractors bidding large "
@@ -311,7 +312,7 @@ A(P("Our contribution is therefore positional, not algorithmic: <b>Indian code "
 A(P("Business value", "h2"))
 A(B("<b>Every design is a purchase order.</b> The output is a wire schedule in "
     "metres by size. Specifying the material is a categorically stronger "
-    "position than advertising to whoever walks into a shop \u2014 this is the "
+    "position than advertising to whoever walks into a shop, this is the "
     "Asian Paints move, which used Beautiful Homes services to escape "
     "commodity paint competition, and which Berger followed with Express "
     "Painting."))
@@ -319,7 +320,7 @@ A(B("<b>It captures the decision years earlier.</b> Wiring is specified during "
     "construction, before the owner has any brand opinion, and it is never "
     "re-shopped. Rewiring a finished house is unthinkable."))
 A(B("<b>It creates a portfolio funnel.</b> The same plan positions the water "
-    "heater, chimney, RO and gas point \u2014 all V-Guard categories, all "
+    "heater, chimney, RO and gas point, all V-Guard categories, all "
     "decided at construction stage, all currently decided by whoever is "
     "standing there."))
 A(B("<b>It is a margin story, not a volume story.</b> V-Guard's FY25-26 "
@@ -329,14 +330,14 @@ A(B("<b>The as-built record is the lock-in.</b> A household whose wiring map "
     "lives in V-Guard's app has a reason to return for every future addition, "
     "fault and renovation."))
 
-A(P("On scale \u2014 and the marking problem", "h2"))
+A(P("On scale, and the marking problem", "h2"))
 A(P("A national service business is genuinely hard: staff, training, equipment, "
     "quality control. We do not propose one. The design engine scales at "
-    "software cost; only the physical marking needs people, so we separate "
+    "software cost. Only the physical marking needs people, so we separate "
     "them deliberately."))
 A(Spacer(1, 2))
 A(DiagTiers())
-A(P("Tier 1 carries the strategy \u2014 free, national, zero marginal cost, "
+A(P("Tier 1 carries the strategy: free, national, zero marginal cost, "
     "and it is where the wire schedules come from. Tier 3 exists to be "
     "photographed. Treating the flagship as a marketing instrument rather than "
     "a P&amp;L line is the honest position, and it is exactly how paint "
@@ -361,15 +362,15 @@ A(B("<b>AR marking accuracy on a construction site</b> is unproven at the "
 A(B("<b>Track fit.</b> This is a Track 4 entry on the basis that the brief "
     "invites solutions \u201caligned with its core categories,\u201d and wires "
     "and switchgear are core. We note plainly that the intelligence sits in "
-    "the design tool rather than inside a powered product \u2014 though its "
+    "the design tool rather than inside a powered product, though its "
     "output, the as-built model, becomes a permanent fixture of the home."))
 
 A(P("Phase 3 plan", "h2"))
 A(B("<b>Working layout generator</b> on real Indian floor plans: rooms in, "
-    "circuits and routed conduits out, with the IS 732 rule set explicit and "
-    "each decision traceable to a clause."))
+    "circuits and routed conduits out, with the rule set explicit and each "
+    "decision traceable to a clause."))
 A(B("<b>Optimisation study:</b> total wire length and voltage drop versus "
-    "distribution-board placement across several house typologies \u2014 "
+    "distribution-board placement across several house typologies, "
     "quantifying the material saving a good layout produces over an improvised "
     "one."))
 A(B("<b>Interactive browser demo</b> generating and visualising a design from "
