@@ -22,7 +22,7 @@ CONTENT_W = PAGE_W - 2 * MARGIN
 
 # ---------------------------------------------------------------- styles
 def style(name, **kw):
-    base = dict(name=name, fontName="Helvetica", fontSize=9.3, leading=13.4,
+    base = dict(name=name, fontName="Helvetica", fontSize=9.2, leading=12.9,
                 textColor=INK, spaceAfter=0)
     base.update(kw)
     return ParagraphStyle(**base)
@@ -35,13 +35,13 @@ S = {
     "meta": style("meta", fontSize=8.2, leading=11, textColor=MUTED,
                   spaceAfter=14),
     "h2": style("h2", fontName="Helvetica-Bold", fontSize=11.4, leading=14,
-                spaceBefore=10, spaceAfter=4, keepWithNext=1),
+                spaceBefore=8.5, spaceAfter=3.5, keepWithNext=1),
     "h3": style("h3", fontName="Helvetica-BoldOblique", fontSize=9.5,
                 leading=12.4, spaceBefore=7, spaceAfter=2.5, keepWithNext=1),
-    "body": style("body", alignment=TA_JUSTIFY, spaceAfter=4.5),
-    "lead": style("lead", fontSize=10.4, leading=14.6, spaceAfter=6),
+    "body": style("body", alignment=TA_JUSTIFY, spaceAfter=4),
+    "lead": style("lead", fontSize=10.2, leading=14.0, spaceAfter=5),
     "bullet": style("bullet", alignment=TA_JUSTIFY, leftIndent=11,
-                    bulletIndent=1, spaceAfter=3.4),
+                    bulletIndent=1, spaceAfter=2.9),
     "pull": style("pull", fontName="Helvetica-Bold", fontSize=10.2,
                   leading=14.6, textColor=ACCENT, leftIndent=10,
                   spaceBefore=6, spaceAfter=8),
@@ -197,7 +197,7 @@ class DiagBoard(Diagram):
     """Per-circuit selective regulation inside the enclosure."""
 
     def __init__(self):
-        Diagram.__init__(self, 178)
+        Diagram.__init__(self, 168)
 
     def draw(self):
         c = self.canv
@@ -209,10 +209,10 @@ class DiagBoard(Diagram):
         c.setStrokeColor(MUTED)
         c.setLineWidth(0.8)
         c.setDash([2, 2], 0)
-        c.roundRect(52, 8, encl_r - 52, 160, 4, stroke=1, fill=0)
+        c.roundRect(52, 6, encl_r - 52, 152, 4, stroke=1, fill=0)
         c.setDash()
         c.restoreState()
-        self.tag(encl_r, 170, "SINGLE ENCLOSURE", MUTED, 6.8, anchor="r",
+        self.tag(encl_r, 162, "SINGLE ENCLOSURE", MUTED, 6.8, anchor="r",
                  font="Helvetica-Bold")
 
         # incoming
@@ -229,14 +229,14 @@ class DiagBoard(Diagram):
             ("Sockets", False, False),
             ("Spare way", False, True),
         ]
-        top, step = 150, 24
+        top, step = 142, 23
         mcb_x, reg_x, lbl_x = 116, 154, 224
         c.saveState()
         c.setStrokeColor(MUTED)
         c.setLineWidth(0.8)
-        c.line(108, 14, 108, 156)          # busbar
+        c.line(108, 12, 108, 148)          # busbar
         c.restoreState()
-        self.tag(108, 160, "bus", MUTED, 6.4, anchor="c")
+        self.tag(108, 152, "bus", MUTED, 6.4, anchor="c")
 
         for i, (name, reg, spare) in enumerate(ways):
             y = top - i * step
@@ -378,9 +378,9 @@ A(P("Two new problems arrive at exactly this location. Rooftop solar under PM "
     "AEEE/Kazam study warns residential charging could become the biggest "
     "hurdle to India's EV push, citing inadequate sanctioned loads, poor "
     "earthing and ageing wiring. <b>Both are board-level problems, not "
-    "appliance-level ones.</b> Meanwhile air-conditioner penetration is still "
-    "only around 8% of households against 13.3 million units sold in 2025, so "
-    "the installed base of vulnerable loads is still being built."))
+    "appliance-level ones.</b> And with air-conditioner penetration still around "
+    "8% of households, the installed base of vulnerable loads is only "
+    "beginning to be built."))
 
 A(P("Novelty, stated honestly", "h2"))
 A(P("We invented none of the constituent technologies, and the proposal is "
@@ -389,7 +389,7 @@ A(P("We invented none of the constituent technologies, and the proposal is "
     "DIN-rail stabilizers exist, but as generic relay-based industrial modules, "
     "not integrated residential consumer units, and not from any mainstream "
     "Indian brand. Series-injection compensation is well published. Smart "
-    "boards exist, including V-Guard's own Invidia+ \u2014 <b>but they measure "
+    "Boards exist, including V-Guard's own Invidia+ \u2014 <b>but they measure "
     "and report; none correct.</b>"))
 A(P("Our contribution is therefore four specific things: the <b>integration</b> "
     "(no one has combined protection and correction in one certified "
@@ -422,42 +422,60 @@ A(P("For the consumer: one box instead of two, whole-circuit protection so a "
     "the wall."))
 
 A(P("Risks and honest limitations", "h2"))
-A(B("<b>Thermal management is make-or-break.</b> If the module cannot hold "
-    "enclosure ambient within MCB derating limits at full load, the concept "
-    "fails. The per-circuit and partial-power choices exist to make this "
-    "tractable, but it must be proven experimentally \u2014 which is why it is "
-    "the primary prototype objective."))
+A(B("<b>Thermal management is make-or-break.</b> If the enclosure cannot hold "
+    "MCB ambient within its derating curve, the concept fails. The per-circuit "
+    "and partial-power choices exist to make this tractable, and the thermal "
+    "model in Phase 3 is built to answer it before any hardware is committed. "
+    "Our working estimate is ~25\u201345 W dissipated per module, which puts "
+    "the practical ceiling at <b>two to three regulated ways per "
+    "enclosure</b> \u2014 not unlimited."))
 A(B("<b>Certification.</b> Boards fall under IS 13032, stabilizers under IS "
     "9815. A combined unit is effectively a new product category requiring BIS "
     "engagement \u2014 a real timeline cost, not a footnote."))
 A(B("<b>No sub-circuit selectivity.</b> A board cannot see inside a circuit. "
     "If an air conditioner shares a way with lights, the remedy is a dedicated "
     "way \u2014 already standard practice for heavy loads \u2014 or a plug-in "
-    "stabilizer for that one unit. This positions CORE at new construction and "
-    "rewiring first, retrofit second."))
-A(B("<b>Cost.</b> Solid-state regulation costs more per kVA than relay-tap iron "
-    "at low volume. At launch this is a premium product, not a mass one."))
+    "stabilizer for that one unit. Depth is the other physical constraint: the "
+    "module must trade width for depth to fit a standard recess, making this a "
+    "<b>wider board, not a deeper one</b>, with the front cover carrying the "
+    "thermal path. Surface-mounted installations are unconstrained; concealed "
+    "fitting needs a nine-inch wall."))
+A(B("<b>Correction depth bounds the input range.</b> Converter size scales with "
+    "how much voltage must be injected, so INVIDIA CORE targets roughly "
+    "170\u2013290 V \u2014 not the 110\u2013500 V of a mainline stabilizer. "
+    "Homes with extreme excursions still need that separate box. Cost per kVA "
+    "is also higher than relay-tap iron at low volume, so this launches "
+    "premium."))
 A(B("<b>The voltage problem is shrinking.</b> Grid quality is improving under "
     "RDSS and appliances tolerate wider ranges. The long-run case rests on the "
     "board becoming the home's power-quality and load-management node \u2014 "
     "which is why the architecture targets solar reverse flow and EV load "
     "management, not just low mains voltage."))
 
-A(P("Prototype plan", "h2"))
-A(B("<b>Single-way regulator:</b> a 3 kVA circuit regulator built around a "
-    "~750 VA converter, closed-loop to 230 V \u00b15%, on a variac bench "
-    "simulating 170\u2013280 V input."))
-A(B("<b>Measured curves:</b> regulation versus input voltage, efficiency versus "
-    "load, and step response side-by-side against a commercial relay-tap "
-    "stabilizer \u2014 demonstrating continuous versus stepped correction."))
-A(B("<b>Thermal validation \u2014 the decisive test.</b> Thermocouple mapping "
-    "inside a standard 8-way enclosure at full load, confirming MCB and RCCB "
-    "ambient stays within rated limits."))
-A(B("<b>Failsafe bypass</b> demonstrated under forced fault and "
-    "over-temperature conditions."))
-A(B("<b>Mechanical mock-up:</b> CAD and a 3D-printed DIN module confirming fit "
-    "in a standard wall recess."))
-
+A(P("Phase 3 plan \u2014 modelling first", "h2"))
+A(P("The decisive question is thermal, and it is answerable analytically before "
+    "hardware exists. We lead with simulation and reserve bench work for "
+    "validation."))
+A(B("<b>Lumped-parameter thermal model</b> of the enclosure: junction \u2192 "
+    "heatsink \u2192 internal air \u2192 wall/front-cover paths, swept across "
+    "module count (1\u20134), enclosure depth (55\u201395 mm) and vent area. "
+    "Output: the maximum number of regulated ways that keeps MCB ambient inside "
+    "its derating curve \u2014 the single most important number in the "
+    "proposal."))
+A(B("<b>Converter simulation</b> (SPICE / Python): series-injection waveforms "
+    "for step-up and step-down operation, regulation versus input across "
+    "170\u2013290 V, efficiency versus load, and step response contrasted "
+    "against a relay tap-changer's dead-band."))
+A(B("<b>Parametric study of the core trade-off:</b> converter VA versus correction "
+    "depth, establishing where series injection stops being cheaper than a tap "
+    "transformer \u2014 and therefore the product's honest input range."))
+A(B("<b>Enclosure CAD plus an interactive configurator:</b> the wider, "
+    "shallower geometry with a finned front-cover thermal path, confirming fit "
+    "in a standard 75\u201395 mm recess, alongside a tool showing per-circuit "
+    "module allocation, MCB-based sizing and cumulative heat budget."))
+A(B("<b>Bench validation, if time permits:</b> a low-voltage scaled-down "
+    "injection stage and thermocouple mapping in a real enclosure \u2014 the "
+    "confirmation step, not the foundation of the argument."))
 
 # ---------------------------------------------------------------- assemble
 def footer(canvas, doc):
