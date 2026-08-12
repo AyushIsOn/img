@@ -189,7 +189,7 @@ rows = [
     [P("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2)", "field")],
     [P("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3)", "field")],
     [Spacer(1, 6)],
-    [P("<b>Institute/E-School:</b>", "field")],
+    [P("<b>Institute/E-School:</b>&nbsp;&nbsp;Manipal University", "field")],
     [Spacer(1, 4)],
     [P("<b>Mobile No of Team Lead:</b>&nbsp;&nbsp;8318010062", "field")],
     [Spacer(1, 4)],
