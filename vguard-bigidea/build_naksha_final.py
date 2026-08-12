@@ -108,15 +108,18 @@ def draw_pipeline(c, x0, y0, scale=1.0, big=False):
         c.drawString(sx(tx), sy(ty), t)
         c.restoreState()
 
-    box(0, 96, 100, 42, "ARCHITECT'S PLAN", "PDF or drawing", fill=FILL)
+    box(0, 96, 100, 42, "FLOOR PLAN", "from the architect", fill=FILL)
     arrow(104, 117, 126)
-    box(130, 88, 130, 58, "NAKSHA ENGINE", "national wiring codes",
+    box(130, 88, 130, 58, "NAKSHA AR APP", "wiring, water, gas, duct",
         fill=ACCENT, stroke=ACCENT)
-    tag(133, 74, "circuits, board siting, routing")
+    tag(131, 74, "walk the house, place the runs")
     for label, sub, oy, note in [
-            ("WIRE SCHEDULE", "exact metres, by size", 140, "a purchase order"),
-            ("SITE MARKING", "phone AR overlay", 88, "built correctly"),
-            ("AS-BUILT RECORD", "permanent wiring map", 36, "lifetime lock-in")]:
+            ("MATERIAL SCHEDULE", "wire and pipe, in metres", 140,
+             "a V-Guard order"),
+            ("CONTRACTOR MAP", "simple, buildable drawing", 88,
+             "built correctly"),
+            ("AS-BUILT RECORD", "permanent utility map", 36,
+             "lifetime lock-in")]:
         c.saveState()
         c.setStrokeColor(ACCENT)
         c.setLineWidth(1.1 if big else 0.9)
@@ -131,13 +134,13 @@ def draw_pipeline(c, x0, y0, scale=1.0, big=False):
 class DiagFlow(Flowable):
     def __init__(self):
         Flowable.__init__(self)
-        self.width, self.height = CW, 116
+        self.width, self.height = CW, 99
 
     def wrap(self, *_):
         return self.width, self.height
 
     def draw(self):
-        draw_pipeline(self.canv, 0, -27, 0.79)
+        draw_pipeline(self.canv, 0, -24, 0.67)
 
 
 # --------------------------------------------------------------- page 1
@@ -179,26 +182,31 @@ A(P("(The first page of the executive summary must adhere to the format given "
     "below)", "ital"))
 
 rows = [
-    [P("<b>Team Name:</b>", "field")],
+    [P("<b>Team Name:</b>&nbsp;&nbsp;D38N", "field")],
     [P("<b>Team Members</b> <i>(Format: Full Name \u2013 Year of passing)</i>",
        "field")],
-    [P("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1)", "field")],
+    [P("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1)&nbsp;&nbsp;Ayush Gupta \u2013 2027", "field")],
     [P("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2)", "field")],
     [P("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3)", "field")],
     [Spacer(1, 6)],
-    [P("<b>Institute/E-School:</b>", "field")],
+    [P("<b>Institute/E-School:</b>&nbsp;&nbsp;Manipal University", "field")],
     [Spacer(1, 4)],
-    [P("<b>Mobile No of Team Lead:</b>", "field")],
+    [P("<b>Mobile No of Team Lead:</b>&nbsp;&nbsp;8318010062", "field")],
     [Spacer(1, 4)],
-    [P("<b>E-mail ID of Team Lead:</b>", "field")],
+    [P("<b>E-mail ID of Team Lead:</b>&nbsp;&nbsp;ayushgupta.2406@gmail.com", "field")],
     [Spacer(1, 6)],
-    [Table([[P("<b>Number of words:</b> 1,362", "field"),
-             P("<b>Date of Submission:</b>", "field")]],
+    [Table([[P("<b>Number of words:</b> 1,431", "field"),
+             P("<b>Date of Submission:</b>&nbsp;&nbsp;12 August 2026", "field")]],
            colWidths=[(CW - 30) * 0.5, (CW - 30) * 0.5])],
     [Spacer(1, 6)],
     [P("<b><u>Google Drive Video Link</u></b>", "field")],
     [P("<b><u>Please paste the google drive link of your team\u2019s video "
        "pitch (40 seconds) below.</u></b>", "field")],
+    [Paragraph("https://drive.google.com/file/d/"
+               "1eBcNDpe4yKDJRv7YKbVwHbuWcS2VZ9WY/view?usp=sharing",
+               ParagraphStyle(name="link", fontName="Times-Roman",
+                              fontSize=9.5, leading=13,
+                              textColor=colors.HexColor("#0645AD")))],
     [Spacer(1, 40)],
 ]
 box = Table(rows, colWidths=[CW])
@@ -218,157 +226,152 @@ A(P("(The first page of the executive summary must adhere to the format given "
     "below and must not exceed 500 words)", "ital"))
 
 A(P("Problem Statement (What &amp; Why)", "h2"))
-A(P("Indian homes are wired from memory. The electrician works without a "
-    "drawing, improvises conduit routes, and leaves no record behind. Roughly "
-    "42% of building fires in India are attributed to electrical short "
-    "circuits, a phrase that conceals ageing wiring, overloaded circuits and "
-    "substandard material."))
-A(P("The rules are not the missing piece. India already publishes codes of "
-    "practice for wiring installation and earthing, and current regulations "
-    "already require installation work to be done by a licensed contractor. "
-    "<b>What is missing is any tool that turns those rules into a drawing "
-    "someone on an Indian residential site will actually use.</b> Because there "
-    "is no drawing, there is also no record, which is why households drill into "
-    "live cables and why renovation becomes guesswork."))
-A(P("For V-Guard the commercial problem is adjacent. Wire is the most "
-    "commoditised product it sells, competing on price, brand recall and "
-    "whatever the electrician happens to be carrying."))
+A(P("When a family builds a house, they do not know where anything needs to go. "
+    "The wiring, the water pipes, the gas line, the chimney duct. Even with the "
+    "architect\u2019s drawings it stays confusing, because a flat plan cannot tell "
+    "you how a room will feel, or where you will actually want a socket, a geyser "
+    "or a chimney."))
+A(P("So these decisions get made on site, quickly, by whoever happens to be "
+    "there. Runs are improvised, material is mis-ordered, and nothing is written "
+    "down. Roughly 42% of building fires in India are attributed to electrical "
+    "short circuits, and with no record, later renovation becomes guesswork."))
+A(P("<b>For V-Guard, that same moment is a missed commercial opportunity.</b> "
+    "Every one of those decisions settles which brand of wire, water heater, "
+    "chimney, RO unit and gas stove ends up in the house. V-Guard sells all of "
+    "them, and is present for none of it."))
 
 A(P("Brief Description of the Idea/Solution", "h2"))
-A(P("<b>NAKSHA changes what is being sold: not a coil of wire, but a designed "
-    "electrical installation that specifies V-Guard wire.</b> An owner, "
-    "contractor or electrician uploads the architect's floor plan and answers a "
-    "few questions about appliances. NAKSHA returns a complete residential "
-    "electrical design, generated against the national wiring and earthing "
-    "codes: circuit split, distribution board siting, conduit routing and point "
-    "placement."))
+A(P("<b>NAKSHA is an augmented reality app from V-Guard.</b> The owner walks "
+    "through the under-construction house holding a phone and places what they "
+    "want where they want it: sockets and switches, the water heater, the water "
+    "line, the gas point, the chimney duct. They see it at full scale on the "
+    "actual wall, before anything is chased or plastered."))
 A(Spacer(1, 2))
 A(KeepTogether([DiagFlow(),
-                P("One upload, three outputs. The first is effectively a "
-                  "purchase order, the second gets the job built correctly, "
-                  "and the third never leaves the house.", "cap")]))
+                P("The owner designs in AR. The app produces a material "
+                  "order, a drawing the trades can build from, and a permanent "
+                  "record.", "cap")]))
+A(P("<b>The app is a marketing instrument as much as a design tool.</b> At the "
+    "exact moment the owner is deciding where the water heater goes, V-Guard is "
+    "the brand in their hand, showing the V-Guard model that fits the space. "
+    "The app is free. What it sells is wire, water heaters, chimneys, RO systems "
+    "and gas stoves. V-Guard offers it as a service, and the service sells the "
+    "products."))
 
 A(P("Technology Proposed", "h2"))
-A(P("<b>Plan understanding:</b> the uploaded plan is vectorised and segmented "
-    "into rooms, walls and openings, with room type inferred from dimensions and "
-    "adjacency and confirmed by the user. <b>Rule engine:</b> the wiring and "
-    "earthing codes are encoded as explicit, auditable constraints covering "
-    "circuit separation, dedicated ways for heavy loads, points per circuit, "
-    "earthing and diversity factors. This layer is deterministic and "
-    "inspectable, not a language model guessing at safety rules. <b>Layout "
-    "optimisation</b> is the core computational problem: place the distribution "
-    "board and route conduits to minimise total wire length and voltage drop, "
-    "subject to the rule set and to buildable chase geometry, solved as a graph "
-    "problem over room adjacency. <b>Bill of quantities</b> converts the design "
-    "into wire length per size with waste allowance, plus conduit, boxes and "
-    "switchgear, mapped onto V-Guard SKUs. <b>Site delivery</b> uses a phone "
-    "based AR overlay, which needs no equipment on site. <b>As-built capture</b> "
-    "has the electrician confirm each run before plastering, producing the "
-    "permanent record."))
+A(P("<b>Augmented reality layer:</b> ARCore and ARKit plane detection with "
+    "world tracking, so placed runs and appliances stay fixed to the wall as the "
+    "user moves. Phone based, nothing to carry on site. <b>Plan "
+    "understanding:</b> an architect\u2019s plan can optionally be uploaded and "
+    "segmented into rooms to give real dimensions. <b>Rule engine:</b> the "
+    "national wiring and earthing codes encoded as explicit, auditable "
+    "constraints, so what the owner draws is corrected to code rather than merely "
+    "recorded. <b>Routing and estimation:</b> runs are routed to minimise length "
+    "and voltage drop, then converted into wire by size, pipe and duct lengths, "
+    "boxes and switchgear, mapped onto V-Guard product codes. <b>Output for "
+    "trades:</b> a dimensioned drawing, because a contractor will not use an app. "
+    "<b>As-built capture:</b> each run is confirmed before plastering."))
 A(PageBreak())
 
-# ------------------------------------------------- SUPPORTING (<=2000 words)
 A(P("(From the second page: remaining content that supports and justifies the "
     "Executive Summary)", "ital"))
 
+A(P("Why V-Guard, and not a startup", "h2"))
+A(P("This is the argument the whole proposal rests on. An independent app that "
+    "helps you plan your home services has no way to make money except by "
+    "charging for the software, which nobody in this market will pay for."))
+A(P("<b>V-Guard sells products in every category the app touches:</b> wires and "
+    "cables, water heaters, chimneys, RO purifiers and gas stoves. That makes "
+    "the app a sales channel rather than a product. It can be given away free, "
+    "forever, because the revenue is downstream. <b>No competitor spans all four "
+    "utilities, so no competitor can afford to give this away.</b>"))
+
 A(P("Novelty and Innovation", "h2"))
-A(P("The components are not new, and this proposal is stronger for saying so. "
-    "Automated electrical takeoff is a mature commercial category. Tools such "
-    "as drawer.ai already accept PDF drawings and return quantities and wire "
-    "lengths with marked-up routing, and Kreo, Trimble Accubid and PlanSwift "
-    "serve the same market. Work presented at ISARC 2026 automates outlet to "
-    "circuit and circuit to panelboard assignment in a CAD and BIM workflow. "
-    "Robotic site layout is also solved: Dusty Robotics has printed coordinated "
-    "models onto more than 300 million square feet of slab."))
-A(P("All of that serves Western commercial contractors bidding large projects. "
-    "Our contribution is therefore positional rather than algorithmic:"))
+A(P("The components exist and the proposal is stronger for saying so. Automated "
+    "electrical takeoff is a mature category: tools such as drawer.ai accept PDF "
+    "drawings and return quantities and wire lengths with marked-up routing, and "
+    "Kreo, Trimble Accubid and PlanSwift serve the same market. Work presented at "
+    "ISARC 2026 automates circuit assignment in a CAD and BIM workflow. Robotic "
+    "site layout is solved too, with Dusty Robotics having printed coordinated "
+    "models onto over 300 million square feet of slab."))
+A(P("All of it serves Western commercial contractors bidding large projects. Our "
+    "contribution is positional:"))
+A(B("<b>The home owner is the user</b>, not an estimator. Existing tools ask for "
+    "a finished design; NAKSHA lets a non-technical person create one by walking "
+    "around and pointing."))
+A(B("<b>All four utilities in one pass</b>, which mirrors how a house is "
+    "actually built and which only V-Guard\u2019s portfolio can monetise."))
 A(B("<b>Indian codes as the rule set.</b> None of the existing tools encode "
     "them."))
-A(B("<b>Residential scale, where no drawing exists today</b>, rather than "
-    "commercial scale where one already does."))
 A(B("<b>The as-built record</b>, which no takeoff tool produces, because its "
     "users leave the site and never return."))
-A(B("<b>Distribution through a channel V-Guard already owns.</b> This is the "
-    "finding that convinced us, and it is set out below."))
 
-A(P("The channel insight", "h2"))
+A(P("The channel is already built", "h2"))
 A(P("Every major Indian wire brand has already digitised its electrician "
     "relationship. RR Kabel has RR Connect, Finolex has Samruddhi, Havells has "
-    "an electrician app, and Polycab's Experts platform reaches around 2.5 lakh "
-    "electricians and retailers, which the company describes in its FY26 annual "
-    "report as a grassroots influencer channel."))
+    "an electrician app, and Polycab\u2019s Experts platform reaches around 2.5 "
+    "lakh electricians and retailers, described in its FY26 annual report as a "
+    "grassroots influencer channel."))
 A(P("<b>Every one of them is a loyalty scheme. Scan a code, collect points, "
-    "redeem a gift.</b> The distribution channel is already built, the "
-    "electricians are already on smartphones, and no brand has put a tool in "
-    "that channel that does any actual work. An electrician does not want "
-    "points. He wants the load calculation done, the wire sizes decided, the "
-    "material list totalled, and a defensible answer when the owner asks why it "
-    "costs what it costs."))
+    "redeem a gift. Nobody has put a tool in that channel that does any actual "
+    "work.</b> The electrician does not want points. He wants the load "
+    "calculation done, the sizes decided, the material list totalled, and a "
+    "defensible answer when the owner asks why it costs what it costs. Give him "
+    "that, and he becomes the distribution."))
 
 A(P("End Consumer and Business Value", "h2"))
-A(P("<b>For the consumer:</b> a home wired to code rather than to habit, an "
-    "itemised material list that makes overcharging visible, and a permanent map "
-    "of where every cable runs, which is what makes future renovation and fault "
-    "finding safe instead of speculative."))
+A(P("<b>For the owner:</b> the ability to see and decide the house before it is "
+    "sealed, an itemised material list that makes overcharging visible, a home "
+    "wired to code rather than to habit, and a permanent map of every service "
+    "run in the building."))
 A(P("<b>For V-Guard,</b> four things:"))
-A(B("<b>Every design is a purchase order</b>, because the output is a wire "
-    "schedule in metres by size. Specifying the material is a stronger position "
-    "than advertising to whoever walks into a shop. This is the Asian Paints "
-    "move, which used Beautiful Homes services to escape commodity paint "
+A(B("<b>It is a marketing channel that sells at the moment of decision.</b> "
+    "Every appliance the owner places in AR is a V-Guard product shown in their "
+    "own room, at the point where the choice is actually made."))
+A(B("<b>Every design becomes an order.</b> The output is a material schedule in "
+    "metres and units, mapped to V-Guard codes. Specifying material is a stronger "
+    "position than advertising to whoever walks into a shop. This is the Asian "
+    "Paints move, which used Beautiful Homes services to escape commodity paint "
     "competition, and which Berger followed with Express Painting."))
-A(B("<b>It captures the decision years earlier.</b> Wiring is specified during "
-    "construction, before the owner has any brand opinion, and it is never "
-    "re-shopped. You cannot rewire a finished house."))
-A(B("<b>It opens a portfolio funnel.</b> The same plan positions the water "
-    "heater, chimney, RO and gas point. All are V-Guard categories, all decided "
-    "at construction stage, and all currently decided by whoever happens to be "
-    "standing there."))
+A(B("<b>It captures the decision years earlier.</b> Services are specified "
+    "during construction, before the owner has any brand opinion, and they are "
+    "never re-shopped. You cannot rewire or re-plumb a finished house."))
 A(B("<b>It is a margin story, not a volume story.</b> FY25-26 revenue grew 7.0% "
     "to Rs 5,966 crore while PAT fell 1.7% to Rs 308 crore. Commodity wire "
     "cannot fix that; specified systems can."))
 
-A(P("On scale, and how the marking is delivered", "h2"))
-A(P("A national service business is genuinely hard: staffing, training, "
-    "equipment and quality control. We do not propose one. The design engine "
-    "scales at software cost, and only the physical marking needs people, so the "
-    "two are separated deliberately into three tiers."))
-A(B("<b>Tier 1, the app.</b> Free, all-India, phone AR marking, no hardware, "
-    "infinitely scalable. This tier carries the strategy, because this is where "
-    "the wire schedules come from."))
-A(B("<b>Tier 2, assisted.</b> A trained V-Guard marking partner in metro "
-    "cities, offered as a paid service."))
-A(B("<b>Tier 3, flagship.</b> Robotic or laser layout, deployed as a showcase. "
-    "Treating it as a marketing instrument rather than a P&amp;L line is the "
-    "honest position, and it is exactly how paint companies launched their "
-    "service brands."))
+A(P("Delivery and scale", "h2"))
+A(P("The app scales at software cost and needs no field organisation, which is "
+    "the whole point of choosing AR over any equipment-based approach. Optional "
+    "paid layers sit on top: a trained V-Guard marking partner in metro cities, "
+    "and a robotic layout flagship deployed as a showcase. Treating the flagship "
+    "as a marketing instrument rather than a revenue line is the honest position, "
+    "and it is exactly how paint companies launched their service brands."))
 
 A(P("Risks and honest limitations", "h2"))
-A(B("<b>Plan quality is the hard input problem.</b> Indian residential plans "
-    "are often scanned, hand marked, incomplete or dimensionally unreliable. The "
-    "engine must degrade gracefully to guided manual tracing, and the first "
-    "release should assume human confirmation of every inferred room."))
-A(B("<b>Liability.</b> Because a licensed contractor is legally responsible for "
-    "the installation, the tool must be positioned as a decision aid he signs "
-    "off, not as designer of record. This needs legal structuring before "
-    "launch."))
-A(B("<b>AR marking accuracy on a live site is unproven</b> at the tolerance "
-    "conduit chasing needs, so Tier 1 should promise dimensioned guidance and "
-    "reference marks rather than millimetre placement."))
-A(B("<b>Adoption is the real risk, not the technology.</b> Experienced "
-    "electricians may read the tool as a challenge to their judgment. It must "
-    "visibly save them time on load calculation and estimating on day one, or it "
-    "will be ignored."))
+A(B("<b>AR accuracy on a live site is the technical risk.</b> Drift and poor "
+    "lighting are real, so the app should promise dimensioned guidance and "
+    "reference marks rather than millimetre placement, and always emit a "
+    "measured drawing as the authoritative output."))
+A(B("<b>A contractor will not use an app.</b> This is why the deliverable to "
+    "the trades is a printed drawing and a material list, not a phone screen."))
+A(B("<b>Liability.</b> A licensed contractor is legally responsible for the "
+    "installation, so the tool must be a decision aid he signs off, not the "
+    "designer of record. This needs legal structuring before launch."))
+A(B("<b>Adoption, not technology, is the real risk.</b> The app must visibly "
+    "save time on load calculation and estimating from day one, or it will be "
+    "ignored by the trades who decide what gets bought."))
 
 A(P("What we would build next", "h2"))
-A(B("A working layout generator on real Indian floor plans: rooms in, circuits "
-    "and routed conduits out, with every decision traceable to a rule."))
-A(B("An optimisation study of total wire length and voltage drop against "
-    "distribution board placement across several house typologies, quantifying "
-    "the material saving a good layout produces over an improvised one."))
-A(B("A browser demo that generates and visualises a design from an uploaded "
-    "plan, with a costed bill of quantities."))
-A(B("An AR feasibility test on a real wall, reporting measured registration "
-    "error honestly rather than asserting it."))
+A(B("A working AR prototype on a phone: place sockets, a water heater and a pipe "
+    "run in a real room, and export a dimensioned drawing plus a material list."))
+A(B("The code rule engine, with every generated decision traceable to a "
+    "clause."))
+A(B("An optimisation study of material length against distribution board "
+    "placement across several house typologies, quantifying the saving a good "
+    "layout produces over an improvised one."))
+A(B("An AR registration test on a real wall, reporting measured error honestly "
+    "rather than asserting it."))
 
 
 def footer(cv, doc):
@@ -406,7 +409,7 @@ c.drawString(58, LH - 104, "One upload. Three outputs.")
 draw_pipeline(c, 74, 150, 1.28, True)
 c.setFillColor(INK)
 c.setFont("Helvetica-Bold", 15)
-c.drawString(58, 92, "The first output is a purchase order.")
+c.drawString(58, 92, "The first output is a V-Guard order.")
 c.drawString(58, 68, "The third one never leaves the house.")
 c.save()
 print("diagram written")
