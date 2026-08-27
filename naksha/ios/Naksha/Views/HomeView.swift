@@ -3,6 +3,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject private var store: DesignStore
+    @State private var showingSettings = false
 
     private var lidarAvailable: Bool {
         RoomCaptureSession.isSupported
@@ -57,12 +58,45 @@ struct HomeView: View {
                     .buttonStyle(.plain)
                 }
 
+                if !store.usingSolver {
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "info.circle")
+                            .foregroundColor(Theme.muted)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("No solver connected")
+                                .font(.caption.weight(.semibold))
+                                .foregroundColor(Theme.ink)
+                            Text("Scanning works, but designing a scanned "
+                                 + "house needs the solver running on your "
+                                 + "Mac. Tap the gear to connect it.")
+                                .font(.caption2)
+                                .foregroundColor(Theme.muted)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    .padding(12)
+                    .background(RoundedRectangle(cornerRadius: 10)
+                        .fill(Color(white: 0.93)))
+                }
+
                 stateSection
             }
             .padding(20)
         }
         .navigationTitle("NAKSHA")
         .background(Color(white: 0.97).ignoresSafeArea())
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { showingSettings = true } label: {
+                    Image(systemName: store.usingSolver
+                          ? "antenna.radiowaves.left.and.right"
+                          : "gearshape")
+                        .foregroundColor(store.usingSolver
+                                         ? Theme.accent : Theme.muted)
+                }
+            }
+        }
+        .sheet(isPresented: $showingSettings) { SolverSettingsView() }
     }
 
     private var header: some View {

@@ -123,12 +123,78 @@ device and no network. This is the fastest way to see whether the app works.
 Replace `Naksha/Resources/sample-2bhk.json` with any `*-design.json` the solver
 produced. The schema is identical, so nothing else changes.
 
-### Connecting to a live solver
+---
 
-`DesignStore.solverEndpoint` is nil by default, which keeps everything on the
-bundled sample. Point it at an HTTP endpoint that accepts a `DesignRequest` and
-returns the same JSON, and scanned geometry gets designed for real. There is no
-server in this repo yet.
+## Part 3, designing a house you scanned yourself
+
+Scanning alone does not produce a design. The scan measures rooms; the solver
+turns rooms into circuits. They are two separate programs and they have to be
+introduced to each other. This is the part to do before a demo.
+
+### Step 1, start the solver on your Mac
+
+```bash
+cd naksha/solver
+python3 serve.py
+```
+
+It prints the addresses the phone can reach, for example:
+
+```
+NAKSHA solver listening on port 8000
+  Set solverEndpoint in the app to one of:
+    http://192.168.1.42:8000
+```
+
+Leave that terminal running. Check it from the Mac first:
+
+```bash
+curl http://localhost:8000/health
+```
+
+### Step 2, tell the app where it is
+
+In the app, tap the **gear icon** at the top right, paste the
+`http://192.168.1.42:8000` address, and tap **Test connection**. You want
+"Connected". The icon on the home screen turns into an aerial once it is set.
+
+The phone and the Mac must be on the same Wi-Fi. Phone hotspot to Mac works
+too. Hotel and campus networks usually block device to device traffic, so use a
+personal hotspot if the test fails on one.
+
+### Step 3, scan, answer, design
+
+1. **Scan a room.** Walk the room slowly until the walls close up, tap Done,
+   then give it a name and pick its type. The type matters: it decides socket
+   counts and whether a fan belongs there.
+2. **Repeat for every room.** One scan per room.
+3. **Answer the questions.** Lights, fans, sockets, and the appliances you want
+   where. This is what the design is actually built from.
+4. **Tap Design the installation.** The rooms and answers go to the Mac, the
+   solver places points, groups circuits, sites the board, routes the conduit,
+   sizes the cable, and sends back a full design.
+5. **Open the AR tab** to project it on your walls.
+
+### What the scan gives you, and what it does not
+
+RoomPlan scans one room at a time, and each scan has its own origin. Nothing in
+the captured data says how the rooms adjoin, so the app does not pretend to
+stitch them. What it keeps is what the scan genuinely measures, the floor area
+and the room type. What it approximates is the arrangement: rooms become
+rectangles of the measured area, packed into a connected layout with doorways
+inferred wherever two rooms share a wall.
+
+That trade is deliberate. Area drives the lighting count through the lumen
+method and room type drives the socket rules, so the circuit schedule, the cable
+sizing and the bill of quantities are all sound. The absolute geometry matters
+for the AR overlay, which is why AR registration is aligned by hand against the
+room you are standing in.
+
+### If you have no Mac on the network
+
+Leave the solver address empty and tap **Open the sample design**. Everything
+except designing your own scan works: drawing, schedule, AR overlay, as-built
+and product list all run from bundled solver output.
 
 ---
 
@@ -148,6 +214,23 @@ Simulator. AR needs a real device.
 Expected. Registration is manual by design. Tap **Reposition**, tap the floor
 again at a known corner, then set heading with the slider. An overlay that is
 confidently wrong is worse than one you placed yourself.
+
+**"No solver address set, so the scanned rooms cannot be designed"**
+Expected when no address is configured. Start `python3 serve.py` on the Mac and
+paste the address it prints into the gear icon. Or tap **Open the sample
+design** to explore the app without a solver.
+
+**Test connection fails but the Mac says the server is running**
+Three usual causes. The phone is on a different Wi-Fi network. The network
+blocks device to device traffic, common on campus and hotel Wi-Fi, so use a
+personal hotspot instead. Or the Mac firewall is prompting for permission to
+accept incoming connections, so allow Python. Confirm the server itself is
+healthy with `curl http://localhost:8000/health` on the Mac.
+
+**Design fails with "could not design this plan"**
+The solver could not build a valid layout from those rooms, usually because a
+scan closed with a degenerate outline. The terminal running `serve.py` prints
+the full reason. Rescanning that one room normally fixes it.
 
 **Solver says maximum demand exceeds sanctioned load**
 That is not an error, it is the finding. A 2 BHK with three air conditioners and
@@ -180,8 +263,13 @@ Honest status against the product as described.
 - **No language model is connected.** The question flow is deterministic. This
   is defensible for a prototype and arguably correct for safety, but it is not
   what "generated by AI" implies, so do not claim it.
-- **RoomPlan captures one room at a time.** Stitching several scans into one
-  coordinate frame is handled crudely and needs real work.
+- **RoomPlan captures one room at a time.** Separate scans share no coordinate
+  frame, so the app keeps the measured area and room type and approximates the
+  arrangement rather than stitching. The schedule and quantities are sound; the
+  plan geometry is representative, not surveyed.
+- **The solver runs on a laptop, not on the phone.** The two connect over local
+  Wi-Fi, so a demo needs both on the same network. Porting the solver to Swift
+  would remove that, at the cost of maintaining the engineering logic twice.
 - **Traced and scanned rooms become axis aligned rectangles.** Fine for the
   rectilinear rooms this targets, wrong for curved or slanted walls.
 - **AR registration accuracy on a live site is unproven.** Promise dimensioned

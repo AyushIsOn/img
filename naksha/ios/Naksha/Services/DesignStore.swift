@@ -24,9 +24,58 @@ final class DesignStore: ObservableObject {
     @Published var requirements = RequirementSet()
     @Published var scannedRooms: [ScannedRoom] = []
 
-    /// Point the app at a running solver to design live geometry.
-    /// Leave nil to stay entirely on the bundled sample.
-    var solverEndpoint: URL? = nil
+    /// Address of the solver, entered by the user and remembered between
+    /// launches. Empty means stay on the bundled sample, which keeps the app
+    /// usable with no laptop on the network.
+    @Published var solverAddress: String =
+        UserDefaults.standard.string(forKey: "solverAddress") ?? "" {
+        didSet { UserDefaults.standard.set(solverAddress,
+                                           forKey: "solverAddress") }
+    }
+
+    @Published var reachability: Reachability = .unknown
+
+    enum Reachability: Equatable {
+        case unknown, checking, ok(String), failed(String)
+    }
+
+    var solverEndpoint: URL? {
+        let trimmed = solverAddress.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return nil }
+        let withScheme = trimmed.contains("://") ? trimmed
+                                                 : "http://\(trimmed)"
+        return URL(string: withScheme)
+    }
+
+    var usingSolver: Bool { solverEndpoint != nil }
+
+    /// Confirms the phone can actually reach the laptop before the user gets
+    /// as far as designing, because "it silently used the sample instead" is a
+    /// confusing way to fail.
+    func checkReachability() async {
+        guard let endpoint = solverEndpoint else {
+            reachability = .unknown
+            return
+        }
+        reachability = .checking
+        do {
+            var request = URLRequest(
+                url: endpoint.appendingPathComponent("health"))
+            request.timeoutInterval = 5
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse,
+                  (200..<300).contains(http.statusCode) else {
+                reachability = .failed("Server responded with an error")
+                return
+            }
+            let info = try? JSONSerialization.jsonObject(with: data)
+                as? [String: Any]
+            let plans = (info?["plans"] as? [String])?.count ?? 0
+            reachability = .ok("Connected, \(plans) sample plans available")
+        } catch {
+            reachability = .failed(error.localizedDescription)
+        }
+    }
 
     var design: Design? {
         if case .ready(let d) = state { return d }
@@ -52,7 +101,11 @@ final class DesignStore: ObservableObject {
 
     func requestDesign() async {
         guard let endpoint = solverEndpoint else {
-            loadSample()
+            // No solver configured. Say so rather than quietly substituting
+            // the sample, which looks like the scan was simply ignored.
+            state = .failed("No solver address set, so the scanned rooms "
+                          + "cannot be designed. Set one in Settings, or open "
+                          + "the sample design instead.")
             return
         }
         state = .working("Designing the installation")
