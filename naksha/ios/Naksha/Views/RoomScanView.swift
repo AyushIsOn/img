@@ -17,6 +17,8 @@ struct RoomScanView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var capturing = false
+    @State private var stopRequested = false
+    @State private var processing = false
     @State private var pendingRoom: CapturedRoom?
     @State private var roomName = ""
     @State private var roomKind = "bedroom"
@@ -27,21 +29,90 @@ struct RoomScanView: View {
     var body: some View {
         VStack(spacing: 0) {
             if capturing {
-                RoomCaptureContainer { room in
-                    pendingRoom = room
-                    capturing = false
+                ZStack(alignment: .bottom) {
+                    RoomCaptureContainer(
+                        stopRequested: $stopRequested,
+                        onProcessing: { processing = true },
+                        onFinish: { room in
+                            pendingRoom = room
+                            endCapture()
+                        },
+                        onFailure: { endCapture() })
+                    .ignoresSafeArea(edges: .bottom)
+
+                    captureControls
                 }
-                .ignoresSafeArea(edges: .bottom)
             } else {
                 list
             }
         }
-        .navigationTitle("Scan rooms")
+        .navigationTitle(capturing ? "Scanning" : "Scan rooms")
+        // Leaving mid capture would abandon the session with no result, so the
+        // way out is the explicit Cancel button below.
+        .navigationBarBackButtonHidden(capturing)
         .sheet(item: Binding(
             get: { pendingRoom.map { IdentifiedRoom(room: $0) } },
             set: { if $0 == nil { pendingRoom = nil } })) { wrapper in
             nameSheet(for: wrapper.room)
         }
+    }
+
+    private func endCapture() {
+        capturing = false
+        stopRequested = false
+        processing = false
+    }
+
+    /// RoomPlan draws the live model and the coaching prompts, but it does not
+    /// supply a way to finish. Stopping the session is what makes it hand back
+    /// the processed room, so the Done button is what actually produces output.
+    private var captureControls: some View {
+        VStack(spacing: 12) {
+            if processing {
+                HStack(spacing: 10) {
+                    ProgressView().tint(.white)
+                    Text("Finishing the scan")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.white)
+                }
+            } else {
+                Text("Walk the room slowly until the walls join up, then tap Done.")
+                    .font(.footnote)
+                    .foregroundColor(.white.opacity(0.9))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                HStack(spacing: 12) {
+                    Button {
+                        endCapture()
+                    } label: {
+                        Text("Cancel")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(Capsule().fill(.white.opacity(0.2)))
+                            .foregroundColor(.white)
+                    }
+
+                    Button {
+                        processing = true
+                        stopRequested = true
+                    } label: {
+                        Label("Done", systemImage: "checkmark")
+                            .font(.subheadline.weight(.bold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(Capsule().fill(.white))
+                            .foregroundColor(.black)
+                    }
+                }
+            }
+        }
+        .padding(18)
+        .background(
+            LinearGradient(colors: [.clear, .black.opacity(0.65)],
+                           startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea(edges: .bottom))
     }
 
     private var list: some View {
@@ -73,6 +144,11 @@ struct RoomScanView: View {
                 }
 
                 Button {
+                    // Reset first. Tearing down the previous capture calls
+                    // finish(), which sets processing, so a stale flag would
+                    // otherwise open the next scan stuck on "Finishing".
+                    processing = false
+                    stopRequested = false
                     capturing = true
                 } label: {
                     Label(store.scannedRooms.isEmpty
@@ -147,10 +223,15 @@ private struct IdentifiedRoom: Identifiable {
 // MARK: - RoomPlan bridge
 
 struct RoomCaptureContainer: UIViewRepresentable {
+    @Binding var stopRequested: Bool
+    let onProcessing: () -> Void
     let onFinish: (CapturedRoom) -> Void
+    let onFailure: () -> Void
 
     func makeCoordinator() -> RoomCaptureCoordinator {
-        RoomCaptureCoordinator(onFinish: onFinish)
+        RoomCaptureCoordinator(onProcessing: onProcessing,
+                               onFinish: onFinish,
+                               onFailure: onFailure)
     }
 
     func makeUIView(context: Context) -> RoomCaptureView {
@@ -161,11 +242,15 @@ struct RoomCaptureContainer: UIViewRepresentable {
         return view
     }
 
-    func updateUIView(_ view: RoomCaptureView, context: Context) {}
+    func updateUIView(_ view: RoomCaptureView, context: Context) {
+        // The Done button flips the binding; stopping the session here is what
+        // triggers RoomPlan's post processing and the delegate callback.
+        if stopRequested { context.coordinator.finish() }
+    }
 
     static func dismantleUIView(_ view: RoomCaptureView,
                                 coordinator: RoomCaptureCoordinator) {
-        view.captureSession.stop()
+        coordinator.finish()
     }
 }
 
@@ -178,35 +263,62 @@ struct RoomCaptureContainer: UIViewRepresentable {
 @objc(NakshaRoomCaptureCoordinator)
 final class RoomCaptureCoordinator: NSObject, RoomCaptureViewDelegate {
 
+    private let onProcessing: () -> Void
     private let onFinish: (CapturedRoom) -> Void
+    private let onFailure: () -> Void
+    private var stopped = false
     weak var view: RoomCaptureView?
 
-    init(onFinish: @escaping (CapturedRoom) -> Void) {
+    init(onProcessing: @escaping () -> Void,
+         onFinish: @escaping (CapturedRoom) -> Void,
+         onFailure: @escaping () -> Void) {
+        self.onProcessing = onProcessing
         self.onFinish = onFinish
+        self.onFailure = onFailure
         super.init()
     }
 
     // Required by NSCoding via RoomCaptureViewDelegate. The delegate is never
-    // encoded or decoded, so both are deliberate no-ops.
+    // encoded or decoded, so these are deliberate no-ops.
     required init?(coder: NSCoder) {
+        self.onProcessing = {}
         self.onFinish = { _ in }
+        self.onFailure = {}
         super.init()
     }
 
     func encode(with coder: NSCoder) {}
+
+    /// Ends the capture. Idempotent, because both the Done button and view
+    /// teardown can reach it and stopping an already stopped session throws.
+    func finish() {
+        guard !stopped else { return }
+        stopped = true
+        onProcessing()
+        view?.captureSession.stop()
+    }
 
     // MARK: RoomCaptureViewDelegate
 
     /// Let RoomPlan post-process the raw scan into the parametric model.
     func captureView(shouldPresent roomDataForProcessing: CapturedRoomData,
                      error: Error?) -> Bool {
-        error == nil
+        if error != nil {
+            DispatchQueue.main.async { self.onFailure() }
+            return false
+        }
+        return true
     }
 
     func captureView(didPresent processedResult: CapturedRoom,
                      error: Error?) {
-        guard error == nil else { return }
-        onFinish(processedResult)
+        // Without this the scan would appear to hang after Done, with no room
+        // handed back and no explanation.
+        guard error == nil else {
+            DispatchQueue.main.async { self.onFailure() }
+            return
+        }
+        DispatchQueue.main.async { self.onFinish(processedResult) }
     }
 }
 
