@@ -1,6 +1,8 @@
 import ARKit
 import RealityKit
+import simd
 import SwiftUI
+import UIKit
 
 /// Projects the design onto the real room.
 ///

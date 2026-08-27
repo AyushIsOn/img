@@ -1,5 +1,7 @@
 import RoomPlan
+import simd
 import SwiftUI
+import UIKit
 
 /// LiDAR room capture.
 ///
