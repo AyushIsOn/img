@@ -147,11 +147,12 @@ private struct IdentifiedRoom: Identifiable {
 struct RoomCaptureContainer: UIViewRepresentable {
     let onFinish: (CapturedRoom) -> Void
 
-    func makeCoordinator() -> Coordinator { Coordinator(onFinish: onFinish) }
+    func makeCoordinator() -> RoomCaptureCoordinator {
+        RoomCaptureCoordinator(onFinish: onFinish)
+    }
 
     func makeUIView(context: Context) -> RoomCaptureView {
         let view = RoomCaptureView(frame: .zero)
-        view.captureSession.delegate = context.coordinator
         view.delegate = context.coordinator
         context.coordinator.view = view
         view.captureSession.run(configuration: RoomCaptureSession.Configuration())
@@ -160,28 +161,50 @@ struct RoomCaptureContainer: UIViewRepresentable {
 
     func updateUIView(_ view: RoomCaptureView, context: Context) {}
 
-    final class Coordinator: NSObject, RoomCaptureSessionDelegate,
-                             RoomCaptureViewDelegate {
-        let onFinish: (CapturedRoom) -> Void
-        weak var view: RoomCaptureView?
+    static func dismantleUIView(_ view: RoomCaptureView,
+                                coordinator: RoomCaptureCoordinator) {
+        view.captureSession.stop()
+    }
+}
 
-        init(onFinish: @escaping (CapturedRoom) -> Void) {
-            self.onFinish = onFinish
-        }
+/// Declared at file scope rather than nested inside the representable.
+///
+/// `RoomCaptureViewDelegate` inherits from `NSCoding`, which is an unusual
+/// requirement for a delegate. That forces two things: the class has to satisfy
+/// `NSCoding` even though it is never archived, and it has to be a top level
+/// type so its Objective-C name is stable. The explicit `@objc` name pins it.
+@objc(NakshaRoomCaptureCoordinator)
+final class RoomCaptureCoordinator: NSObject, RoomCaptureViewDelegate {
 
-        /// Let RoomPlan post-process the raw scan into the parametric model.
-        func captureView(shouldPresent roomDataForProcessing: CapturedRoomData,
-                         error: Error?) -> Bool { true }
+    private let onFinish: (CapturedRoom) -> Void
+    weak var view: RoomCaptureView?
 
-        func captureView(didPresent processedResult: CapturedRoom,
-                         error: Error?) {
-            guard error == nil else { return }
-            onFinish(processedResult)
-        }
+    init(onFinish: @escaping (CapturedRoom) -> Void) {
+        self.onFinish = onFinish
+        super.init()
+    }
 
-        func stop() {
-            view?.captureSession.stop()
-        }
+    // Required by NSCoding via RoomCaptureViewDelegate. The delegate is never
+    // encoded or decoded, so both are deliberate no-ops.
+    required init?(coder: NSCoder) {
+        self.onFinish = { _ in }
+        super.init()
+    }
+
+    func encode(with coder: NSCoder) {}
+
+    // MARK: RoomCaptureViewDelegate
+
+    /// Let RoomPlan post-process the raw scan into the parametric model.
+    func captureView(shouldPresent roomDataForProcessing: CapturedRoomData,
+                     error: Error?) -> Bool {
+        error == nil
+    }
+
+    func captureView(didPresent processedResult: CapturedRoom,
+                     error: Error?) {
+        guard error == nil else { return }
+        onFinish(processedResult)
     }
 }
 
