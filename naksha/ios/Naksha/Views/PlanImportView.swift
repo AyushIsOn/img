@@ -1,6 +1,7 @@
-import PhotosUI
 import PDFKit
+import PhotosUI
 import SwiftUI
+import UIKit
 import UniformTypeIdentifiers
 
 /// Import the architect's drawing and trace the rooms over it.
