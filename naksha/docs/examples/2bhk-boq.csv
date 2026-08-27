@@ -1,7 +1,7 @@
 Item,Quantity,Unit,Rate (Rs),Amount (Rs)
-Cable 1.5 sq mm,244.2,m,14.0,3418.8
+Cable 1.5 sq mm,235.1,m,14.0,3291.4
 Cable 2.5 sq mm,601.6,m,22.0,13235.2
-Conduit 20 mm,269.1,m,18.0,4843.8
+Conduit 20 mm,266.2,m,18.0,4791.6
 LED panel 18 W,18,no,420.0,7560.0
 BLDC ceiling fan,3,no,3100.0,9300.0
 Switch plate,7,no,260.0,1820.0
@@ -11,4 +11,4 @@ MCB,12,no,210.0,2520.0
 DB way,14,no,120.0,1680.0
 RCCB 30 mA,1,no,1850.0,1850.0
 
-Material total,,,,49327.8
+Material total,,,,49148.2

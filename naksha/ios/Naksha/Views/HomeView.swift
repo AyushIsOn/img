@@ -29,6 +29,15 @@ struct HomeView: View {
                     .disabled(!lidarAvailable)
 
                     NavigationLink {
+                        PlanImportView()
+                    } label: {
+                        Card(icon: "doc.viewfinder",
+                             title: "Use the architect's plan",
+                             detail: "Import a photo or PDF, set the scale, "
+                                   + "then trace the rooms over it.")
+                    }
+
+                    NavigationLink {
                         SketchPlanView()
                     } label: {
                         Card(icon: "square.on.square.dashed",

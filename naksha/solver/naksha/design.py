@@ -374,14 +374,28 @@ def group_circuits(points: List[DevicePoint],
 
     circuits: List[Circuit] = []
     n = 0
-    for grp in _cluster([p for p in lighting if p.is_load],
-                        LIGHT_CIRCUIT_MAX_W, LIGHT_CIRCUIT_MAX_POINTS, plan):
+
+    light_groups = _cluster([p for p in lighting if p.is_load],
+                            LIGHT_CIRCUIT_MAX_W, LIGHT_CIRCUIT_MAX_POINTS,
+                            plan)
+
+    # A switch plate is fed from exactly one circuit. Where a room's lighting
+    # is split across circuits, the plate goes with whichever circuit owns the
+    # most points in that room, so it is never energised from two ways.
+    boards = [p for p in lighting if p.kind == "switchboard"]
+    board_owner: Dict[str, int] = {}
+    for b in boards:
+        best_i, best_count = 0, -1
+        for i, grp in enumerate(light_groups):
+            count = sum(1 for q in grp if q.room == b.room)
+            if count > best_count:
+                best_i, best_count = i, count
+        board_owner[b.id] = best_i
+
+    for i, grp in enumerate(light_groups):
         n += 1
-        # pull in the switchboards of the rooms this circuit serves
-        rooms = {p.room for p in grp}
-        boards = [p for p in lighting
-                  if p.kind == "switchboard" and p.room in rooms]
-        circuits.append(Circuit(f"C{n}", "lighting", grp + boards))
+        mine = [b for b in boards if board_owner[b.id] == i]
+        circuits.append(Circuit(f"C{n}", "lighting", grp + mine))
     for grp in _cluster(power, POWER_CIRCUIT_MAX_W,
                         POWER_CIRCUIT_MAX_POINTS, plan):
         n += 1

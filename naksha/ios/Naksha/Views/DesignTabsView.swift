@@ -12,8 +12,10 @@ struct DesignTabsView: View {
                 .tabItem { Label("Circuits", systemImage: "list.bullet.indent") }
             NavigationStack { ARWiringView(design: design) }
                 .tabItem { Label("AR", systemImage: "arkit") }
+            NavigationStack { AsBuiltView(design: design) }
+                .tabItem { Label("As-built", systemImage: "checkmark.seal") }
             MaterialListView(design: design)
-                .tabItem { Label("Material", systemImage: "cart") }
+                .tabItem { Label("Buy", systemImage: "cart") }
         }
         .navigationTitle(design.plan.name)
         .navigationBarTitleDisplayMode(.inline)
@@ -156,20 +158,6 @@ private struct ScheduleTab: View {
 struct MaterialListView: View {
     let design: Design
 
-    /// Appliance points carry the V-Guard range they belong to, so the list of
-    /// things to buy is generated from the design rather than merchandised
-    /// separately.
-    private var suggestions: [(category: String, items: [String])] {
-        var byCategory: [String: Set<String>] = [:]
-        for p in design.points {
-            guard let category = p.vguardCategory else { continue }
-            byCategory[category, default: []].insert(p.label)
-        }
-        return byCategory
-            .map { ($0.key, $0.value.sorted()) }
-            .sorted { $0.0 < $1.0 }
-    }
-
     var body: some View {
         List {
             Section {
@@ -199,22 +187,39 @@ struct MaterialListView: View {
                              + "cable. Rates are indicative.") }
 
             Section {
-                ForEach(suggestions, id: \.category) { group in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(group.category)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundColor(Theme.accent)
-                        ForEach(group.items, id: \.self) { item in
-                            Text("\u{2022} \(item)")
-                                .font(.caption).foregroundColor(Theme.ink)
+                ForEach(ProductCatalogue.recommendations(for: design)) { rec in
+                    VStack(alignment: .leading, spacing: 3) {
+                        HStack(alignment: .firstTextBaseline) {
+                            Text(rec.product.name)
+                                .font(.subheadline.weight(.semibold))
+                            Spacer()
+                            Text("x\(rec.quantity)")
+                                .font(.caption.monospacedDigit())
+                                .foregroundColor(Theme.muted)
+                            Text(String(format: "Rs %.0f", rec.lineTotal))
+                                .font(.subheadline.monospacedDigit())
+                                .foregroundColor(Theme.ink)
                         }
+                        Text(rec.product.spec)
+                            .font(.caption2).foregroundColor(Theme.muted)
+                        Text(rec.reason)
+                            .font(.caption2).foregroundColor(Theme.accent)
                     }
                     .padding(.vertical, 3)
                 }
-            } header: { Text("From the V-Guard range") }
-              footer: { Text("Every point you placed maps to a product "
-                             + "category, so the list follows the design "
-                             + "instead of being sold separately.") }
+                HStack {
+                    Text("Product total").font(.subheadline.weight(.bold))
+                    Spacer()
+                    Text(String(format: "Rs %.0f",
+                                ProductCatalogue.total(for: design)))
+                        .font(.subheadline.weight(.bold).monospacedDigit())
+                        .foregroundColor(Theme.accent)
+                }
+            } header: { Text("Recommended for this design") }
+              footer: { Text("Every line is here because the design produced "
+                             + "a point that needs it. Nothing is merchandised "
+                             + "separately, so the list cannot drift from what "
+                             + "the house actually needs. Prices indicative.") }
         }
     }
 }

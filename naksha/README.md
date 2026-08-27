@@ -86,9 +86,9 @@ overstated.
 ```
 Plan                     m2  Pts  Ckt    Radial   Steiner  Steiner+opt  Topology   Board   Total
 1 BHK, 45 sq m           48   32    7     201.3     125.8        114.8     37.5%    8.7%   43.0%
-2 BHK, 84 sq m           84   54   12     511.3     280.3        256.3     45.2%    8.6%   49.9%
-3 BHK, 128 sq m         130   75   14     834.1     370.0        348.5     55.6%    5.8%   58.2%
-MEAN                                                                       46.1%    7.7%   50.4%
+2 BHK, 84 sq m           84   54   12     511.3     282.4        258.4     44.8%    8.5%   49.7%
+3 BHK, 128 sq m         130   75   14     834.1     372.9        351.4     55.3%    5.8%   57.9%
+MEAN                                                                       45.8%    7.7%   50.1%
 ```
 
 Lengths are metres of conduit including vertical drops.
