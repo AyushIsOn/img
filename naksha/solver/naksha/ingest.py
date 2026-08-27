@@ -45,24 +45,45 @@ def _rect(x0: float, y0: float, w: float, h: float) -> List[Point]:
             (round(x0 + w, 3), round(y0 + h, 3)), (round(x0, 3), round(y0 + h, 3))]
 
 
-def _dimensions(entry: Dict) -> Tuple[float, float]:
+def _dimensions(entry: Dict, label: str = "a room") -> Tuple[float, float]:
     """Recover a sensible width and depth for one captured room.
 
     The traced area is trusted over the bounding box, because a hand traced
     outline is more reliable in total size than in squareness. The bounding box
     only supplies the aspect ratio.
+
+    A room whose size cannot be established raises instead of falling back to
+    an arbitrary default. Floor area drives the lighting count through the
+    lumen method and the socket rules, so inventing a size would produce a
+    schedule that looks authoritative and is wrong. Better to say which room
+    failed and let it be rescanned.
     """
     polygon = entry.get("polygon") or []
-    if len(polygon) < 3:
-        return 3.0, 3.0
-    w, h = _bbox_of(polygon)
-    area = polygon_area([(p[0], p[1]) for p in polygon])
-    if w <= 0 or h <= 0 or area <= 0:
-        return max(w, 1.0), max(h, 1.0)
-    aspect = w / h
-    depth = math.sqrt(area / aspect)
-    width = area / depth
-    return round(width, 2), round(depth, 2)
+    if len(polygon) >= 3:
+        w, h = _bbox_of(polygon)
+        area = polygon_area([(p[0], p[1]) for p in polygon])
+        if w > 0 and h > 0 and area > 0:
+            aspect = w / h
+            depth = math.sqrt(area / aspect)
+            return round(area / depth, 2), round(depth, 2)
+        if w > 0 and h > 0:
+            return round(w, 2), round(h, 2)
+
+    # No usable outline. Accept an explicit size if one was supplied, which is
+    # how a sketched or manually entered room arrives.
+    width = entry.get("width") or entry.get("widthM")
+    depth = entry.get("depth") or entry.get("depthM") or entry.get("length")
+    if width and depth and float(width) > 0 and float(depth) > 0:
+        return round(float(width), 2), round(float(depth), 2)
+
+    area = entry.get("area") or entry.get("areaM2") or entry.get("floor_area")
+    if area and float(area) > 0:
+        side = math.sqrt(float(area))     # square is the least wrong guess
+        return round(side, 2), round(side, 2)
+
+    raise ValueError(
+        f"cannot establish the size of {label}: the scan produced no usable "
+        f"outline and no area or dimensions were given. Rescan that room.")
 
 
 # ------------------------------------------------------------- shelf packing
@@ -185,7 +206,7 @@ def floorplan_from_scans(scanned: List[Dict],
         used[raw] = used.get(raw, 0) + 1
         label = raw if used[raw] == 1 else f"{raw} {used[raw]}"
         kind = (entry.get("kind") or "bedroom").lower()
-        w, h = _dimensions(entry)
+        w, h = _dimensions(entry, label)
         prepared.append((label, kind, max(w, 1.0), max(h, 1.0)))
 
     # living space first, so the front door lands somewhere sensible

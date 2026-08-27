@@ -133,10 +133,31 @@ introduced to each other. This is the part to do before a demo.
 
 ### Step 1, start the solver on your Mac
 
+If you have not installed the dependencies yet, do that first. Skipping it gives
+you `ModuleNotFoundError: No module named 'networkx'`.
+
 ```bash
 cd naksha/solver
+python3 -m pip install -r requirements.txt
 python3 serve.py
 ```
+
+If pip refuses with `externally-managed-environment`, which Homebrew Python
+does, use a virtual environment:
+
+```bash
+cd naksha/solver
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python3 serve.py
+```
+
+Every new terminal then needs `source .venv/bin/activate` before `serve.py`.
+
+The server itself only needs `networkx`. `numpy` and `matplotlib` are for the
+drawing sheets that `run.py` produces, so `pip install networkx` is enough if
+you only want the app talking to the solver.
 
 It prints the addresses the phone can reach, for example:
 
