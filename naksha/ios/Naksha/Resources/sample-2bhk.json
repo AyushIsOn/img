@@ -1,0 +1,4589 @@
+{
+  "plan": {
+    "name": "2 BHK, 84 sq m",
+    "ceiling_height": 3.0,
+    "rooms": [
+      {
+        "name": "Living",
+        "kind": "living",
+        "polygon": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            5.0,
+            0.0
+          ],
+          [
+            5.0,
+            4.5
+          ],
+          [
+            0.0,
+            4.5
+          ]
+        ],
+        "area": 22.5
+      },
+      {
+        "name": "Kitchen",
+        "kind": "kitchen",
+        "polygon": [
+          [
+            5.0,
+            0.0
+          ],
+          [
+            8.0,
+            0.0
+          ],
+          [
+            8.0,
+            3.2
+          ],
+          [
+            5.0,
+            3.2
+          ]
+        ],
+        "area": 9.6
+      },
+      {
+        "name": "Bath 1",
+        "kind": "bath",
+        "polygon": [
+          [
+            8.0,
+            0.0
+          ],
+          [
+            10.5,
+            0.0
+          ],
+          [
+            10.5,
+            3.2
+          ],
+          [
+            8.0,
+            3.2
+          ]
+        ],
+        "area": 8.0
+      },
+      {
+        "name": "Passage",
+        "kind": "passage",
+        "polygon": [
+          [
+            5.0,
+            3.2
+          ],
+          [
+            10.5,
+            3.2
+          ],
+          [
+            10.5,
+            4.5
+          ],
+          [
+            5.0,
+            4.5
+          ]
+        ],
+        "area": 7.15
+      },
+      {
+        "name": "Bedroom 1",
+        "kind": "bedroom",
+        "polygon": [
+          [
+            0.0,
+            4.5
+          ],
+          [
+            5.0,
+            4.5
+          ],
+          [
+            5.0,
+            8.0
+          ],
+          [
+            0.0,
+            8.0
+          ]
+        ],
+        "area": 17.5
+      },
+      {
+        "name": "Bedroom 2",
+        "kind": "bedroom",
+        "polygon": [
+          [
+            5.0,
+            4.5
+          ],
+          [
+            8.0,
+            4.5
+          ],
+          [
+            8.0,
+            8.0
+          ],
+          [
+            5.0,
+            8.0
+          ]
+        ],
+        "area": 10.5
+      },
+      {
+        "name": "Bath 2",
+        "kind": "bath",
+        "polygon": [
+          [
+            8.0,
+            4.5
+          ],
+          [
+            10.5,
+            4.5
+          ],
+          [
+            10.5,
+            8.0
+          ],
+          [
+            8.0,
+            8.0
+          ]
+        ],
+        "area": 8.75
+      }
+    ],
+    "doors": [
+      {
+        "position": [
+          2.0,
+          0.0
+        ],
+        "room_a": "Living",
+        "room_b": null,
+        "width": 1.0,
+        "is_entry": true
+      },
+      {
+        "position": [
+          5.0,
+          1.6
+        ],
+        "room_a": "Living",
+        "room_b": "Kitchen",
+        "width": 0.9,
+        "is_entry": false
+      },
+      {
+        "position": [
+          5.0,
+          3.85
+        ],
+        "room_a": "Living",
+        "room_b": "Passage",
+        "width": 1.0,
+        "is_entry": false
+      },
+      {
+        "position": [
+          2.0,
+          4.5
+        ],
+        "room_a": "Living",
+        "room_b": "Bedroom 1",
+        "width": 0.9,
+        "is_entry": false
+      },
+      {
+        "position": [
+          6.5,
+          4.5
+        ],
+        "room_a": "Passage",
+        "room_b": "Bedroom 2",
+        "width": 0.9,
+        "is_entry": false
+      },
+      {
+        "position": [
+          9.2,
+          4.5
+        ],
+        "room_a": "Passage",
+        "room_b": "Bath 2",
+        "width": 0.75,
+        "is_entry": false
+      },
+      {
+        "position": [
+          9.2,
+          3.2
+        ],
+        "room_a": "Passage",
+        "room_b": "Bath 1",
+        "width": 0.75,
+        "is_entry": false
+      }
+    ]
+  },
+  "board": [
+    3.0,
+    1.5
+  ],
+  "points": [
+    {
+      "id": "F001",
+      "kind": "fan",
+      "room": "Living",
+      "xy": [
+        2.5,
+        2.25
+      ],
+      "height": 3.0,
+      "watts": 55.0,
+      "label": "BLDC ceiling fan",
+      "vguard_category": "Fans"
+    },
+    {
+      "id": "L002",
+      "kind": "light",
+      "room": "Living",
+      "xy": [
+        0.833,
+        1.125
+      ],
+      "height": 3.0,
+      "watts": 18.0,
+      "label": "LED panel 18W",
+      "vguard_category": "Lighting"
+    },
+    {
+      "id": "L003",
+      "kind": "light",
+      "room": "Living",
+      "xy": [
+        2.5,
+        1.125
+      ],
+      "height": 3.0,
+      "watts": 18.0,
+      "label": "LED panel 18W",
+      "vguard_category": "Lighting"
+    },
+    {
+      "id": "L004",
+      "kind": "light",
+      "room": "Living",
+      "xy": [
+        4.167,
+        1.125
+      ],
+      "height": 3.0,
+      "watts": 18.0,
+      "label": "LED panel 18W",
+      "vguard_category": "Lighting"
+    },
+    {
+      "id": "L005",
+      "kind": "light",
+      "room": "Living",
+      "xy": [
+        0.833,
+        3.375
+      ],
+      "height": 3.0,
+      "watts": 18.0,
+      "label": "LED panel 18W",
+      "vguard_category": "Lighting"
+    },
+    {
+      "id": "L006",
+      "kind": "light",
+      "room": "Living",
+      "xy": [
+        2.5,
+        3.375
+      ],
+      "height": 3.0,
+      "watts": 18.0,
+      "label": "LED panel 18W",
+      "vguard_category": "Lighting"
+    },
+    {
+      "id": "S007",
+      "kind": "switchboard",
+      "room": "Living",
+      "xy": [
+        1.454,
+        0.396
+      ],
+      "height": 1.25,
+      "watts": 0.0,
+      "label": "Switch plate",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "K008",
+      "kind": "socket",
+      "room": "Living",
+      "xy": [
+        0.662,
+        0.208
+      ],
+      "height": 0.3,
+      "watts": 200.0,
+      "label": "6A socket",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "K009",
+      "kind": "socket",
+      "room": "Living",
+      "xy": [
+        3.229,
+        0.263
+      ],
+      "height": 0.3,
+      "watts": 200.0,
+      "label": "6A socket",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "K010",
+      "kind": "socket",
+      "room": "Living",
+      "xy": [
+        4.102,
+        0.22
+      ],
+      "height": 0.3,
+      "watts": 200.0,
+      "label": "6A socket",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "A011",
+      "kind": "appliance",
+      "room": "Living",
+      "xy": [
+        4.782,
+        0.401
+      ],
+      "height": 2.1,
+      "watts": 1800,
+      "label": "Air conditioner 1.5 T",
+      "vguard_category": "Air Conditioners"
+    },
+    {
+      "id": "A012",
+      "kind": "appliance",
+      "room": "Living",
+      "xy": [
+        4.743,
+        1.286
+      ],
+      "height": 1.1,
+      "watts": 150,
+      "label": "Television",
+      "vguard_category": null
+    },
+    {
+      "id": "L013",
+      "kind": "light",
+      "room": "Kitchen",
+      "xy": [
+        5.75,
+        0.8
+      ],
+      "height": 3.0,
+      "watts": 18.0,
+      "label": "LED panel 18W",
+      "vguard_category": "Lighting"
+    },
+    {
+      "id": "L014",
+      "kind": "light",
+      "room": "Kitchen",
+      "xy": [
+        7.25,
+        0.8
+      ],
+      "height": 3.0,
+      "watts": 18.0,
+      "label": "LED panel 18W",
+      "vguard_category": "Lighting"
+    },
+    {
+      "id": "L015",
+      "kind": "light",
+      "room": "Kitchen",
+      "xy": [
+        5.75,
+        2.4
+      ],
+      "height": 3.0,
+      "watts": 18.0,
+      "label": "LED panel 18W",
+      "vguard_category": "Lighting"
+    },
+    {
+      "id": "S016",
+      "kind": "switchboard",
+      "room": "Kitchen",
+      "xy": [
+        5.257,
+        2.139
+      ],
+      "height": 1.25,
+      "watts": 0.0,
+      "label": "Switch plate",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "K017",
+      "kind": "socket",
+      "room": "Kitchen",
+      "xy": [
+        5.371,
+        0.217
+      ],
+      "height": 0.3,
+      "watts": 200.0,
+      "label": "6A socket",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "K018",
+      "kind": "socket",
+      "room": "Kitchen",
+      "xy": [
+        6.381,
+        0.279
+      ],
+      "height": 0.3,
+      "watts": 200.0,
+      "label": "6A socket",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "K019",
+      "kind": "socket",
+      "room": "Kitchen",
+      "xy": [
+        7.368,
+        0.236
+      ],
+      "height": 0.3,
+      "watts": 200.0,
+      "label": "6A socket",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "K020",
+      "kind": "socket",
+      "room": "Kitchen",
+      "xy": [
+        7.761,
+        0.827
+      ],
+      "height": 0.3,
+      "watts": 200.0,
+      "label": "6A socket",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "K021",
+      "kind": "socket",
+      "room": "Kitchen",
+      "xy": [
+        7.724,
+        1.799
+      ],
+      "height": 0.3,
+      "watts": 200.0,
+      "label": "6A socket",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "A022",
+      "kind": "appliance",
+      "room": "Kitchen",
+      "xy": [
+        7.796,
+        2.815
+      ],
+      "height": 2.1,
+      "watts": 250,
+      "label": "Chimney",
+      "vguard_category": "Kitchen Appliances"
+    },
+    {
+      "id": "A023",
+      "kind": "appliance",
+      "room": "Kitchen",
+      "xy": [
+        6.943,
+        2.934
+      ],
+      "height": 1.1,
+      "watts": 60,
+      "label": "RO purifier",
+      "vguard_category": "Water Purifiers"
+    },
+    {
+      "id": "A024",
+      "kind": "appliance",
+      "room": "Kitchen",
+      "xy": [
+        5.972,
+        2.94
+      ],
+      "height": 0.3,
+      "watts": 200,
+      "label": "Refrigerator",
+      "vguard_category": null
+    },
+    {
+      "id": "L025",
+      "kind": "light",
+      "room": "Bath 1",
+      "xy": [
+        9.25,
+        0.8
+      ],
+      "height": 3.0,
+      "watts": 18.0,
+      "label": "LED panel 18W",
+      "vguard_category": "Lighting"
+    },
+    {
+      "id": "L026",
+      "kind": "light",
+      "room": "Bath 1",
+      "xy": [
+        9.25,
+        2.4
+      ],
+      "height": 3.0,
+      "watts": 18.0,
+      "label": "LED panel 18W",
+      "vguard_category": "Lighting"
+    },
+    {
+      "id": "S027",
+      "kind": "switchboard",
+      "room": "Bath 1",
+      "xy": [
+        8.728,
+        2.922
+      ],
+      "height": 1.25,
+      "watts": 0.0,
+      "label": "Switch plate",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "K028",
+      "kind": "socket",
+      "room": "Bath 1",
+      "xy": [
+        8.802,
+        0.265
+      ],
+      "height": 0.3,
+      "watts": 200.0,
+      "label": "6A socket",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "A029",
+      "kind": "appliance",
+      "room": "Bath 1",
+      "xy": [
+        10.002,
+        0.245
+      ],
+      "height": 2.1,
+      "watts": 2000,
+      "label": "Water heater 15 L",
+      "vguard_category": "Water Heaters"
+    },
+    {
+      "id": "L030",
+      "kind": "light",
+      "room": "Passage",
+      "xy": [
+        7.750000000000001,
+        3.85
+      ],
+      "height": 3.0,
+      "watts": 18.0,
+      "label": "LED panel 18W",
+      "vguard_category": "Lighting"
+    },
+    {
+      "id": "S031",
+      "kind": "switchboard",
+      "room": "Passage",
+      "xy": [
+        6.48,
+        3.91
+      ],
+      "height": 1.25,
+      "watts": 0.0,
+      "label": "Switch plate",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "K032",
+      "kind": "socket",
+      "room": "Passage",
+      "xy": [
+        6.115,
+        3.291
+      ],
+      "height": 0.3,
+      "watts": 200.0,
+      "label": "6A socket",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "F033",
+      "kind": "fan",
+      "room": "Bedroom 1",
+      "xy": [
+        2.5,
+        6.25
+      ],
+      "height": 3.0,
+      "watts": 55.0,
+      "label": "BLDC ceiling fan",
+      "vguard_category": "Fans"
+    },
+    {
+      "id": "L034",
+      "kind": "light",
+      "room": "Bedroom 1",
+      "xy": [
+        1.25,
+        5.375
+      ],
+      "height": 3.0,
+      "watts": 18.0,
+      "label": "LED panel 18W",
+      "vguard_category": "Lighting"
+    },
+    {
+      "id": "L035",
+      "kind": "light",
+      "room": "Bedroom 1",
+      "xy": [
+        3.75,
+        5.375
+      ],
+      "height": 3.0,
+      "watts": 18.0,
+      "label": "LED panel 18W",
+      "vguard_category": "Lighting"
+    },
+    {
+      "id": "L036",
+      "kind": "light",
+      "room": "Bedroom 1",
+      "xy": [
+        1.25,
+        7.125
+      ],
+      "height": 3.0,
+      "watts": 18.0,
+      "label": "LED panel 18W",
+      "vguard_category": "Lighting"
+    },
+    {
+      "id": "S037",
+      "kind": "switchboard",
+      "room": "Bedroom 1",
+      "xy": [
+        1.538,
+        4.906
+      ],
+      "height": 1.25,
+      "watts": 0.0,
+      "label": "Switch plate",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "K038",
+      "kind": "socket",
+      "room": "Bedroom 1",
+      "xy": [
+        0.741,
+        4.686
+      ],
+      "height": 0.3,
+      "watts": 200.0,
+      "label": "6A socket",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "K039",
+      "kind": "socket",
+      "room": "Bedroom 1",
+      "xy": [
+        3.559,
+        4.73
+      ],
+      "height": 0.3,
+      "watts": 200.0,
+      "label": "6A socket",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "K040",
+      "kind": "socket",
+      "room": "Bedroom 1",
+      "xy": [
+        4.559,
+        4.67
+      ],
+      "height": 0.3,
+      "watts": 200.0,
+      "label": "6A socket",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "A041",
+      "kind": "appliance",
+      "room": "Bedroom 1",
+      "xy": [
+        4.737,
+        5.439
+      ],
+      "height": 2.1,
+      "watts": 1500,
+      "label": "Air conditioner 1 T",
+      "vguard_category": "Air Conditioners"
+    },
+    {
+      "id": "F042",
+      "kind": "fan",
+      "room": "Bedroom 2",
+      "xy": [
+        6.5,
+        6.25
+      ],
+      "height": 3.0,
+      "watts": 55.0,
+      "label": "BLDC ceiling fan",
+      "vguard_category": "Fans"
+    },
+    {
+      "id": "L043",
+      "kind": "light",
+      "room": "Bedroom 2",
+      "xy": [
+        6.5,
+        5.375
+      ],
+      "height": 3.0,
+      "watts": 18.0,
+      "label": "LED panel 18W",
+      "vguard_category": "Lighting"
+    },
+    {
+      "id": "L044",
+      "kind": "light",
+      "room": "Bedroom 2",
+      "xy": [
+        6.5,
+        7.125
+      ],
+      "height": 3.0,
+      "watts": 18.0,
+      "label": "LED panel 18W",
+      "vguard_category": "Lighting"
+    },
+    {
+      "id": "S045",
+      "kind": "switchboard",
+      "room": "Bedroom 2",
+      "xy": [
+        5.947,
+        4.762
+      ],
+      "height": 1.25,
+      "watts": 0.0,
+      "label": "Switch plate",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "K046",
+      "kind": "socket",
+      "room": "Bedroom 2",
+      "xy": [
+        7.673,
+        4.722
+      ],
+      "height": 0.3,
+      "watts": 200.0,
+      "label": "6A socket",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "K047",
+      "kind": "socket",
+      "room": "Bedroom 2",
+      "xy": [
+        7.725,
+        6.02
+      ],
+      "height": 0.3,
+      "watts": 200.0,
+      "label": "6A socket",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "K048",
+      "kind": "socket",
+      "room": "Bedroom 2",
+      "xy": [
+        7.791,
+        7.407
+      ],
+      "height": 0.3,
+      "watts": 200.0,
+      "label": "6A socket",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "A049",
+      "kind": "appliance",
+      "room": "Bedroom 2",
+      "xy": [
+        6.737,
+        7.724
+      ],
+      "height": 2.1,
+      "watts": 1500,
+      "label": "Air conditioner 1 T",
+      "vguard_category": "Air Conditioners"
+    },
+    {
+      "id": "L050",
+      "kind": "light",
+      "room": "Bath 2",
+      "xy": [
+        9.25,
+        5.375
+      ],
+      "height": 3.0,
+      "watts": 18.0,
+      "label": "LED panel 18W",
+      "vguard_category": "Lighting"
+    },
+    {
+      "id": "L051",
+      "kind": "light",
+      "room": "Bath 2",
+      "xy": [
+        9.25,
+        7.125
+      ],
+      "height": 3.0,
+      "watts": 18.0,
+      "label": "LED panel 18W",
+      "vguard_category": "Lighting"
+    },
+    {
+      "id": "S052",
+      "kind": "switchboard",
+      "room": "Bath 2",
+      "xy": [
+        8.72,
+        4.78
+      ],
+      "height": 1.25,
+      "watts": 0.0,
+      "label": "Switch plate",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "K053",
+      "kind": "socket",
+      "room": "Bath 2",
+      "xy": [
+        10.111,
+        4.743
+      ],
+      "height": 0.3,
+      "watts": 200.0,
+      "label": "6A socket",
+      "vguard_category": "Switchgear"
+    },
+    {
+      "id": "A054",
+      "kind": "appliance",
+      "room": "Bath 2",
+      "xy": [
+        10.24,
+        5.854
+      ],
+      "height": 2.1,
+      "watts": 2000,
+      "label": "Water heater 15 L",
+      "vguard_category": "Water Heaters"
+    }
+  ],
+  "circuits": [
+    {
+      "id": "C1",
+      "kind": "lighting",
+      "mcb_amps": 6.0,
+      "cable_mm2": 1.5,
+      "connected_watts": 163.0,
+      "route_length_m": 17.0,
+      "vdrop_percent": 0.13,
+      "point_ids": [
+        "L002",
+        "L003",
+        "L004",
+        "F001",
+        "L005",
+        "L006",
+        "L013",
+        "S007",
+        "S016"
+      ],
+      "route_edges": [
+        [
+          [
+            1.5,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ]
+        ],
+        [
+          [
+            1.5,
+            1.0
+          ],
+          [
+            2.0,
+            1.0
+          ]
+        ],
+        [
+          [
+            2.0,
+            1.0
+          ],
+          [
+            2.5,
+            1.0
+          ]
+        ],
+        [
+          [
+            3.0,
+            1.0
+          ],
+          [
+            3.5,
+            1.0
+          ]
+        ],
+        [
+          [
+            3.0,
+            1.0
+          ],
+          [
+            3.0,
+            1.5
+          ]
+        ],
+        [
+          [
+            3.0,
+            1.5
+          ],
+          [
+            2.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            4.5,
+            2.0
+          ],
+          [
+            4.0,
+            2.0
+          ]
+        ],
+        [
+          [
+            4.5,
+            2.0
+          ],
+          [
+            5.0,
+            2.0
+          ]
+        ],
+        [
+          [
+            2.5,
+            3.5
+          ],
+          [
+            2.0,
+            3.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            3.5
+          ],
+          [
+            2.5,
+            3.0
+          ]
+        ],
+        [
+          [
+            2.5,
+            3.0
+          ],
+          [
+            2.5,
+            2.5
+          ]
+        ],
+        [
+          [
+            1.0,
+            0.5
+          ],
+          [
+            1.5,
+            0.5
+          ]
+        ],
+        [
+          [
+            1.0,
+            0.5
+          ],
+          [
+            1.0,
+            1.0
+          ]
+        ],
+        [
+          [
+            1.0,
+            3.5
+          ],
+          [
+            1.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            4.0,
+            1.5
+          ],
+          [
+            4.0,
+            1.0
+          ]
+        ],
+        [
+          [
+            4.0,
+            1.5
+          ],
+          [
+            4.0,
+            2.0
+          ]
+        ],
+        [
+          [
+            4.0,
+            1.0
+          ],
+          [
+            3.5,
+            1.0
+          ]
+        ],
+        [
+          [
+            2.5,
+            1.0
+          ],
+          [
+            2.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            1.5
+          ],
+          [
+            2.5,
+            2.0
+          ]
+        ],
+        [
+          [
+            5.0,
+            2.0
+          ],
+          [
+            5.5,
+            2.0
+          ]
+        ],
+        [
+          [
+            5.5,
+            1.5
+          ],
+          [
+            5.5,
+            1.0
+          ]
+        ],
+        [
+          [
+            5.5,
+            1.5
+          ],
+          [
+            5.5,
+            2.0
+          ]
+        ],
+        [
+          [
+            2.0,
+            3.5
+          ],
+          [
+            1.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            2.0
+          ],
+          [
+            2.5,
+            2.5
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "C2",
+      "kind": "lighting",
+      "mcb_amps": 6.0,
+      "cable_mm2": 1.5,
+      "connected_watts": 163.0,
+      "route_length_m": 28.75,
+      "vdrop_percent": 0.21,
+      "point_ids": [
+        "L014",
+        "L015",
+        "L030",
+        "L034",
+        "L035",
+        "F033",
+        "L036",
+        "S016",
+        "S031",
+        "S037"
+      ],
+      "route_edges": [
+        [
+          [
+            4.5,
+            2.0
+          ],
+          [
+            4.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            4.5,
+            2.0
+          ],
+          [
+            5.0,
+            2.0
+          ]
+        ],
+        [
+          [
+            4.5,
+            2.0
+          ],
+          [
+            4.5,
+            2.5
+          ]
+        ],
+        [
+          [
+            4.5,
+            2.5
+          ],
+          [
+            4.5,
+            3.0
+          ]
+        ],
+        [
+          [
+            5.0,
+            4.0
+          ],
+          [
+            4.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            5.0,
+            4.0
+          ],
+          [
+            5.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            3.0,
+            1.5
+          ],
+          [
+            2.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            3.0,
+            1.5
+          ],
+          [
+            3.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            1.0,
+            6.5
+          ],
+          [
+            1.0,
+            6.0
+          ]
+        ],
+        [
+          [
+            1.0,
+            6.5
+          ],
+          [
+            1.0,
+            7.0
+          ]
+        ],
+        [
+          [
+            1.0,
+            6.0
+          ],
+          [
+            1.0,
+            5.5
+          ]
+        ],
+        [
+          [
+            2.0,
+            5.0
+          ],
+          [
+            1.5,
+            5.0
+          ]
+        ],
+        [
+          [
+            2.0,
+            5.0
+          ],
+          [
+            2.5,
+            5.0
+          ]
+        ],
+        [
+          [
+            1.5,
+            2.0
+          ],
+          [
+            1.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            1.5,
+            2.0
+          ],
+          [
+            1.5,
+            2.5
+          ]
+        ],
+        [
+          [
+            1.5,
+            2.5
+          ],
+          [
+            1.5,
+            3.0
+          ]
+        ],
+        [
+          [
+            2.5,
+            1.5
+          ],
+          [
+            2.0,
+            1.5
+          ]
+        ],
+        [
+          [
+            1.5,
+            5.0
+          ],
+          [
+            1.0,
+            5.0
+          ]
+        ],
+        [
+          [
+            1.5,
+            5.0
+          ],
+          [
+            1.5,
+            4.5
+          ]
+        ],
+        [
+          [
+            7.0,
+            4.0
+          ],
+          [
+            6.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            7.0,
+            4.0
+          ],
+          [
+            7.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            6.5,
+            1.0
+          ],
+          [
+            6.0,
+            1.0
+          ]
+        ],
+        [
+          [
+            6.5,
+            1.0
+          ],
+          [
+            7.0,
+            1.0
+          ]
+        ],
+        [
+          [
+            6.5,
+            4.0
+          ],
+          [
+            6.0,
+            4.0
+          ]
+        ],
+        [
+          [
+            4.5,
+            4.0
+          ],
+          [
+            4.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            4.5,
+            1.5
+          ],
+          [
+            4.0,
+            1.5
+          ]
+        ],
+        [
+          [
+            3.5,
+            5.5
+          ],
+          [
+            3.0,
+            5.5
+          ]
+        ],
+        [
+          [
+            5.5,
+            2.0
+          ],
+          [
+            5.0,
+            2.0
+          ]
+        ],
+        [
+          [
+            5.5,
+            2.0
+          ],
+          [
+            5.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            5.5,
+            2.0
+          ],
+          [
+            5.5,
+            2.5
+          ]
+        ],
+        [
+          [
+            1.5,
+            1.5
+          ],
+          [
+            2.0,
+            1.5
+          ]
+        ],
+        [
+          [
+            1.0,
+            5.5
+          ],
+          [
+            1.0,
+            5.0
+          ]
+        ],
+        [
+          [
+            1.5,
+            4.0
+          ],
+          [
+            1.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            1.5,
+            4.0
+          ],
+          [
+            1.5,
+            4.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            6.0
+          ],
+          [
+            2.5,
+            5.5
+          ]
+        ],
+        [
+          [
+            6.0,
+            1.0
+          ],
+          [
+            5.5,
+            1.0
+          ]
+        ],
+        [
+          [
+            6.0,
+            4.0
+          ],
+          [
+            5.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            4.0,
+            1.5
+          ],
+          [
+            3.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            3.0,
+            5.5
+          ],
+          [
+            2.5,
+            5.5
+          ]
+        ],
+        [
+          [
+            5.5,
+            1.0
+          ],
+          [
+            5.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            4.5,
+            3.5
+          ],
+          [
+            4.5,
+            3.0
+          ]
+        ],
+        [
+          [
+            8.0,
+            4.0
+          ],
+          [
+            7.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            2.5,
+            5.5
+          ],
+          [
+            2.5,
+            5.0
+          ]
+        ],
+        [
+          [
+            1.5,
+            3.0
+          ],
+          [
+            1.5,
+            3.5
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "C3",
+      "kind": "lighting",
+      "mcb_amps": 6.0,
+      "cable_mm2": 1.5,
+      "connected_watts": 163.0,
+      "route_length_m": 28.25,
+      "vdrop_percent": 0.21,
+      "point_ids": [
+        "L043",
+        "F042",
+        "L044",
+        "L050",
+        "L051",
+        "L025",
+        "L026",
+        "S027",
+        "S045",
+        "S052"
+      ],
+      "route_edges": [
+        [
+          [
+            6.5,
+            5.0
+          ],
+          [
+            6.5,
+            4.5
+          ]
+        ],
+        [
+          [
+            6.5,
+            5.0
+          ],
+          [
+            6.5,
+            5.5
+          ]
+        ],
+        [
+          [
+            6.5,
+            5.5
+          ],
+          [
+            6.0,
+            5.5
+          ]
+        ],
+        [
+          [
+            6.5,
+            5.5
+          ],
+          [
+            6.5,
+            6.0
+          ]
+        ],
+        [
+          [
+            4.5,
+            2.5
+          ],
+          [
+            4.5,
+            2.0
+          ]
+        ],
+        [
+          [
+            4.5,
+            2.5
+          ],
+          [
+            4.5,
+            3.0
+          ]
+        ],
+        [
+          [
+            4.5,
+            2.0
+          ],
+          [
+            4.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            4.0
+          ],
+          [
+            4.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            5.0,
+            4.0
+          ],
+          [
+            5.0,
+            4.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            4.5
+          ],
+          [
+            5.0,
+            5.0
+          ]
+        ],
+        [
+          [
+            3.0,
+            1.5
+          ],
+          [
+            3.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            9.0,
+            2.5
+          ],
+          [
+            8.5,
+            2.5
+          ]
+        ],
+        [
+          [
+            9.0,
+            2.5
+          ],
+          [
+            9.0,
+            2.0
+          ]
+        ],
+        [
+          [
+            9.0,
+            2.0
+          ],
+          [
+            9.0,
+            1.5
+          ]
+        ],
+        [
+          [
+            9.0,
+            5.5
+          ],
+          [
+            8.5,
+            5.5
+          ]
+        ],
+        [
+          [
+            9.0,
+            5.5
+          ],
+          [
+            9.0,
+            5.0
+          ]
+        ],
+        [
+          [
+            9.0,
+            5.5
+          ],
+          [
+            9.0,
+            6.0
+          ]
+        ],
+        [
+          [
+            9.0,
+            5.0
+          ],
+          [
+            9.0,
+            4.5
+          ]
+        ],
+        [
+          [
+            8.0,
+            3.5
+          ],
+          [
+            7.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            8.0,
+            3.5
+          ],
+          [
+            8.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            8.5,
+            2.5
+          ],
+          [
+            8.5,
+            3.0
+          ]
+        ],
+        [
+          [
+            8.5,
+            5.5
+          ],
+          [
+            8.5,
+            5.0
+          ]
+        ],
+        [
+          [
+            6.0,
+            5.0
+          ],
+          [
+            5.5,
+            5.0
+          ]
+        ],
+        [
+          [
+            6.0,
+            5.0
+          ],
+          [
+            6.0,
+            5.5
+          ]
+        ],
+        [
+          [
+            6.5,
+            4.5
+          ],
+          [
+            6.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            7.5,
+            3.5
+          ],
+          [
+            7.0,
+            3.5
+          ]
+        ],
+        [
+          [
+            6.5,
+            4.0
+          ],
+          [
+            6.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            6.5,
+            7.0
+          ],
+          [
+            6.5,
+            6.5
+          ]
+        ],
+        [
+          [
+            4.5,
+            4.0
+          ],
+          [
+            4.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            4.5,
+            1.5
+          ],
+          [
+            4.0,
+            1.5
+          ]
+        ],
+        [
+          [
+            9.0,
+            1.5
+          ],
+          [
+            9.0,
+            1.0
+          ]
+        ],
+        [
+          [
+            5.5,
+            5.0
+          ],
+          [
+            5.0,
+            5.0
+          ]
+        ],
+        [
+          [
+            9.0,
+            7.0
+          ],
+          [
+            9.0,
+            6.5
+          ]
+        ],
+        [
+          [
+            9.0,
+            4.5
+          ],
+          [
+            9.0,
+            4.0
+          ]
+        ],
+        [
+          [
+            9.0,
+            4.0
+          ],
+          [
+            9.0,
+            3.5
+          ]
+        ],
+        [
+          [
+            7.0,
+            3.5
+          ],
+          [
+            6.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            6.5,
+            6.5
+          ],
+          [
+            6.5,
+            6.0
+          ]
+        ],
+        [
+          [
+            4.0,
+            1.5
+          ],
+          [
+            3.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            4.5,
+            3.5
+          ],
+          [
+            4.5,
+            3.0
+          ]
+        ],
+        [
+          [
+            9.0,
+            3.5
+          ],
+          [
+            8.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            9.0,
+            3.5
+          ],
+          [
+            9.0,
+            3.0
+          ]
+        ],
+        [
+          [
+            9.0,
+            3.0
+          ],
+          [
+            8.5,
+            3.0
+          ]
+        ],
+        [
+          [
+            9.0,
+            6.0
+          ],
+          [
+            9.0,
+            6.5
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "C4",
+      "kind": "power",
+      "mcb_amps": 16.0,
+      "cable_mm2": 2.5,
+      "connected_watts": 910.0,
+      "route_length_m": 30.4,
+      "vdrop_percent": 0.76,
+      "point_ids": [
+        "K018",
+        "K020",
+        "K021",
+        "A022",
+        "A023"
+      ],
+      "route_edges": [
+        [
+          [
+            4.5,
+            2.5
+          ],
+          [
+            4.5,
+            2.0
+          ]
+        ],
+        [
+          [
+            4.5,
+            2.5
+          ],
+          [
+            4.5,
+            3.0
+          ]
+        ],
+        [
+          [
+            4.5,
+            2.0
+          ],
+          [
+            4.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            3.0,
+            1.5
+          ],
+          [
+            3.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            1.5
+          ],
+          [
+            4.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            1.5
+          ],
+          [
+            5.0,
+            1.0
+          ]
+        ],
+        [
+          [
+            5.5,
+            0.5
+          ],
+          [
+            5.0,
+            0.5
+          ]
+        ],
+        [
+          [
+            5.5,
+            0.5
+          ],
+          [
+            6.0,
+            0.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            1.0
+          ],
+          [
+            5.0,
+            0.5
+          ]
+        ],
+        [
+          [
+            8.0,
+            3.5
+          ],
+          [
+            7.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            8.0,
+            3.5
+          ],
+          [
+            8.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            5.5,
+            3.5
+          ],
+          [
+            5.0,
+            3.5
+          ]
+        ],
+        [
+          [
+            5.5,
+            3.5
+          ],
+          [
+            6.0,
+            3.5
+          ]
+        ],
+        [
+          [
+            8.0,
+            3.0
+          ],
+          [
+            8.0,
+            2.5
+          ]
+        ],
+        [
+          [
+            8.0,
+            3.0
+          ],
+          [
+            8.5,
+            3.0
+          ]
+        ],
+        [
+          [
+            6.5,
+            1.0
+          ],
+          [
+            6.5,
+            0.5
+          ]
+        ],
+        [
+          [
+            6.5,
+            1.0
+          ],
+          [
+            6.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            6.5,
+            1.5
+          ],
+          [
+            6.5,
+            2.0
+          ]
+        ],
+        [
+          [
+            7.5,
+            3.5
+          ],
+          [
+            7.0,
+            3.5
+          ]
+        ],
+        [
+          [
+            4.5,
+            1.5
+          ],
+          [
+            4.0,
+            1.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            3.5
+          ],
+          [
+            4.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            8.0,
+            2.5
+          ],
+          [
+            8.0,
+            2.0
+          ]
+        ],
+        [
+          [
+            8.0,
+            2.0
+          ],
+          [
+            8.0,
+            1.5
+          ]
+        ],
+        [
+          [
+            7.0,
+            3.5
+          ],
+          [
+            6.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            7.5,
+            2.0
+          ],
+          [
+            7.0,
+            2.0
+          ]
+        ],
+        [
+          [
+            6.5,
+            0.5
+          ],
+          [
+            6.0,
+            0.5
+          ]
+        ],
+        [
+          [
+            7.0,
+            3.0
+          ],
+          [
+            7.0,
+            2.5
+          ]
+        ],
+        [
+          [
+            6.5,
+            3.5
+          ],
+          [
+            6.0,
+            3.5
+          ]
+        ],
+        [
+          [
+            4.0,
+            1.5
+          ],
+          [
+            3.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            4.5,
+            3.0
+          ],
+          [
+            4.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            9.0,
+            3.5
+          ],
+          [
+            8.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            9.0,
+            3.5
+          ],
+          [
+            9.0,
+            3.0
+          ]
+        ],
+        [
+          [
+            8.0,
+            1.5
+          ],
+          [
+            8.0,
+            1.0
+          ]
+        ],
+        [
+          [
+            9.0,
+            3.0
+          ],
+          [
+            8.5,
+            3.0
+          ]
+        ],
+        [
+          [
+            7.0,
+            2.0
+          ],
+          [
+            6.5,
+            2.0
+          ]
+        ],
+        [
+          [
+            7.0,
+            2.0
+          ],
+          [
+            7.0,
+            2.5
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "C5",
+      "kind": "power",
+      "mcb_amps": 16.0,
+      "cable_mm2": 2.5,
+      "connected_watts": 1000.0,
+      "route_length_m": 32.0,
+      "vdrop_percent": 0.88,
+      "point_ids": [
+        "A024",
+        "K032",
+        "K040",
+        "K038",
+        "K039"
+      ],
+      "route_edges": [
+        [
+          [
+            3.0,
+            4.5
+          ],
+          [
+            2.5,
+            4.5
+          ]
+        ],
+        [
+          [
+            3.0,
+            4.5
+          ],
+          [
+            3.5,
+            4.5
+          ]
+        ],
+        [
+          [
+            4.0,
+            3.5
+          ],
+          [
+            3.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            4.0,
+            3.5
+          ],
+          [
+            4.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            3.0,
+            1.5
+          ],
+          [
+            2.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            3.0,
+            1.5
+          ],
+          [
+            3.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            3.0,
+            1.5
+          ],
+          [
+            3.0,
+            2.0
+          ]
+        ],
+        [
+          [
+            3.5,
+            3.5
+          ],
+          [
+            3.0,
+            3.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            1.5
+          ],
+          [
+            4.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            1.5
+          ],
+          [
+            5.0,
+            2.0
+          ]
+        ],
+        [
+          [
+            5.5,
+            3.0
+          ],
+          [
+            5.0,
+            3.0
+          ]
+        ],
+        [
+          [
+            5.5,
+            3.0
+          ],
+          [
+            6.0,
+            3.0
+          ]
+        ],
+        [
+          [
+            5.5,
+            3.5
+          ],
+          [
+            5.0,
+            3.5
+          ]
+        ],
+        [
+          [
+            5.5,
+            3.5
+          ],
+          [
+            6.0,
+            3.5
+          ]
+        ],
+        [
+          [
+            0.5,
+            4.5
+          ],
+          [
+            1.0,
+            4.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            4.5
+          ],
+          [
+            2.0,
+            4.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            4.5
+          ],
+          [
+            2.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            2.5,
+            4.0
+          ],
+          [
+            2.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            1.5
+          ],
+          [
+            2.5,
+            2.0
+          ]
+        ],
+        [
+          [
+            3.0,
+            3.5
+          ],
+          [
+            3.0,
+            3.0
+          ]
+        ],
+        [
+          [
+            3.0,
+            3.0
+          ],
+          [
+            3.0,
+            2.5
+          ]
+        ],
+        [
+          [
+            4.5,
+            4.5
+          ],
+          [
+            4.0,
+            4.5
+          ]
+        ],
+        [
+          [
+            4.5,
+            1.5
+          ],
+          [
+            4.0,
+            1.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            3.0
+          ],
+          [
+            5.0,
+            2.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            3.5
+          ],
+          [
+            4.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            2.0,
+            4.5
+          ],
+          [
+            1.5,
+            4.5
+          ]
+        ],
+        [
+          [
+            1.5,
+            4.5
+          ],
+          [
+            1.0,
+            4.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            3.0
+          ],
+          [
+            2.5,
+            2.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            3.0
+          ],
+          [
+            2.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            3.0,
+            2.5
+          ],
+          [
+            3.0,
+            2.0
+          ]
+        ],
+        [
+          [
+            4.0,
+            1.5
+          ],
+          [
+            3.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            3.5,
+            4.5
+          ],
+          [
+            4.0,
+            4.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            2.0
+          ],
+          [
+            5.0,
+            2.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            2.0
+          ],
+          [
+            2.5,
+            2.5
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "C6",
+      "kind": "power",
+      "mcb_amps": 16.0,
+      "cable_mm2": 2.5,
+      "connected_watts": 1000.0,
+      "route_length_m": 36.5,
+      "vdrop_percent": 1.0,
+      "point_ids": [
+        "K046",
+        "K047",
+        "K048",
+        "K053",
+        "K028"
+      ],
+      "route_edges": [
+        [
+          [
+            9.5,
+            4.0
+          ],
+          [
+            9.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            9.5,
+            4.0
+          ],
+          [
+            9.5,
+            4.5
+          ]
+        ],
+        [
+          [
+            9.5,
+            4.5
+          ],
+          [
+            9.0,
+            4.5
+          ]
+        ],
+        [
+          [
+            9.5,
+            4.5
+          ],
+          [
+            10.0,
+            4.5
+          ]
+        ],
+        [
+          [
+            4.0,
+            3.5
+          ],
+          [
+            4.0,
+            3.0
+          ]
+        ],
+        [
+          [
+            4.0,
+            3.5
+          ],
+          [
+            4.0,
+            4.0
+          ]
+        ],
+        [
+          [
+            3.0,
+            1.5
+          ],
+          [
+            3.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            4.0,
+            3.0
+          ],
+          [
+            4.0,
+            2.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            4.5
+          ],
+          [
+            5.0,
+            4.0
+          ]
+        ],
+        [
+          [
+            5.0,
+            4.5
+          ],
+          [
+            5.5,
+            4.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            4.0
+          ],
+          [
+            4.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            8.0,
+            6.0
+          ],
+          [
+            8.0,
+            5.5
+          ]
+        ],
+        [
+          [
+            8.0,
+            6.0
+          ],
+          [
+            8.0,
+            6.5
+          ]
+        ],
+        [
+          [
+            8.0,
+            6.5
+          ],
+          [
+            8.0,
+            7.0
+          ]
+        ],
+        [
+          [
+            7.0,
+            4.5
+          ],
+          [
+            6.5,
+            4.5
+          ]
+        ],
+        [
+          [
+            7.0,
+            4.5
+          ],
+          [
+            7.0,
+            4.0
+          ]
+        ],
+        [
+          [
+            7.0,
+            4.5
+          ],
+          [
+            7.5,
+            4.5
+          ]
+        ],
+        [
+          [
+            7.0,
+            4.0
+          ],
+          [
+            7.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            7.5,
+            6.0
+          ],
+          [
+            7.5,
+            5.5
+          ]
+        ],
+        [
+          [
+            6.5,
+            4.5
+          ],
+          [
+            6.0,
+            4.5
+          ]
+        ],
+        [
+          [
+            9.5,
+            0.5
+          ],
+          [
+            9.0,
+            0.5
+          ]
+        ],
+        [
+          [
+            9.5,
+            0.5
+          ],
+          [
+            9.5,
+            1.0
+          ]
+        ],
+        [
+          [
+            9.5,
+            3.5
+          ],
+          [
+            9.5,
+            3.0
+          ]
+        ],
+        [
+          [
+            4.0,
+            2.0
+          ],
+          [
+            4.0,
+            1.5
+          ]
+        ],
+        [
+          [
+            4.0,
+            2.0
+          ],
+          [
+            4.0,
+            2.5
+          ]
+        ],
+        [
+          [
+            9.5,
+            3.0
+          ],
+          [
+            9.5,
+            2.5
+          ]
+        ],
+        [
+          [
+            4.5,
+            4.0
+          ],
+          [
+            4.0,
+            4.0
+          ]
+        ],
+        [
+          [
+            7.5,
+            4.5
+          ],
+          [
+            7.5,
+            5.0
+          ]
+        ],
+        [
+          [
+            8.0,
+            5.5
+          ],
+          [
+            8.0,
+            5.0
+          ]
+        ],
+        [
+          [
+            8.5,
+            4.5
+          ],
+          [
+            8.0,
+            4.5
+          ]
+        ],
+        [
+          [
+            8.5,
+            4.5
+          ],
+          [
+            9.0,
+            4.5
+          ]
+        ],
+        [
+          [
+            9.0,
+            4.5
+          ],
+          [
+            9.0,
+            4.0
+          ]
+        ],
+        [
+          [
+            9.0,
+            4.0
+          ],
+          [
+            8.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            8.5,
+            4.0
+          ],
+          [
+            8.0,
+            4.0
+          ]
+        ],
+        [
+          [
+            8.0,
+            5.0
+          ],
+          [
+            8.0,
+            4.5
+          ]
+        ],
+        [
+          [
+            9.5,
+            1.5
+          ],
+          [
+            9.5,
+            1.0
+          ]
+        ],
+        [
+          [
+            9.5,
+            1.5
+          ],
+          [
+            9.5,
+            2.0
+          ]
+        ],
+        [
+          [
+            6.0,
+            4.5
+          ],
+          [
+            5.5,
+            4.5
+          ]
+        ],
+        [
+          [
+            7.5,
+            5.5
+          ],
+          [
+            7.5,
+            5.0
+          ]
+        ],
+        [
+          [
+            9.5,
+            2.0
+          ],
+          [
+            9.5,
+            2.5
+          ]
+        ],
+        [
+          [
+            4.0,
+            1.5
+          ],
+          [
+            3.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            8.0,
+            4.0
+          ],
+          [
+            7.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            8.0,
+            7.0
+          ],
+          [
+            8.0,
+            7.5
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "C7",
+      "kind": "power",
+      "mcb_amps": 16.0,
+      "cable_mm2": 2.5,
+      "connected_watts": 1150.0,
+      "route_length_m": 28.4,
+      "vdrop_percent": 0.89,
+      "point_ids": [
+        "K008",
+        "K010",
+        "K009",
+        "A012",
+        "K017",
+        "K019"
+      ],
+      "route_edges": [
+        [
+          [
+            0.5,
+            0.0
+          ],
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            4.0,
+            0.0
+          ],
+          [
+            3.5,
+            0.0
+          ]
+        ],
+        [
+          [
+            2.5,
+            0.5
+          ],
+          [
+            2.0,
+            0.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            0.5
+          ],
+          [
+            3.0,
+            0.5
+          ]
+        ],
+        [
+          [
+            3.0,
+            1.5
+          ],
+          [
+            3.0,
+            1.0
+          ]
+        ],
+        [
+          [
+            3.0,
+            1.5
+          ],
+          [
+            3.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            3.5,
+            0.0
+          ],
+          [
+            3.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            3.0,
+            1.0
+          ],
+          [
+            3.0,
+            0.5
+          ]
+        ],
+        [
+          [
+            7.0,
+            0.0
+          ],
+          [
+            6.5,
+            0.0
+          ]
+        ],
+        [
+          [
+            7.0,
+            0.0
+          ],
+          [
+            7.5,
+            0.0
+          ]
+        ],
+        [
+          [
+            5.0,
+            1.0
+          ],
+          [
+            5.0,
+            0.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            1.0
+          ],
+          [
+            5.0,
+            1.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            1.5
+          ],
+          [
+            4.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            5.5,
+            0.0
+          ],
+          [
+            5.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            5.5,
+            0.0
+          ],
+          [
+            6.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            6.5,
+            0.0
+          ],
+          [
+            6.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            1.5,
+            0.0
+          ]
+        ],
+        [
+          [
+            4.0,
+            1.5
+          ],
+          [
+            3.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            4.0,
+            1.5
+          ],
+          [
+            4.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            2.0,
+            0.5
+          ],
+          [
+            1.5,
+            0.5
+          ]
+        ],
+        [
+          [
+            3.0,
+            0.0
+          ],
+          [
+            3.0,
+            0.5
+          ]
+        ],
+        [
+          [
+            1.5,
+            0.0
+          ],
+          [
+            1.5,
+            0.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            0.5
+          ],
+          [
+            5.0,
+            0.0
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "C8",
+      "kind": "dedicated",
+      "mcb_amps": 16.0,
+      "cable_mm2": 2.5,
+      "connected_watts": 1800,
+      "route_length_m": 5.4,
+      "vdrop_percent": 0.27,
+      "point_ids": [
+        "A011"
+      ],
+      "route_edges": [
+        [
+          [
+            3.5,
+            1.5
+          ],
+          [
+            3.0,
+            1.5
+          ]
+        ],
+        [
+          [
+            3.5,
+            1.5
+          ],
+          [
+            4.0,
+            1.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            1.5
+          ],
+          [
+            4.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            1.5
+          ],
+          [
+            5.0,
+            1.0
+          ]
+        ],
+        [
+          [
+            5.0,
+            0.5
+          ],
+          [
+            5.0,
+            1.0
+          ]
+        ],
+        [
+          [
+            4.5,
+            1.5
+          ],
+          [
+            4.0,
+            1.5
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "C9",
+      "kind": "dedicated",
+      "mcb_amps": 16.0,
+      "cable_mm2": 2.5,
+      "connected_watts": 2000,
+      "route_length_m": 14.9,
+      "vdrop_percent": 0.82,
+      "point_ids": [
+        "A029"
+      ],
+      "route_edges": [
+        [
+          [
+            4.5,
+            2.5
+          ],
+          [
+            4.5,
+            2.0
+          ]
+        ],
+        [
+          [
+            4.5,
+            2.5
+          ],
+          [
+            4.5,
+            3.0
+          ]
+        ],
+        [
+          [
+            4.5,
+            2.0
+          ],
+          [
+            4.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            3.0,
+            1.5
+          ],
+          [
+            3.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            9.0,
+            2.0
+          ],
+          [
+            9.0,
+            1.5
+          ]
+        ],
+        [
+          [
+            9.0,
+            2.0
+          ],
+          [
+            9.0,
+            2.5
+          ]
+        ],
+        [
+          [
+            9.0,
+            2.5
+          ],
+          [
+            9.0,
+            3.0
+          ]
+        ],
+        [
+          [
+            7.0,
+            3.5
+          ],
+          [
+            6.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            7.0,
+            3.5
+          ],
+          [
+            7.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            8.0,
+            3.5
+          ],
+          [
+            7.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            8.0,
+            3.5
+          ],
+          [
+            8.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            10.0,
+            0.0
+          ],
+          [
+            9.5,
+            0.0
+          ]
+        ],
+        [
+          [
+            5.5,
+            3.5
+          ],
+          [
+            5.0,
+            3.5
+          ]
+        ],
+        [
+          [
+            5.5,
+            3.5
+          ],
+          [
+            6.0,
+            3.5
+          ]
+        ],
+        [
+          [
+            6.5,
+            3.5
+          ],
+          [
+            6.0,
+            3.5
+          ]
+        ],
+        [
+          [
+            4.0,
+            1.5
+          ],
+          [
+            3.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            4.0,
+            1.5
+          ],
+          [
+            4.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            4.5,
+            3.0
+          ],
+          [
+            4.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            9.0,
+            0.5
+          ],
+          [
+            9.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            9.0,
+            0.5
+          ],
+          [
+            9.0,
+            1.0
+          ]
+        ],
+        [
+          [
+            9.0,
+            0.0
+          ],
+          [
+            9.5,
+            0.0
+          ]
+        ],
+        [
+          [
+            4.5,
+            3.5
+          ],
+          [
+            5.0,
+            3.5
+          ]
+        ],
+        [
+          [
+            9.0,
+            3.5
+          ],
+          [
+            8.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            9.0,
+            3.5
+          ],
+          [
+            9.0,
+            3.0
+          ]
+        ],
+        [
+          [
+            9.0,
+            1.5
+          ],
+          [
+            9.0,
+            1.0
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "C10",
+      "kind": "dedicated",
+      "mcb_amps": 16.0,
+      "cable_mm2": 2.5,
+      "connected_watts": 1500,
+      "route_length_m": 8.9,
+      "vdrop_percent": 0.37,
+      "point_ids": [
+        "A041"
+      ],
+      "route_edges": [
+        [
+          [
+            2.5,
+            4.0
+          ],
+          [
+            2.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            4.0
+          ],
+          [
+            2.5,
+            4.5
+          ]
+        ],
+        [
+          [
+            3.0,
+            1.5
+          ],
+          [
+            2.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            3.0
+          ],
+          [
+            2.5,
+            2.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            3.0
+          ],
+          [
+            2.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            4.5,
+            5.5
+          ],
+          [
+            4.0,
+            5.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            2.0
+          ],
+          [
+            2.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            2.0
+          ],
+          [
+            2.5,
+            2.5
+          ]
+        ],
+        [
+          [
+            4.0,
+            5.5
+          ],
+          [
+            3.5,
+            5.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            5.0
+          ],
+          [
+            2.5,
+            4.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            5.0
+          ],
+          [
+            2.5,
+            5.5
+          ]
+        ],
+        [
+          [
+            2.5,
+            5.5
+          ],
+          [
+            3.0,
+            5.5
+          ]
+        ],
+        [
+          [
+            3.5,
+            5.5
+          ],
+          [
+            3.0,
+            5.5
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "C11",
+      "kind": "dedicated",
+      "mcb_amps": 16.0,
+      "cable_mm2": 2.5,
+      "connected_watts": 1500,
+      "route_length_m": 11.9,
+      "vdrop_percent": 0.49,
+      "point_ids": [
+        "A049"
+      ],
+      "route_edges": [
+        [
+          [
+            3.0,
+            1.5
+          ],
+          [
+            3.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            4.0
+          ],
+          [
+            4.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            5.0,
+            4.0
+          ],
+          [
+            5.0,
+            4.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            4.5
+          ],
+          [
+            5.0,
+            5.0
+          ]
+        ],
+        [
+          [
+            3.5,
+            3.5
+          ],
+          [
+            3.5,
+            3.0
+          ]
+        ],
+        [
+          [
+            3.5,
+            3.5
+          ],
+          [
+            3.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            3.5,
+            3.0
+          ],
+          [
+            3.5,
+            2.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            7.0
+          ],
+          [
+            5.0,
+            6.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            7.0
+          ],
+          [
+            5.0,
+            7.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            7.5
+          ],
+          [
+            5.5,
+            7.5
+          ]
+        ],
+        [
+          [
+            6.0,
+            7.5
+          ],
+          [
+            5.5,
+            7.5
+          ]
+        ],
+        [
+          [
+            6.0,
+            7.5
+          ],
+          [
+            6.5,
+            7.5
+          ]
+        ],
+        [
+          [
+            3.5,
+            4.0
+          ],
+          [
+            4.0,
+            4.0
+          ]
+        ],
+        [
+          [
+            4.0,
+            4.0
+          ],
+          [
+            4.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            3.5,
+            1.5
+          ],
+          [
+            3.5,
+            2.0
+          ]
+        ],
+        [
+          [
+            5.0,
+            5.5
+          ],
+          [
+            5.0,
+            5.0
+          ]
+        ],
+        [
+          [
+            5.0,
+            5.5
+          ],
+          [
+            5.0,
+            6.0
+          ]
+        ],
+        [
+          [
+            3.5,
+            2.0
+          ],
+          [
+            3.5,
+            2.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            6.0
+          ],
+          [
+            5.0,
+            6.5
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "C12",
+      "kind": "dedicated",
+      "mcb_amps": 16.0,
+      "cable_mm2": 2.5,
+      "connected_watts": 2000,
+      "route_length_m": 13.9,
+      "vdrop_percent": 0.76,
+      "point_ids": [
+        "A054"
+      ],
+      "route_edges": [
+        [
+          [
+            4.5,
+            2.5
+          ],
+          [
+            4.5,
+            2.0
+          ]
+        ],
+        [
+          [
+            4.5,
+            2.5
+          ],
+          [
+            4.5,
+            3.0
+          ]
+        ],
+        [
+          [
+            4.5,
+            2.0
+          ],
+          [
+            4.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            4.0
+          ],
+          [
+            5.0,
+            3.5
+          ]
+        ],
+        [
+          [
+            5.0,
+            4.0
+          ],
+          [
+            5.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            3.0,
+            1.5
+          ],
+          [
+            3.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            6.0,
+            4.0
+          ],
+          [
+            5.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            6.0,
+            4.0
+          ],
+          [
+            6.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            9.0,
+            5.5
+          ],
+          [
+            9.0,
+            5.0
+          ]
+        ],
+        [
+          [
+            9.0,
+            5.5
+          ],
+          [
+            9.0,
+            6.0
+          ]
+        ],
+        [
+          [
+            9.0,
+            5.0
+          ],
+          [
+            9.0,
+            4.5
+          ]
+        ],
+        [
+          [
+            10.0,
+            6.0
+          ],
+          [
+            9.5,
+            6.0
+          ]
+        ],
+        [
+          [
+            4.0,
+            1.5
+          ],
+          [
+            3.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            4.0,
+            1.5
+          ],
+          [
+            4.5,
+            1.5
+          ]
+        ],
+        [
+          [
+            7.0,
+            4.0
+          ],
+          [
+            6.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            7.0,
+            4.0
+          ],
+          [
+            7.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            4.5,
+            3.0
+          ],
+          [
+            4.5,
+            3.5
+          ]
+        ],
+        [
+          [
+            4.5,
+            3.5
+          ],
+          [
+            5.0,
+            3.5
+          ]
+        ],
+        [
+          [
+            8.0,
+            4.0
+          ],
+          [
+            7.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            8.0,
+            4.0
+          ],
+          [
+            8.5,
+            4.0
+          ]
+        ],
+        [
+          [
+            9.0,
+            4.5
+          ],
+          [
+            9.0,
+            4.0
+          ]
+        ],
+        [
+          [
+            9.0,
+            6.0
+          ],
+          [
+            9.5,
+            6.0
+          ]
+        ],
+        [
+          [
+            8.5,
+            4.0
+          ],
+          [
+            9.0,
+            4.0
+          ]
+        ]
+      ]
+    }
+  ],
+  "summary": {
+    "floor_area_m2": 84.0,
+    "connected_load_w": 13349.0,
+    "maximum_demand_w": 9428.9,
+    "sanctioned_load_w": 5000,
+    "conduit_m": 256.3
+  },
+  "checks": [
+    "maximum demand 9429W exceeds sanctioned load 5000W, load management needed"
+  ],
+  "bill_of_quantities": {
+    "lines": [
+      {
+        "item": "Cable 1.5 sq mm",
+        "qty": 244.2,
+        "unit": "m",
+        "rate": 14.0,
+        "amount": 3418.8
+      },
+      {
+        "item": "Cable 2.5 sq mm",
+        "qty": 601.6,
+        "unit": "m",
+        "rate": 22.0,
+        "amount": 13235.2
+      },
+      {
+        "item": "Conduit 20 mm",
+        "qty": 269.1,
+        "unit": "m",
+        "rate": 18.0,
+        "amount": 4843.8
+      },
+      {
+        "item": "LED panel 18 W",
+        "qty": 18,
+        "unit": "no",
+        "rate": 420.0,
+        "amount": 7560.0
+      },
+      {
+        "item": "BLDC ceiling fan",
+        "qty": 3,
+        "unit": "no",
+        "rate": 3100.0,
+        "amount": 9300.0
+      },
+      {
+        "item": "Switch plate",
+        "qty": 7,
+        "unit": "no",
+        "rate": 260.0,
+        "amount": 1820.0
+      },
+      {
+        "item": "6 A socket",
+        "qty": 17,
+        "unit": "no",
+        "rate": 95.0,
+        "amount": 1615.0
+      },
+      {
+        "item": "16 A socket",
+        "qty": 9,
+        "unit": "no",
+        "rate": 165.0,
+        "amount": 1485.0
+      },
+      {
+        "item": "MCB",
+        "qty": 12,
+        "unit": "no",
+        "rate": 210.0,
+        "amount": 2520.0
+      },
+      {
+        "item": "DB way",
+        "qty": 14,
+        "unit": "no",
+        "rate": 120.0,
+        "amount": 1680.0
+      },
+      {
+        "item": "RCCB 30 mA",
+        "qty": 1,
+        "unit": "no",
+        "rate": 1850.0,
+        "amount": 1850.0
+      }
+    ],
+    "total": 49327.8,
+    "wire_by_size": {
+      "1.5": 244.2,
+      "2.5": 601.6
+    },
+    "conduit_m": 269.1
+  }
+}

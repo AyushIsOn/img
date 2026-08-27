@@ -1,0 +1,46 @@
+# XcodeGen spec. Generates Naksha.xcodeproj from the sources in this folder.
+#
+#   brew install xcodegen
+#   cd ios && xcodegen generate && open Naksha.xcodeproj
+#
+# If you would rather not install XcodeGen, see ios/README.md for the manual
+# route, which takes about two minutes.
+
+name: Naksha
+
+options:
+  bundleIdPrefix: com.d38n
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+
+targets:
+  Naksha:
+    type: application
+    platform: iOS
+    sources:
+      - path: Naksha
+    resources:
+      - path: Naksha/Resources
+    info:
+      path: Naksha/Info.plist
+      properties:
+        CFBundleDisplayName: NAKSHA
+        CFBundleShortVersionString: "0.1"
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        NSCameraUsageDescription: >-
+          NAKSHA uses the camera and LiDAR scanner to measure your rooms and to
+          show the wiring layout on your walls.
+        UIRequiredDeviceCapabilities:
+          - arkit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.d38n.naksha
+        SWIFT_VERSION: "5.9"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        GENERATE_INFOPLIST_FILE: NO
+        ENABLE_USER_SCRIPT_SANDBOXING: NO

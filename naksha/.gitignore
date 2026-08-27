@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+solver/out/
+.DS_Store
+build/
+*.xcuserstate
+xcuserdata/
