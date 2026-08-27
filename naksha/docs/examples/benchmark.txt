@@ -1,0 +1,22 @@
+================================================================================================
+                                    NAKSHA routing benchmark                                    
+================================================================================================
+Plan                     m2  Pts  Ckt    Radial   Steiner  Steiner+opt  Topology   Board   Total
+------------------------------------------------------------------------------------------------
+1 BHK, 45 sq m           48   32    7     201.3     125.8        114.8     37.5%    8.7%   43.0%
+2 BHK, 84 sq m           84   54   12     511.3     280.3        256.3     45.2%    8.6%   49.9%
+3 BHK, 128 sq m         130   75   14     834.1     370.0        348.5     55.6%    5.8%   58.2%
+------------------------------------------------------------------------------------------------
+MEAN                                                                       46.1%    7.7%   50.4%
+
+Lengths are metres of conduit including vertical drops.
+Topology  = shared Steiner tree instead of one run per point.
+Board     = solver chosen board position instead of the entry door.
+Total     = both effects combined.
+
+Caveat, stated because it matters: pure radial is the worst case.
+Experienced electricians loop lighting points in and out, which
+already recovers part of the topology saving. Real practice sits
+between radial and optimal, so the topology figure should be read
+as an upper bound, and the board siting figure as the clean result
+since it holds the topology constant.
