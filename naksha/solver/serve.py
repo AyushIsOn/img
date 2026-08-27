@@ -29,9 +29,24 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 warnings.filterwarnings("ignore")
 
-from naksha.design import bill_of_quantities, design_floor, maximum_demand, validate
-from naksha.ingest import design_from_request
-from naksha.plans import CATALOGUE
+try:
+    from naksha.design import bill_of_quantities, design_floor, maximum_demand, validate
+    from naksha.ingest import design_from_request
+    from naksha.plans import CATALOGUE
+except ModuleNotFoundError as exc:
+    # A missing dependency is the single most likely first run problem, and a
+    # bare traceback does not tell you what to type. This does.
+    print(f"\n  Missing dependency: {exc.name}\n")
+    print("  The server needs networkx. Install it, from this folder:\n")
+    print("      python3 -m pip install -r requirements.txt\n")
+    print("  If pip refuses with 'externally-managed-environment', which")
+    print("  Homebrew Python does, use a virtual environment instead:\n")
+    print("      python3 -m venv .venv")
+    print("      source .venv/bin/activate")
+    print("      pip install -r requirements.txt\n")
+    print("  Then run this again. Remember that a new terminal needs")
+    print("  'source .venv/bin/activate' before python3 serve.py.\n")
+    raise SystemExit(1)
 
 MAX_BODY = 2 * 1024 * 1024      # a floor plan payload is kilobytes, not megabytes
 
