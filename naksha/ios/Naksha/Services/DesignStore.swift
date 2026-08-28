@@ -24,6 +24,18 @@ final class DesignStore: ObservableObject {
     @Published var requirements = RequirementSet()
     @Published var scannedRooms: [ScannedRoom] = []
 
+    // MARK: Interview
+
+    @Published var profile: HouseholdProfile?
+    @Published var answers: [InterviewAnswer] = []
+    @Published var question: InterviewQuestion?
+    @Published var interviewDone = false
+    @Published var interviewBusy = false
+    /// "llm" when the model wrote the question, "rules" when the server fell
+    /// back to its script. Surfaced so the interface never overclaims.
+    @Published var interviewSource = "rules"
+    @Published var interviewError: String?
+
     /// Address of the solver, entered by the user and remembered between
     /// launches. Empty means stay on the bundled sample, which keeps the app
     /// usable with no laptop on the network.
@@ -77,6 +89,58 @@ final class DesignStore: ObservableObject {
         }
     }
 
+    /// Asks the solver for the next question. The model, and therefore the
+    /// API key, lives on that machine and never on the phone.
+    func advanceInterview() async {
+        guard let endpoint = solverEndpoint else {
+            interviewError = "Connect the solver first. Tap the gear, paste "
+                           + "the address printed by serve.py."
+            return
+        }
+        interviewBusy = true
+        interviewError = nil
+        do {
+            var request = URLRequest(
+                url: endpoint.appendingPathComponent("interview"))
+            request.httpMethod = "POST"
+            request.timeoutInterval = 45
+            request.setValue("application/json",
+                             forHTTPHeaderField: "Content-Type")
+            request.httpBody = try JSONEncoder().encode(
+                InterviewRequest(answers: answers, profile: profile))
+            let (data, response) = try await URLSession.shared.data(for: request)
+            if let http = response as? HTTPURLResponse,
+               !(200..<300).contains(http.statusCode) {
+                throw StoreError.server(http.statusCode)
+            }
+            let turn = try JSONDecoder().decode(InterviewTurn.self, from: data)
+            if let updated = turn.profile { profile = updated }
+            interviewSource = turn.source ?? interviewSource
+            question = turn.question
+            interviewDone = turn.done || turn.question == nil
+        } catch {
+            interviewError = Self.describe(error)
+        }
+        interviewBusy = false
+    }
+
+    func answer(_ value: AnswerValue) async {
+        guard let question else { return }
+        answers.append(InterviewAnswer(id: question.id,
+                                       prompt: question.prompt,
+                                       answer: value))
+        self.question = nil
+        await advanceInterview()
+    }
+
+    func restartInterview() {
+        answers = []
+        profile = nil
+        question = nil
+        interviewDone = false
+        interviewError = nil
+    }
+
     var design: Design? {
         if case .ready(let d) = state { return d }
         return nil
@@ -116,7 +180,8 @@ final class DesignStore: ObservableObject {
                              forHTTPHeaderField: "Content-Type")
             request.httpBody = try JSONEncoder().encode(
                 DesignRequest(rooms: scannedRooms,
-                              requirements: requirements))
+                              requirements: requirements,
+                              profile: profile))
             let (data, response) = try await URLSession.shared.data(for: request)
             if let http = response as? HTTPURLResponse,
                !(200..<300).contains(http.statusCode) {
@@ -187,4 +252,7 @@ struct ScannedRoom: Codable, Identifiable {
 struct DesignRequest: Codable {
     let rooms: [ScannedRoom]
     let requirements: RequirementSet
+    /// When present the solver derives per-room appliance placements from the
+    /// interview, so the old room-by-room questionnaire is not needed.
+    let profile: HouseholdProfile?
 }

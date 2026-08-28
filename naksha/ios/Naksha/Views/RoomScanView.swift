@@ -63,6 +63,47 @@ struct RoomScanView: View {
         }
     }
 
+    private var designing: Bool {
+        if case .working = store.state { return true }
+        return false
+    }
+
+    @ViewBuilder private var designState: some View {
+        switch store.state {
+        case .idle:
+            EmptyView()
+        case .working(let message):
+            HStack(spacing: 10) {
+                ProgressView().tint(Brand.amber)
+                Text(message).font(.caption).foregroundStyle(Theme.muted)
+            }
+        case .failed(let message):
+            VStack(alignment: .leading, spacing: 5) {
+                Label("Could not design this", systemImage:
+                        "exclamationmark.triangle")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.warn)
+                Text(message).font(.caption2).foregroundStyle(Theme.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(12)
+            .glassCard(14)
+        case .ready(let design):
+            VStack(alignment: .leading, spacing: 8) {
+                Text("\(design.points.count) points  \u{00B7}  "
+                     + "\(design.circuits.count) circuits  \u{00B7}  "
+                     + String(format: "%.0f m conduit", design.summary.conduitM))
+                    .font(.caption).foregroundStyle(Theme.muted)
+                NavigationLink {
+                    DesignTabsView(design: design)
+                } label: {
+                    Label("Open the drawings", systemImage: "doc.richtext")
+                }
+                .buttonStyle(.vguardGlass)
+            }
+        }
+    }
+
     private func endCapture() {
         capturing = false
         stopRequested = false
@@ -164,14 +205,29 @@ struct RoomScanView: View {
                 .buttonStyle(.vguard)
 
                 if !store.scannedRooms.isEmpty {
-                    NavigationLink {
-                        RequirementsView(rooms: store.scannedRooms)
-                    } label: {
-                        Label("Next, what goes in each room",
-                              systemImage: "arrow.right")
-                            .frame(maxWidth: .infinity)
+                    if store.profile != nil {
+                        // The interview already established what goes where,
+                        // so the room-by-room questionnaire is skipped.
+                        Button {
+                            Task { await store.requestDesign() }
+                        } label: {
+                            Label("Design the installation",
+                                  systemImage: "wand.and.stars")
+                        }
+                        .buttonStyle(.vguard)
+                        .disabled(designing)
+
+                        designState
+                    } else {
+                        NavigationLink {
+                            RequirementsView(rooms: store.scannedRooms)
+                        } label: {
+                            Label("Next, what goes in each room",
+                                  systemImage: "arrow.right")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.vguardGlass)
                     }
-                    .buttonStyle(.vguardGlass)
                 }
             }
             .padding(20)
