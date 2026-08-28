@@ -281,5 +281,13 @@ def design_from_request(body: Dict):
     from .design import design_floor
 
     plan = floorplan_from_scans(body.get("rooms") or [])
-    reqs = requirements_from_payload(body.get("requirements") or {}, plan)
+
+    # A profile from the interview is converted to per-room placements here.
+    # Anything the app collected by hand still wins, so the two can coexist.
+    payload = dict(body.get("requirements") or {})
+    profile = body.get("profile")
+    if profile and not payload.get("appliances"):
+        from naksha.interview import requirements_from_profile
+        payload = requirements_from_profile(profile, plan.rooms)
+    reqs = requirements_from_payload(payload, plan)
     return design_floor(plan, reqs)

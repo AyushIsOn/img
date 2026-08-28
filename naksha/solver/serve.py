@@ -32,6 +32,7 @@ warnings.filterwarnings("ignore")
 try:
     from naksha.design import bill_of_quantities, design_floor, maximum_demand, validate
     from naksha.ingest import design_from_request
+    from naksha.interview import available as interview_available, next_turn
     from naksha.plans import CATALOGUE
 except ModuleNotFoundError as exc:
     # A missing dependency is the single most likely first run problem, and a
@@ -131,7 +132,9 @@ class Handler(BaseHTTPRequestHandler):
         if self.path.rstrip("/") in ("/health", ""):
             self._send(200, {"status": "ok",
                              "addresses": local_addresses(),
-                             "plans": sorted(CATALOGUE)})
+                             "plans": sorted(CATALOGUE),
+                             "interview": "llm" if interview_available()
+                                          else "rules"})
             return
         if self.path.startswith("/sample/"):
             key = self.path.rsplit("/", 1)[-1]
@@ -147,8 +150,9 @@ class Handler(BaseHTTPRequestHandler):
 
     # ----------------------------------------------------------------- POST
     def do_POST(self) -> None:
-        if self.path.rstrip("/") != "/design":
-            self._send(404, {"error": "post to /design"})
+        route = self.path.rstrip("/")
+        if route not in ("/design", "/interview"):
+            self._send(404, {"error": "post to /design or /interview"})
             return
 
         length = int(self.headers.get("Content-Length") or 0)
@@ -163,6 +167,22 @@ class Handler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(length))
         except json.JSONDecodeError as exc:
             self._send(400, {"error": f"invalid JSON: {exc}"})
+            return
+
+        # The interview runs before anything is scanned, so it is handled
+        # before the rooms check below.
+        if route == "/interview":
+            try:
+                turn = next_turn(body.get("answers") or [],
+                                 body.get("profile"))
+            except Exception as exc:                 # noqa: BLE001
+                traceback.print_exc()
+                self._send(500, {"error": f"interview failed: {exc}"})
+                return
+            asked = turn.get("question", {}) or {}
+            print(f"  interview [{turn.get('source')}] -> "
+                  f"{asked.get('id') or 'done'}")
+            self._send(200, turn)
             return
 
         rooms = body.get("rooms") or []
