@@ -16,6 +16,8 @@ struct PlanCanvasView: View {
             Canvas { ctx, size in
                 let t = transform(for: size)
                 drawRooms(&ctx, t)
+                drawFixtures(&ctx, t)
+                drawOpenings(&ctx, t)
                 if showCircuits { drawRoutes(&ctx, t) }
                 drawPoints(&ctx, t)
                 drawBoard(&ctx, t)
@@ -78,6 +80,138 @@ struct PlanCanvasView: View {
                         .foregroundColor(Theme.paperMuted),
                      at: CGPoint(x: c.x, y: c.y + 4))
         }
+    }
+
+    /// Built-in joinery, hatched. An electrician needs to see it because a wall
+    /// with a fitted wardrobe against it cannot be chased.
+    private func drawFixtures(_ ctx: inout GraphicsContext, _ t: Transform) {
+        for fixture in design.plan.fixtures {
+            let pts = fixture.cgPolygon.map(t.apply)
+            guard let first = pts.first else { continue }
+            var path = Path()
+            path.move(to: first)
+            for p in pts.dropFirst() { path.addLine(to: p) }
+            path.closeSubpath()
+            ctx.fill(path, with: .color(Theme.paperMuted.opacity(0.10)))
+            ctx.stroke(path, with: .color(Theme.paperMuted),
+                       style: StrokeStyle(lineWidth: 0.9, dash: [3, 2]))
+
+            let box = path.boundingRect
+            if box.width > 26 || box.height > 26 {
+                ctx.draw(Text(fixture.name.uppercased())
+                            .font(.system(size: 6, weight: .semibold))
+                            .foregroundColor(Theme.paperMuted),
+                         at: CGPoint(x: box.midX, y: box.midY))
+            }
+        }
+    }
+
+    /// Doors as a swing arc, windows as the conventional triple line.
+    ///
+    /// Both are drawn by erasing the wall across the opening first, which is
+    /// what makes a plan read as a plan rather than as a box with symbols on it.
+    private func drawOpenings(_ ctx: inout GraphicsContext, _ t: Transform) {
+        for door in design.plan.doors {
+            guard let (along, normal) = wallAxes(at: door.point) else { continue }
+            let c = t.apply(door.point)
+            let half = door.width * t.scale / 2
+
+            // clear the wall through the opening
+            var gap = Path()
+            gap.move(to: CGPoint(x: c.x - along.dx * half,
+                                 y: c.y - along.dy * half))
+            gap.addLine(to: CGPoint(x: c.x + along.dx * half,
+                                    y: c.y + along.dy * half))
+            ctx.stroke(gap, with: .color(Theme.paper),
+                       style: StrokeStyle(lineWidth: 3.4, lineCap: .butt))
+
+            // leaf, then the swing
+            let hinge = CGPoint(x: c.x - along.dx * half,
+                                y: c.y - along.dy * half)
+            let leafEnd = CGPoint(x: hinge.x + normal.dx * half * 2,
+                                  y: hinge.y + normal.dy * half * 2)
+            var leaf = Path()
+            leaf.move(to: hinge)
+            leaf.addLine(to: leafEnd)
+            ctx.stroke(leaf, with: .color(Theme.wall), lineWidth: 1.0)
+
+            var arc = Path()
+            arc.move(to: leafEnd)
+            arc.addQuadCurve(
+                to: CGPoint(x: hinge.x + along.dx * half * 2,
+                            y: hinge.y + along.dy * half * 2),
+                control: CGPoint(x: hinge.x + (along.dx + normal.dx) * half * 1.7,
+                                 y: hinge.y + (along.dy + normal.dy) * half * 1.7))
+            ctx.stroke(arc, with: .color(Theme.paperMuted),
+                       style: StrokeStyle(lineWidth: 0.7, dash: [2.5, 2]))
+        }
+
+        for window in design.plan.windows {
+            guard let (along, normal) = wallAxes(at: window.point) else { continue }
+            let c = t.apply(window.point)
+            let half = window.width * t.scale / 2
+
+            var gap = Path()
+            gap.move(to: CGPoint(x: c.x - along.dx * half,
+                                 y: c.y - along.dy * half))
+            gap.addLine(to: CGPoint(x: c.x + along.dx * half,
+                                    y: c.y + along.dy * half))
+            ctx.stroke(gap, with: .color(Theme.paper),
+                       style: StrokeStyle(lineWidth: 3.4, lineCap: .butt))
+
+            for offset in [-1.3, 0.0, 1.3] {
+                var line = Path()
+                line.move(to: CGPoint(
+                    x: c.x - along.dx * half + normal.dx * offset,
+                    y: c.y - along.dy * half + normal.dy * offset))
+                line.addLine(to: CGPoint(
+                    x: c.x + along.dx * half + normal.dx * offset,
+                    y: c.y + along.dy * half + normal.dy * offset))
+                ctx.stroke(line, with: .color(Theme.wall),
+                           lineWidth: offset == 0 ? 0.9 : 0.6)
+            }
+        }
+    }
+
+    /// Which way the wall runs at a point on the perimeter, and its inward
+    /// normal, both in screen space. Found from the nearest room edge, so it
+    /// works for any wall direction rather than assuming an axis.
+    private func wallAxes(at plan: CGPoint)
+        -> (along: Axis, normal: Axis)? {
+        var best: (dist: CGFloat, a: CGPoint, b: CGPoint)?
+        for room in design.plan.rooms {
+            let pts = room.cgPolygon
+            guard pts.count > 1 else { continue }
+            for i in pts.indices {
+                let a = pts[i], b = pts[(i + 1) % pts.count]
+                let d = distance(from: plan, toSegment: a, and: b)
+                if best == nil || d < best!.dist { best = (d, a, b) }
+            }
+        }
+        guard let edge = best else { return nil }
+        let dx = edge.b.x - edge.a.x, dy = edge.b.y - edge.a.y
+        let len = hypot(dx, dy)
+        guard len > 0 else { return nil }
+        // Screen y is flipped relative to plan y, hence the negation.
+        let along = Axis(dx: dx / len, dy: -dy / len)
+        return (along, Axis(dx: -along.dy, dy: along.dx))
+    }
+
+    /// A unit direction in screen space. Declared here rather than reaching
+    /// for CGVector, whose availability is not worth depending on.
+    struct Axis {
+        let dx: CGFloat
+        let dy: CGFloat
+    }
+
+    private func distance(from p: CGPoint, toSegment a: CGPoint,
+                          and b: CGPoint) -> CGFloat {
+        let dx = b.x - a.x, dy = b.y - a.y
+        let lenSq = dx * dx + dy * dy
+        guard lenSq > 0 else { return hypot(p.x - a.x, p.y - a.y) }
+        var u = ((p.x - a.x) * dx + (p.y - a.y) * dy) / lenSq
+        u = max(0, min(1, u))
+        return hypot(p.x - (a.x + u * dx), p.y - (a.y + u * dy))
     }
 
     private func drawRoutes(_ ctx: inout GraphicsContext, _ t: Transform) {

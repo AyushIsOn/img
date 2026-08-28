@@ -25,6 +25,15 @@ struct ARWiringView: View {
 
     private var rooms: [Room] { design.plan.rooms }
 
+    /// Plan distance between the two chosen corners, for the accuracy readout.
+    private var planSpan: Double {
+        guard let room = rooms.first(where: { $0.name == placement.anchorRoom })
+                ?? rooms.first else { return 0 }
+        let a = placement.cornerA.planPoint(in: room)
+        let b = placement.cornerB.planPoint(in: room)
+        return Double(hypot(b.x - a.x, b.y - a.y))
+    }
+
     var body: some View {
         ZStack(alignment: .bottom) {
             ARContainer(design: design,
@@ -35,11 +44,7 @@ struct ARWiringView: View {
 
             VStack(spacing: 10) {
                 if !isPlaced {
-                    VStack(spacing: 10) {
-                        banner("Which room are you standing in?")
-                        roomPicker
-                        banner("Now point at the floor and tap.")
-                    }
+                    alignment
                 } else if showControls {
                     controls
                         .transition(.move(edge: .bottom)
@@ -64,6 +69,14 @@ struct ARWiringView: View {
         }
         .navigationTitle("AR overlay")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            // Seeded from the design. A hardcoded 3.0 m put this room's 12 foot
+            // ceiling a metre out, and every drop hanging off it with it.
+            placement.ceilingHeight = design.plan.ceilingHeight
+            if placement.anchorRoom == nil {
+                placement.anchorRoom = design.plan.rooms.first?.name
+            }
+        }
     }
 
     private func banner(_ text: String) -> some View {
@@ -73,6 +86,49 @@ struct ARWiringView: View {
             .padding(.vertical, 10)
             .padding(.horizontal, 14)
             .glassChip()
+    }
+
+    /// Two corners, in order. Each is chosen and then tapped on the floor,
+    /// which is enough to fix position and rotation exactly.
+    private var alignment: some View {
+        VStack(spacing: 12) {
+            if design.plan.rooms.count > 1 {
+                banner("Which room are you standing in?")
+                roomPicker
+            }
+
+            let first = placement.worldA == nil
+            banner(first
+                   ? "Point at the FIRST floor corner and tap"
+                   : "Now the SECOND corner, along one wall")
+
+            HStack(spacing: 8) {
+                Text(first ? "Corner 1" : "Corner 2")
+                    .font(.caption2.weight(.bold))
+                    .foregroundColor(.white.opacity(0.75))
+                ForEach(RoomCorner.allCases) { corner in
+                    let selected = first ? placement.cornerA : placement.cornerB
+                    chip(corner.label, active: selected == corner,
+                         tint: Brand.amber) {
+                        if first { placement.cornerA = corner }
+                        else { placement.cornerB = corner }
+                    }
+                }
+            }
+
+            if !first {
+                Button {
+                    placement.restart()
+                } label: {
+                    Label("Start over", systemImage: "arrow.counterclockwise")
+                        .font(.caption.weight(.semibold))
+                }
+                .buttonStyle(.bordered)
+                .tint(.white)
+            }
+        }
+        .padding(14)
+        .glassOverlay(22)
     }
 
     /// Chosen before the tap, because it decides what the tap means.
@@ -107,19 +163,32 @@ struct ARWiringView: View {
                     .font(.caption2).foregroundStyle(.white.opacity(0.7))
                     .frame(width: 68, alignment: .leading)
             }
-            HStack {
-                Text("Rotate")
-                    .font(.caption).foregroundColor(.white.opacity(0.8))
-                Slider(value: $placement.headingDegrees, in: 0...360)
-                Text("\(Int(placement.headingDegrees))\u{00B0}")
-                    .font(.caption.monospacedDigit())
-                    .foregroundColor(.white)
-                    .frame(width: 38, alignment: .trailing)
+            // Rotation is solved from the two corners, so there is nothing to
+            // set here. What is worth showing is how well the tapped span
+            // agrees with the plan, which is a direct read on accuracy.
+            if let measured = placement.measuredSpan {
+                HStack(spacing: 6) {
+                    Image(systemName: "ruler")
+                        .font(.system(size: 10, weight: .bold))
+                    Text(String(format: "measured %.2f m", measured))
+                        .font(.caption.monospacedDigit())
+                    Text(String(format: "· plan %.2f m", planSpan))
+                        .font(.caption2.monospacedDigit())
+                        .foregroundColor(.white.opacity(0.6))
+                    Spacer()
+                    Text(String(format: "%+.1f%%",
+                                planSpan > 0
+                                ? (Double(measured) - planSpan) / planSpan * 100
+                                : 0))
+                        .font(.caption2.monospacedDigit().weight(.bold))
+                        .foregroundColor(Brand.gold)
+                }
+                .foregroundColor(.white.opacity(0.85))
             }
             HStack {
                 Text("Ceiling")
                     .font(.caption).foregroundColor(.white.opacity(0.8))
-                Slider(value: $placement.ceilingHeight, in: 2.2...3.6)
+                Slider(value: $placement.ceilingHeight, in: 2.0...4.5)
                 Text(String(format: "%.2f m", placement.ceilingHeight))
                     .font(.caption.monospacedDigit())
                     .foregroundColor(.white)
@@ -163,7 +232,7 @@ struct ARWiringView: View {
             HStack(spacing: 10) {
                 Button {
                     isPlaced = false
-                    placement.origin = nil
+                    placement.restart()
                 } label: {
                     Label("Reposition", systemImage: "arrow.counterclockwise")
                         .font(.caption.weight(.semibold))
@@ -202,34 +271,141 @@ struct ARWiringView: View {
 
 // MARK: - Placement
 
+/// Which corner of the room is being pointed at.
+///
+/// A corner is the only unambiguous landmark in a room: you can see exactly
+/// where two walls meet the floor. The centre of a room cannot be pointed at
+/// accurately, and in a furnished room it is usually under something.
+enum RoomCorner: String, CaseIterable, Identifiable {
+    case w4w3, w3w2, w2w1, w1w4
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .w4w3: return "W4 · W3"
+        case .w3w2: return "W3 · W2"
+        case .w2w1: return "W2 · W1"
+        case .w1w4: return "W1 · W4"
+        }
+    }
+
+    /// Wall 1 is the far wall, 2 the right, 3 the near wall, 4 the left, which
+    /// is how the room was surveyed.
+    func planPoint(in room: Room) -> CGPoint {
+        let xs = room.cgPolygon.map(\.x), ys = room.cgPolygon.map(\.y)
+        guard let x0 = xs.min(), let x1 = xs.max(),
+              let y0 = ys.min(), let y1 = ys.max() else { return .zero }
+        switch self {
+        case .w4w3: return CGPoint(x: x0, y: y0)
+        case .w3w2: return CGPoint(x: x1, y: y0)
+        case .w2w1: return CGPoint(x: x1, y: y1)
+        case .w1w4: return CGPoint(x: x0, y: y1)
+        }
+    }
+}
+
+/// How the plan is fixed to the room.
+///
+/// Two corner correspondences determine a rigid transform in the floor plane
+/// exactly: the first fixes position, the pair fixes rotation. That replaces a
+/// single tap in the middle of the floor plus a heading slider, neither of which
+/// could be got right by eye, and rotation error grew with distance from the
+/// anchor.
 struct Placement {
-    /// World transform of the anchor, set by the first tap.
-    var origin: simd_float4x4? = nil
-    var headingDegrees: Double = 0
-    var ceilingHeight: Double = 3.0
-
-    /// The room the user is standing in.
-    ///
-    /// This is the fix for the overlay appearing in the wrong place. The plan
-    /// is authored in floor coordinates whose origin is a corner of the whole
-    /// floor, so anchoring plan (0,0) to the tap put every other room as far
-    /// away as it sits on the drawing, frequently through a wall or outside the
-    /// building. Anchoring the chosen room's centre instead means the wiring
-    /// lands in the room you are actually standing in.
-    var anchorRoom: String? = nil
-
-    /// Show only the anchored room. The rest of the house is still correct
-    /// relative to it, but on site one room at a time is what you want.
+    var anchorRoom: String?
     var onlyAnchorRoom: Bool = true
 
-    /// Manual nudge, in metres, applied after the heading.
-    ///
-    /// A tap lands where ARKit thinks the floor is and the room centre is only
-    /// as good as the scan, so the overlay will sit a little off. Rather than
-    /// pretending otherwise, this lets it be slid onto the real conduit and
-    /// switch boxes already on the wall.
+    /// Defaulted from the design rather than assumed. A hardcoded 3.0 m put a
+    /// 12 foot ceiling a metre out, and every drop with it.
+    var ceilingHeight: Double = 3.0
+
+    /// Residual nudge, once aligned. Should rarely be needed now.
     var nudgeX: Double = 0
     var nudgeZ: Double = 0
+
+    var cornerA: RoomCorner = .w1w4
+    var cornerB: RoomCorner = .w2w1
+    var worldA: SIMD3<Float>?
+    var worldB: SIMD3<Float>?
+
+    var isAligned: Bool { worldA != nil && worldB != nil }
+
+    /// Which corner the next tap records.
+    var awaiting: RoomCorner? {
+        if worldA == nil { return cornerA }
+        if worldB == nil { return cornerB }
+        return nil
+    }
+
+    mutating func record(_ world: SIMD3<Float>) {
+        if worldA == nil { worldA = world }
+        else if worldB == nil { worldB = world }
+    }
+
+    mutating func restart() {
+        worldA = nil
+        worldB = nil
+        nudgeX = 0
+        nudgeZ = 0
+    }
+
+    /// Distance between the two tapped corners, for comparison with the plan.
+    var measuredSpan: Float? {
+        guard let a = worldA, let b = worldB else { return nil }
+        return simd_length(SIMD2(b.x - a.x, b.z - a.z))
+    }
+}
+
+/// The plan to world map, solved from the two corners.
+///
+/// Plan y runs away from the near wall and ARKit z runs towards the camera, so
+/// the plan is first mirrored in y and then rotated. Held as a struct so the
+/// solve happens once per render rather than per point.
+struct PlanTransform {
+    let originXZ: SIMD2<Float>
+    let floorY: Float
+    let planAnchor: SIMD2<Float>
+    let cos: Float
+    let sin: Float
+    let nudge: SIMD2<Float>
+
+    init?(placement: Placement, room: Room) {
+        guard let a = placement.worldA, let b = placement.worldB else {
+            return nil
+        }
+        let planA = placement.cornerA.planPoint(in: room)
+        let planB = placement.cornerB.planPoint(in: room)
+
+        // Mirror y so plan and world agree on handedness before rotating.
+        let uA = SIMD2<Float>(Float(planA.x), Float(-planA.y))
+        let uB = SIMD2<Float>(Float(planB.x), Float(-planB.y))
+        let planVec = uB - uA
+        let worldVec = SIMD2<Float>(b.x - a.x, b.z - a.z)
+        guard simd_length(planVec) > 0.05, simd_length(worldVec) > 0.05 else {
+            return nil
+        }
+
+        // A rotation of theta about +Y reduces the angle in the xz plane by
+        // theta, so theta is the plan angle less the world angle.
+        let theta = atan2(planVec.y, planVec.x) - atan2(worldVec.y, worldVec.x)
+        cos = Foundation.cos(theta)
+        sin = Foundation.sin(theta)
+        originXZ = SIMD2(a.x, a.z)
+        floorY = a.y
+        planAnchor = uA
+        nudge = SIMD2(Float(placement.nudgeX), Float(placement.nudgeZ))
+    }
+
+    /// A plan point at `height` above the floor, in world space.
+    func world(_ p: CGPoint, _ height: Float) -> SIMD3<Float> {
+        let d = SIMD2<Float>(Float(p.x), Float(-p.y)) - planAnchor
+        let x = d.x * cos + d.y * sin
+        let z = -d.x * sin + d.y * cos
+        return SIMD3(originXZ.x + x + nudge.x,
+                     floorY + height,
+                     originXZ.y + z + nudge.y)
+    }
 }
 
 // MARK: - ARView bridge
@@ -243,9 +419,9 @@ struct ARContainer: UIViewRepresentable {
 
     func makeCoordinator() -> Coordinator {
         Coordinator(design: design,
-                    onPlaced: { transform in
-                        placement.origin = transform
-                        isPlaced = true
+                    onTapFloor: { world in
+                        placement.record(world)
+                        isPlaced = placement.isAligned
                     })
     }
 
@@ -281,13 +457,14 @@ struct ARContainer: UIViewRepresentable {
 
     final class Coordinator: NSObject {
         let design: Design
-        let onPlaced: (simd_float4x4) -> Void
+        let onTapFloor: (SIMD3<Float>) -> Void
         weak var arView: ARView?
         private var root: AnchorEntity?
 
-        init(design: Design, onPlaced: @escaping (simd_float4x4) -> Void) {
+        init(design: Design,
+             onTapFloor: @escaping (SIMD3<Float>) -> Void) {
             self.design = design
-            self.onPlaced = onPlaced
+            self.onTapFloor = onTapFloor
         }
 
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
@@ -297,41 +474,40 @@ struct ARContainer: UIViewRepresentable {
                                     allowing: .estimatedPlane,
                                     alignment: .horizontal)
             guard let hit = hits.first else { return }
-            onPlaced(hit.worldTransform)
+            let t = hit.worldTransform.columns.3
+            onTapFloor(SIMD3(t.x, t.y, t.z))
         }
 
         /// Rebuilds the overlay. Cheap enough at house scale to redraw wholesale
         /// rather than diff, which keeps the state handling simple.
         func render(placement: Placement, visibleCircuit: String?) {
-            guard let view = arView, let origin = placement.origin else {
-                root?.removeFromParent()
-                root = nil
-                return
-            }
+            guard let view = arView else { return }
             root?.removeFromParent()
+            root = nil
 
-            let anchor = AnchorEntity(world: origin)
-            let heading = Float(placement.headingDegrees * .pi / 180)
-            let spin = simd_quatf(angle: heading, axis: [0, 1, 0])
-            let ceiling = Float(placement.ceilingHeight)
-
-            // The room the user says they are standing in. Its centre becomes
-            // the tap point, so the overlay lands here rather than wherever the
-            // floor plan happens to have its origin.
             let room = design.plan.rooms.first {
                 $0.name == placement.anchorRoom
             } ?? design.plan.rooms.first
-            let datum = room?.center ?? .zero
-            let onlyHere = placement.onlyAnchorRoom && room != nil
+            guard let room,
+                  let map = PlanTransform(placement: placement, room: room)
+            else { return }
 
-            /// Plan metres to anchor-relative world metres. Plan y runs away
-            /// from the entry and ARKit z runs towards the camera, so the
-            /// vertical axis is negated exactly once, here.
-            let nudge = SIMD3<Float>(Float(placement.nudgeX), 0,
-                                     Float(placement.nudgeZ))
-            func world(_ p: CGPoint, _ y: Float) -> SIMD3<Float> {
-                spin.act(SIMD3<Float>(Float(p.x - datum.x), y,
-                                      Float(-(p.y - datum.y)))) + nudge
+            let anchor = AnchorEntity(world: .zero)
+            let ceiling = Float(placement.ceilingHeight)
+            let onlyHere = placement.onlyAnchorRoom
+
+            // The room outline itself, at the ceiling line. Gives the overlay
+            // something to read against, and makes any misalignment obvious
+            // rather than leaving the runs floating unexplained.
+            let corners = room.cgPolygon
+            for i in corners.indices {
+                let a = corners[i], b = corners[(i + 1) % corners.count]
+                if let edge = Self.conduit(from: map.world(a, ceiling),
+                                           to: map.world(b, ceiling),
+                                           colour: Palette.outline,
+                                           thickness: 0.016) {
+                    anchor.addChild(edge)
+                }
             }
 
             for (i, circuit) in design.circuits.enumerated() {
@@ -339,16 +515,13 @@ struct ARContainer: UIViewRepresentable {
                 let colour = Palette.uiColor(i)
 
                 for (a, b) in circuit.segments {
-                    // A run crossing into another room is dropped when showing
-                    // one room, judged on its midpoint so a run that merely
-                    // clips a corner is not lost.
-                    if onlyHere, let room {
+                    if onlyHere {
                         let mid = CGPoint(x: (a.x + b.x) / 2,
                                           y: (a.y + b.y) / 2)
                         if !room.contains(mid) { continue }
                     }
-                    if let run = Self.conduit(from: world(a, ceiling),
-                                              to: world(b, ceiling),
+                    if let run = Self.conduit(from: map.world(a, ceiling),
+                                              to: map.world(b, ceiling),
                                               colour: colour) {
                         anchor.addChild(run)
                     }
@@ -356,30 +529,25 @@ struct ARContainer: UIViewRepresentable {
 
                 let ids = Set(circuit.pointIDs)
                 for point in design.points where ids.contains(point.id) {
-                    if onlyHere, point.room != room?.name { continue }
+                    if onlyHere, point.room != room.name { continue }
                     let y = point.kind.isCeilingMounted
                         ? ceiling : Float(point.height)
-                    let pos = world(point.point, y)
+                    let pos = map.world(point.point, y)
                     let marker = Self.marker(for: point.kind, colour: colour)
                     marker.position = pos
                     anchor.addChild(marker)
 
-                    // A floating caption per fitting. Without these the
-                    // overlay is a set of coloured blocks; with them it reads
-                    // as a drawing standing in the room.
                     let caption = point.watts > 0
-                        ? "\(point.label)  ·  \(Int(point.watts)) W"
+                        ? "\(point.label)  \(Int(point.watts))W"
                         : point.label
                     if let tag = Self.caption(caption, colour: colour) {
-                        tag.position = pos + SIMD3<Float>(0, 0.14, 0)
-                        tag.transform.rotation = spin
+                        tag.position = pos + SIMD3<Float>(0, 0.10, 0)
                         anchor.addChild(tag)
                     }
 
-                    // drop from the ceiling to a wall device, so the run reads
-                    // as a real chase rather than a floating line
                     if !point.kind.isCeilingMounted {
-                        let top = SIMD3<Float>(pos.x, ceiling, pos.z)
+                        let top = SIMD3<Float>(pos.x, map.floorY + ceiling,
+                                               pos.z)
                         if let drop = Self.conduit(from: top, to: pos,
                                                    colour: colour) {
                             anchor.addChild(drop)
@@ -388,24 +556,19 @@ struct ARContainer: UIViewRepresentable {
                 }
             }
 
-            // The board, placed through the same transform. Shown only when it
-            // is in this room, or when the whole floor is on, otherwise it
-            // appears through a wall with nothing connecting it.
-            let boardHere = room?.contains(design.boardPoint) ?? true
+            let boardHere = room.contains(design.boardPoint)
             if !onlyHere || boardHere {
                 let board = ModelEntity(
                     mesh: .generateBox(size: [0.30, 0.40, 0.10],
                                        cornerRadius: 0.01),
                     materials: [Self.glow(Palette.accent)])
-                let boardPos = world(design.boardPoint, 1.5)
-                board.position = boardPos
+                let pos = map.world(design.boardPoint, 1.5)
+                board.position = pos
                 anchor.addChild(board)
-
                 if let tag = Self.caption(
-                    "DB  ·  \(design.circuits.count) ways",
+                    "DB  \(design.circuits.count) ways",
                     colour: Palette.accent) {
-                    tag.position = boardPos + SIMD3<Float>(0, 0.30, 0)
-                    tag.transform.rotation = spin
+                    tag.position = pos + SIMD3<Float>(0, 0.30, 0)
                     anchor.addChild(tag)
                 }
             }
@@ -418,7 +581,8 @@ struct ARContainer: UIViewRepresentable {
 
         /// A conduit run drawn as a thin box between two points.
         static func conduit(from a: SIMD3<Float>, to b: SIMD3<Float>,
-                            colour: UIColor) -> ModelEntity? {
+                            colour: UIColor,
+                            thickness: Float = 0.040) -> ModelEntity? {
             let delta = b - a
             let length = simd_length(delta)
             guard length > 0.01 else { return nil }
@@ -426,7 +590,8 @@ struct ARContainer: UIViewRepresentable {
             // white ceiling it disappears on camera. This is a guidance
             // overlay, not a scale model, so it is drawn thicker.
             let mesh = MeshResource.generateBox(
-                size: [0.040, 0.040, length], cornerRadius: 0.018)
+                size: [thickness, thickness, length],
+                cornerRadius: thickness * 0.45)
             let entity = ModelEntity(
                 mesh: mesh,
                 materials: [Self.glow(colour)])
@@ -474,7 +639,7 @@ struct ARContainer: UIViewRepresentable {
             let mesh = MeshResource.generateText(
                 text,
                 extrusionDepth: 0.0008,
-                font: .systemFont(ofSize: 0.052, weight: .semibold),
+                font: .systemFont(ofSize: 0.022, weight: .semibold),
                 containerFrame: .zero,
                 alignment: .center,
                 lineBreakMode: .byTruncatingTail)
@@ -507,6 +672,8 @@ struct ARContainer: UIViewRepresentable {
 
 enum Palette {
     static let accent = UIColor(red: 1.00, green: 0.62, blue: 0.10, alpha: 1)
+    /// The room outline, deliberately quiet so it frames rather than competes.
+    static let outline = UIColor(white: 1.0, alpha: 0.55)
 
     /// Saturated and light, unlike the print cycle.
     ///
