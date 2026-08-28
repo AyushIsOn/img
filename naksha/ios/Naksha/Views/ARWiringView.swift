@@ -102,8 +102,30 @@ struct ARWiringView: View {
             HStack {
                 Text("Ceiling")
                     .font(.caption).foregroundColor(.white.opacity(0.8))
-                Slider(value: $placement.ceilingHeight, in: 2.4...3.6)
+                Slider(value: $placement.ceilingHeight, in: 2.2...3.6)
                 Text(String(format: "%.2f m", placement.ceilingHeight))
+                    .font(.caption.monospacedDigit())
+                    .foregroundColor(.white)
+                    .frame(width: 52, alignment: .trailing)
+            }
+            // A tap lands where ARKit thinks the floor is, and the room centre
+            // is only as good as the scan, so the overlay will sit a little
+            // off. These slide it onto the conduit and boxes actually on the
+            // wall instead of pretending the registration is exact.
+            HStack {
+                Text("Slide X")
+                    .font(.caption).foregroundColor(.white.opacity(0.8))
+                Slider(value: $placement.nudgeX, in: -3...3)
+                Text(String(format: "%+.2f", placement.nudgeX))
+                    .font(.caption.monospacedDigit())
+                    .foregroundColor(.white)
+                    .frame(width: 52, alignment: .trailing)
+            }
+            HStack {
+                Text("Slide Z")
+                    .font(.caption).foregroundColor(.white.opacity(0.8))
+                Slider(value: $placement.nudgeZ, in: -3...3)
+                Text(String(format: "%+.2f", placement.nudgeZ))
                     .font(.caption.monospacedDigit())
                     .foregroundColor(.white)
                     .frame(width: 52, alignment: .trailing)
@@ -171,6 +193,15 @@ struct Placement {
     /// Show only the anchored room. The rest of the house is still correct
     /// relative to it, but on site one room at a time is what you want.
     var onlyAnchorRoom: Bool = true
+
+    /// Manual nudge, in metres, applied after the heading.
+    ///
+    /// A tap lands where ARKit thinks the floor is and the room centre is only
+    /// as good as the scan, so the overlay will sit a little off. Rather than
+    /// pretending otherwise, this lets it be slid onto the real conduit and
+    /// switch boxes already on the wall.
+    var nudgeX: Double = 0
+    var nudgeZ: Double = 0
 }
 
 // MARK: - ARView bridge
@@ -268,9 +299,11 @@ struct ARContainer: UIViewRepresentable {
             /// Plan metres to anchor-relative world metres. Plan y runs away
             /// from the entry and ARKit z runs towards the camera, so the
             /// vertical axis is negated exactly once, here.
+            let nudge = SIMD3<Float>(Float(placement.nudgeX), 0,
+                                     Float(placement.nudgeZ))
             func world(_ p: CGPoint, _ y: Float) -> SIMD3<Float> {
                 spin.act(SIMD3<Float>(Float(p.x - datum.x), y,
-                                      Float(-(p.y - datum.y))))
+                                      Float(-(p.y - datum.y)))) + nudge
             }
 
             for (i, circuit) in design.circuits.enumerated() {
@@ -323,8 +356,7 @@ struct ARContainer: UIViewRepresentable {
                 let board = ModelEntity(
                     mesh: .generateBox(size: [0.30, 0.40, 0.10],
                                        cornerRadius: 0.01),
-                    materials: [SimpleMaterial(color: Palette.accent,
-                                               isMetallic: false)])
+                    materials: [Self.glow(Palette.accent)])
                 board.position = world(design.boardPoint, 1.5)
                 anchor.addChild(board)
             }
@@ -341,11 +373,14 @@ struct ARContainer: UIViewRepresentable {
             let delta = b - a
             let length = simd_length(delta)
             guard length > 0.01 else { return nil }
+            // Real conduit is about 20 mm, but at that size against a lit
+            // white ceiling it disappears on camera. This is a guidance
+            // overlay, not a scale model, so it is drawn thicker.
             let mesh = MeshResource.generateBox(
-                size: [0.018, 0.018, length], cornerRadius: 0.008)
+                size: [0.040, 0.040, length], cornerRadius: 0.018)
             let entity = ModelEntity(
                 mesh: mesh,
-                materials: [SimpleMaterial(color: colour, isMetallic: false)])
+                materials: [Self.glow(colour)])
             entity.position = (a + b) / 2
             // point the box's z axis along the run
             let dir = simd_normalize(delta)
@@ -367,19 +402,27 @@ struct ARContainer: UIViewRepresentable {
             let mesh: MeshResource
             switch kind {
             case .light:
-                mesh = .generateSphere(radius: 0.055)
-            case .fan:
                 mesh = .generateSphere(radius: 0.075)
+            case .fan:
+                mesh = .generateSphere(radius: 0.105)
             case .switchboard:
-                mesh = .generateBox(size: [0.09, 0.09, 0.02], cornerRadius: 0.004)
+                mesh = .generateBox(size: [0.13, 0.13, 0.035], cornerRadius: 0.008)
             case .socket:
-                mesh = .generateBox(size: [0.07, 0.07, 0.02], cornerRadius: 0.004)
+                mesh = .generateBox(size: [0.11, 0.11, 0.035], cornerRadius: 0.008)
             case .appliance:
-                mesh = .generateBox(size: [0.11, 0.11, 0.03], cornerRadius: 0.005)
+                mesh = .generateBox(size: [0.15, 0.15, 0.045], cornerRadius: 0.010)
             }
-            return ModelEntity(
-                mesh: mesh,
-                materials: [SimpleMaterial(color: colour, isMetallic: false)])
+            return ModelEntity(mesh: mesh, materials: [Self.glow(colour)])
+        }
+
+        /// Unlit, so the overlay reads at full strength regardless of the room.
+        ///
+        /// SimpleMaterial is shaded by the scene, and the circuit palette is
+        /// tuned for white paper, so runs came out as dark grey lines on a
+        /// bright ceiling and were effectively invisible. Unlit keeps the
+        /// colour exactly as specified.
+        static func glow(_ colour: UIColor) -> UnlitMaterial {
+            UnlitMaterial(color: colour)
         }
     }
 }
@@ -387,19 +430,24 @@ struct ARContainer: UIViewRepresentable {
 // MARK: - UIKit palette
 
 enum Palette {
-    static let accent = UIColor(red: 0.12, green: 0.43, blue: 0.35, alpha: 1)
+    static let accent = UIColor(red: 1.00, green: 0.62, blue: 0.10, alpha: 1)
 
+    /// Saturated and light, unlike the print cycle.
+    ///
+    /// The drawing's colours are chosen for white paper. Overlaid on a camera
+    /// feed of a white ceiling they read as dark grey and vanish, so AR gets its
+    /// own set at full chroma.
     private static let cycle: [UIColor] = [
-        UIColor(red: 0.12, green: 0.43, blue: 0.35, alpha: 1),
-        UIColor(red: 0.72, green: 0.28, blue: 0.16, alpha: 1),
-        UIColor(red: 0.18, green: 0.36, blue: 0.54, alpha: 1),
-        UIColor(red: 0.54, green: 0.43, blue: 0.12, alpha: 1),
-        UIColor(red: 0.42, green: 0.25, blue: 0.54, alpha: 1),
-        UIColor(red: 0.25, green: 0.54, blue: 0.49, alpha: 1),
-        UIColor(red: 0.66, green: 0.27, blue: 0.25, alpha: 1),
-        UIColor(red: 0.29, green: 0.54, blue: 0.18, alpha: 1),
-        UIColor(red: 0.54, green: 0.35, blue: 0.18, alpha: 1),
-        UIColor(red: 0.18, green: 0.44, blue: 0.54, alpha: 1),
+        UIColor(red: 1.00, green: 0.62, blue: 0.10, alpha: 1),   // brand amber
+        UIColor(red: 0.20, green: 0.90, blue: 0.75, alpha: 1),   // cyan green
+        UIColor(red: 0.40, green: 0.70, blue: 1.00, alpha: 1),   // sky
+        UIColor(red: 1.00, green: 0.85, blue: 0.25, alpha: 1),   // gold
+        UIColor(red: 0.80, green: 0.55, blue: 1.00, alpha: 1),   // violet
+        UIColor(red: 0.35, green: 1.00, blue: 0.55, alpha: 1),   // mint
+        UIColor(red: 1.00, green: 0.45, blue: 0.45, alpha: 1),   // coral
+        UIColor(red: 0.65, green: 1.00, blue: 0.35, alpha: 1),   // lime
+        UIColor(red: 1.00, green: 0.70, blue: 0.40, alpha: 1),   // apricot
+        UIColor(red: 0.45, green: 0.90, blue: 1.00, alpha: 1),   // ice
     ]
 
     static func uiColor(_ index: Int) -> UIColor {
