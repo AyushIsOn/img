@@ -47,58 +47,63 @@ ROOM: Dict = {
     "name": "Ayush's room",
     "kind": "bedroom",
 
+    # Corrected against the GLB scan of the room, which measured an oriented
+    # footprint of 4.507 x 3.610 m and a total height span of 3.098 m. The
+    # depth and the ceiling height had been transposed: the room is 12 feet
+    # deep with a 10 foot ceiling, not 10 feet deep with a 12 foot ceiling.
+    # Nominal feet are used since the scan agrees to within 1.4%.
     "width": round(15 * FEET, 3),      # 4.572 m, along Wall 1 and Wall 3
-    "depth": round(10 * FEET, 3),      # 3.048 m, Wall 3 to Wall 1
-    "ceiling": round(12 * FEET, 3),    # 3.658 m
+    "depth": round(12 * FEET, 3),      # 3.658 m, Wall 3 to Wall 1
+    "ceiling": round(10 * FEET, 3),    # 3.048 m
 
     # Doors, by the wall they are in. `along` is measured from the origin end
     # of that wall to the centre of the opening.
     "doors": [
         {"wall": 1, "along": 3.95, "width": 0.90, "label": "Door 2"},
-        {"wall": 2, "along": 2.60, "width": 0.90, "label": "Door 3"},
-        {"wall": 4, "along": 2.55, "width": 0.90, "label": "Door 1"},
+        {"wall": 2, "along": 3.12, "width": 0.90, "label": "Door 3"},
+        {"wall": 4, "along": 3.06, "width": 0.90, "label": "Door 1"},
     ],
     "windows": [
-        {"wall": 2, "along": 1.50, "width": 1.20, "sill": 0.95},
+        {"wall": 2, "along": 1.80, "width": 1.20, "sill": 0.95},
     ],
 
     # Built-in joinery. Not electrical, but the scan sees it and it belongs on
     # the drawing: you cannot chase a wall behind a fitted wardrobe.
     "fixtures": [
-        {"name": "Cupboard", "wall": 4, "from": 0.15, "to": 2.10,
+        {"name": "Cupboard", "wall": 4, "from": 0.18, "to": 2.52,
          "depth": 0.60},
     ],
 
     # The distribution board is the existing MCB box on Wall 1.
-    "board": {"x": 0.30, "y": 2.95, "h": 1.80, "label": "MCB box"},
+    "board": {"x": 0.30, "y": 3.56, "h": 1.80, "label": "MCB box"},
 
     # Fittings. Ceiling mounted items leave `h` as None.
     "points": [
         # --- Wall 1, the desk wall -------------------------------------
         {"kind": "light", "label": "Tubelight 25 W",
-         "x": 1.60, "y": 2.95, "h": 2.90, "watts": 25},
+         "x": 1.60, "y": 3.56, "h": 2.75, "watts": 25},
         {"kind": "switchboard", "label": "Switchboard 1",
-         "x": 2.55, "y": 2.96, "h": 1.25},
+         "x": 2.55, "y": 3.57, "h": 1.25},
         {"kind": "socket", "label": "6 A socket, desk",
-         "x": 2.55, "y": 2.96, "h": 1.05, "watts": 200},
+         "x": 2.55, "y": 3.57, "h": 1.05, "watts": 200},
 
         # --- Wall 2, the window wall -----------------------------------
         {"kind": "appliance", "label": "Air conditioner",
-         "x": 4.42, "y": 2.20, "h": 2.85, "watts": 1500,
+         "x": 4.42, "y": 2.64, "h": 2.40, "watts": 1500,
          "dedicated": True, "category": "Air Conditioners",
          # The isolator actually fitted is 25 A, so the circuit is recorded
          # at 25 A rather than the 16 A a 1 ton load would otherwise get.
          "mcb_amps": 25.0},
         {"kind": "switchboard", "label": "AC isolator 25 A",
-         "x": 4.44, "y": 1.80, "h": 2.55},
+         "x": 4.44, "y": 2.16, "h": 2.20},
         {"kind": "switchboard", "label": "Switchboard 2",
-         "x": 4.44, "y": 0.80, "h": 1.25},
+         "x": 4.44, "y": 0.96, "h": 1.25},
         {"kind": "socket", "label": "6 A socket, bedside",
-         "x": 4.44, "y": 0.80, "h": 1.05, "watts": 200},
+         "x": 4.44, "y": 0.96, "h": 1.05, "watts": 200},
 
         # --- Wall 3, the bed wall --------------------------------------
         {"kind": "light", "label": "LED 12 W",
-         "x": 2.10, "y": 0.10, "h": 2.85, "watts": 12},
+         "x": 2.10, "y": 0.10, "h": 2.60, "watts": 12},
         {"kind": "switchboard", "label": "Switchboard 3",
          "x": 2.30, "y": 0.11, "h": 1.15},
         {"kind": "socket", "label": "6 A socket, bed",
@@ -106,7 +111,7 @@ ROOM: Dict = {
 
         # --- Ceiling ---------------------------------------------------
         {"kind": "fan", "label": "Ceiling fan 1200 mm",
-         "x": 2.29, "y": 1.52, "h": None, "watts": 75},
+         "x": 2.29, "y": 1.83, "h": None, "watts": 75},
     ],
 
     # Wall 4 carries the cupboard and Door 1 only, nothing electrical.
