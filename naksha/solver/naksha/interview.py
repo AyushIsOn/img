@@ -79,8 +79,16 @@ failure here. \
 Set done true and question null once you can plan the installation, usually \
 after seven to nine questions.
 
-Use count for small integers, choice for one of a short list, multi when several \
-apply, number for a measured quantity.
+Ask about ONE thing per question. "How many air conditioners and which rooms" is \
+two questions; ask the count, then the rooms.
+
+Pick the control honestly, because the wrong one cannot be answered:
+count for a small integer, number for a measured quantity, choice for exactly \
+one of a short list, multi when several apply, text for anything free-form such \
+as a name or a list of room names.
+
+If you use choice or multi you MUST supply a non-empty options array. A choice \
+with no options gives the user no way to answer.
 """
 
 # Appliance wattages. The model states intent; the rule engine states load, so
