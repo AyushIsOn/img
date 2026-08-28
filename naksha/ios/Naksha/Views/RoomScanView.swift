@@ -19,7 +19,10 @@ struct RoomScanView: View {
     @State private var capturing = false
     @State private var stopRequested = false
     @State private var processing = false
-    @State private var pendingRoom: CapturedRoom?
+    // Holds the wrapper, not the bare room. The wrapper carries the identity
+    // the sheet is keyed on, so it has to be created once when the room
+    // arrives rather than rebuilt while the view is being evaluated.
+    @State private var pendingRoom: IdentifiedRoom?
     @State private var roomName = ""
     @State private var roomKind = "bedroom"
 
@@ -34,7 +37,7 @@ struct RoomScanView: View {
                         stopRequested: $stopRequested,
                         onProcessing: { processing = true },
                         onFinish: { room in
-                            pendingRoom = room
+                            pendingRoom = IdentifiedRoom(room: room)
                             endCapture()
                         },
                         onFailure: { endCapture() })
@@ -50,9 +53,12 @@ struct RoomScanView: View {
         // Leaving mid capture would abandon the session with no result, so the
         // way out is the explicit Cancel button below.
         .navigationBarBackButtonHidden(capturing)
-        .sheet(item: Binding(
-            get: { pendingRoom.map { IdentifiedRoom(room: $0) } },
-            set: { if $0 == nil { pendingRoom = nil } })) { wrapper in
+        // Bound straight to the stored wrapper. The previous version built a
+        // new IdentifiedRoom inside the binding's getter, so a fresh UUID was
+        // minted on every body evaluation. sheet(item:) treats a changed id as
+        // a different item, so it dismissed and represented the sheet on every
+        // render, which read as the card flickering open and closed.
+        .sheet(item: $pendingRoom) { wrapper in
             nameSheet(for: wrapper.room)
         }
     }
@@ -250,7 +256,7 @@ struct RoomCaptureContainer: UIViewRepresentable {
 
     static func dismantleUIView(_ view: RoomCaptureView,
                                 coordinator: RoomCaptureCoordinator) {
-        coordinator.finish()
+        coordinator.abandon()
     }
 }
 
@@ -289,12 +295,20 @@ final class RoomCaptureCoordinator: NSObject, RoomCaptureViewDelegate {
 
     func encode(with coder: NSCoder) {}
 
-    /// Ends the capture. Idempotent, because both the Done button and view
-    /// teardown can reach it and stopping an already stopped session throws.
-    func finish() {
+    /// Ends the capture and expects a room back, which is the Done button.
+    func finish() { stop(reportingProgress: true) }
+
+    /// Ends the capture without expecting a result, which is view teardown
+    /// after Cancel. Reporting progress here would set the processing flag on
+    /// the way out and leave the next capture opening on a spinner.
+    func abandon() { stop(reportingProgress: false) }
+
+    /// Idempotent, because Done and teardown can both arrive and stopping an
+    /// already stopped session throws.
+    private func stop(reportingProgress: Bool) {
         guard !stopped else { return }
         stopped = true
-        onProcessing()
+        if reportingProgress { onProcessing() }
         view?.captureSession.stop()
     }
 
