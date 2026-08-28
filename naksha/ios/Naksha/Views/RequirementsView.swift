@@ -30,7 +30,7 @@ struct RequirementsView: View {
             .padding(20)
         }
         .navigationTitle("Your requirements")
-        .background(Color(white: 0.97).ignoresSafeArea())
+        
     }
 
     /// Derived from what has actually been recorded, so the bar cannot drift
@@ -88,14 +88,13 @@ struct RequirementsView: View {
                 Label("Design the installation", systemImage: "wand.and.stars")
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .buttonStyle(.vguard)
             .disabled(isWorking)
 
             designState
         }
         .padding(16)
-        .background(RoundedRectangle(cornerRadius: 14).fill(Color.white))
+        .glassCard(18, tinted: true)
     }
 
     private var isWorking: Bool {
@@ -129,8 +128,7 @@ struct RequirementsView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(10)
-            .background(RoundedRectangle(cornerRadius: 8)
-                .fill(Theme.warn.opacity(0.08)))
+            .glassCard(12)
 
         case .ready(let design):
             VStack(alignment: .leading, spacing: 8) {
@@ -144,8 +142,7 @@ struct RequirementsView: View {
                     Label("Open the drawings", systemImage: "doc.richtext")
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
+                .buttonStyle(.vguardGlass)
             }
         }
     }
@@ -173,7 +170,7 @@ struct RequirementsView: View {
             }
         }
         .padding(14)
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white))
+        .glassCard(16)
     }
 }
 
@@ -259,7 +256,7 @@ private struct QuestionCard: View {
             }
         }
         .padding(18)
-        .background(RoundedRectangle(cornerRadius: 16).fill(Color.white))
+        .glassCard(20)
     }
 
     private func appliancePicker(room: String, roomKind: String) -> some View {
@@ -381,6 +378,7 @@ struct SketchPlanView: View {
                 }
             }
         }
+        .scrollContentBackground(.hidden)
         .navigationTitle("Sketch the plan")
     }
 

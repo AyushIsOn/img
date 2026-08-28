@@ -96,8 +96,8 @@ struct RoomScanView: View {
                             .font(.subheadline.weight(.semibold))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
-                            .background(Capsule().fill(.white.opacity(0.2)))
-                            .foregroundColor(.white)
+                            .glassChip()
+                            .foregroundColor(Theme.ink)
                     }
 
                     Button {
@@ -108,7 +108,7 @@ struct RoomScanView: View {
                             .font(.subheadline.weight(.bold))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
-                            .background(Capsule().fill(.white))
+                            .background(Brand.markGradient, in: .capsule)
                             .foregroundColor(.black)
                     }
                 }
@@ -145,8 +145,7 @@ struct RoomScanView: View {
                         }
                     }
                     .padding(14)
-                    .background(RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white))
+                    .glassCard(16)
                 }
 
                 Button {
@@ -162,8 +161,7 @@ struct RoomScanView: View {
                           systemImage: "camera.viewfinder")
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                .buttonStyle(.vguard)
 
                 if !store.scannedRooms.isEmpty {
                     NavigationLink {
@@ -173,13 +171,12 @@ struct RoomScanView: View {
                               systemImage: "arrow.right")
                             .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.bordered)
-                    .controlSize(.large)
+                    .buttonStyle(.vguardGlass)
                 }
             }
             .padding(20)
         }
-        .background(Color(white: 0.97).ignoresSafeArea())
+        
     }
 
     private func nameSheet(for room: CapturedRoom) -> some View {

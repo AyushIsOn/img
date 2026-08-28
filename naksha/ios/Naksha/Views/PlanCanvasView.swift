@@ -20,7 +20,7 @@ struct PlanCanvasView: View {
                 drawPoints(&ctx, t)
                 drawBoard(&ctx, t)
             }
-            .background(Color(white: 0.99))
+            .background(Theme.paper)
         }
     }
 
@@ -71,11 +71,11 @@ struct PlanCanvasView: View {
             let c = t.apply(room.center)
             ctx.draw(Text(room.name.uppercased())
                         .font(.system(size: 8, weight: .bold))
-                        .foregroundColor(Theme.ink),
+                        .foregroundColor(Theme.paperInk),
                      at: CGPoint(x: c.x, y: c.y - 7))
             ctx.draw(Text(String(format: "%.1f m\u{00B2}", room.area))
                         .font(.system(size: 7))
-                        .foregroundColor(Theme.muted),
+                        .foregroundColor(Theme.paperMuted),
                      at: CGPoint(x: c.x, y: c.y + 4))
         }
     }
@@ -102,7 +102,7 @@ struct PlanCanvasView: View {
             let index = design.circuits.firstIndex { $0.pointIDs.contains(point.id) }
             let dimmed = highlighted != nil
                 && design.circuit(for: point)?.id != highlighted
-            let colour = (index.map { Theme.circuitColour($0) } ?? Theme.ink)
+            let colour = (index.map { Theme.circuitColour($0) } ?? Theme.paperInk)
                 .opacity(dimmed ? 0.2 : 1.0)
             symbol(&ctx, point.kind, at: p, colour: colour)
         }
@@ -163,37 +163,8 @@ struct PlanCanvasView: View {
         let p = t.apply(design.boardPoint)
         let rect = CGRect(x: p.x - 12, y: p.y - 8, width: 24, height: 16)
         ctx.fill(Path(roundedRect: rect, cornerRadius: 2),
-                 with: .color(Theme.accent))
+                 with: .color(Theme.paperInk))
         ctx.draw(Text("DB").font(.system(size: 8, weight: .bold))
                     .foregroundColor(.white), at: p)
-    }
-}
-
-// MARK: - Shared palette
-
-enum Theme {
-    static let ink = Color(red: 0.11, green: 0.11, blue: 0.11)
-    static let muted = Color(white: 0.54)
-    static let accent = Color(red: 0.12, green: 0.43, blue: 0.35)
-    static let roomFill = Color(red: 0.97, green: 0.965, blue: 0.957)
-    static let wall = Color(red: 0.11, green: 0.11, blue: 0.11)
-    static let warn = Color(red: 0.72, green: 0.28, blue: 0.16)
-
-    /// Matches the cycle used by the Python drawing module.
-    private static let cycle: [Color] = [
-        Color(red: 0.12, green: 0.43, blue: 0.35),
-        Color(red: 0.72, green: 0.28, blue: 0.16),
-        Color(red: 0.18, green: 0.36, blue: 0.54),
-        Color(red: 0.54, green: 0.43, blue: 0.12),
-        Color(red: 0.42, green: 0.25, blue: 0.54),
-        Color(red: 0.25, green: 0.54, blue: 0.49),
-        Color(red: 0.66, green: 0.27, blue: 0.25),
-        Color(red: 0.29, green: 0.54, blue: 0.18),
-        Color(red: 0.54, green: 0.35, blue: 0.18),
-        Color(red: 0.18, green: 0.44, blue: 0.54),
-    ]
-
-    static func circuitColour(_ index: Int) -> Color {
-        cycle[index % cycle.count]
     }
 }

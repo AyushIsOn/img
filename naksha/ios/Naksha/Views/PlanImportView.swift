@@ -40,7 +40,7 @@ struct PlanImportView: View {
                             calibration: $calibration,
                             current: $current,
                             traced: tracedRooms)
-                    .background(Color(white: 0.92))
+                    .background(Brand.surface)
                 instructions
             } else {
                 sourcePicker
@@ -79,7 +79,7 @@ struct PlanImportView: View {
             }
             .padding(20)
         }
-        .background(Color(white: 0.97).ignoresSafeArea())
+
         .onChange(of: photoItem) { _, item in
             guard let item else { return }
             Task {
@@ -183,7 +183,9 @@ struct PlanImportView: View {
             }
         }
         .padding(14)
-        .background(Color.white)
+        .glassCard(20)
+        .padding(.horizontal, 12)
+        .padding(.bottom, 8)
     }
 
     private var namingSheet: some View {

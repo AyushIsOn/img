@@ -49,7 +49,7 @@ struct ARWiringView: View {
             .foregroundColor(.white)
             .padding(.vertical, 10)
             .padding(.horizontal, 14)
-            .background(Capsule().fill(Color.black.opacity(0.65)))
+            .glassChip()
     }
 
     private var controls: some View {
@@ -79,7 +79,7 @@ struct ARWiringView: View {
                     }
                     ForEach(Array(design.circuits.enumerated()), id: \.1.id) { i, c in
                         chip(c.id, active: visibleCircuit == c.id,
-                             tint: Theme.circuitColour(i)) {
+                             tint: Theme.circuitAccent(i)) {
                             visibleCircuit = (visibleCircuit == c.id) ? nil : c.id
                         }
                     }
@@ -96,8 +96,7 @@ struct ARWiringView: View {
             .tint(.white)
         }
         .padding(14)
-        .background(RoundedRectangle(cornerRadius: 16)
-            .fill(Color.black.opacity(0.6)))
+        .glassOverlay(24)
     }
 
     private func chip(_ title: String, active: Bool,
@@ -106,9 +105,10 @@ struct ARWiringView: View {
         Button(action: action) {
             Text(title)
                 .font(.caption2.weight(.semibold))
-                .padding(.vertical, 6).padding(.horizontal, 11)
-                .background(Capsule().fill(active ? tint : Color.white.opacity(0.18)))
-                .foregroundColor(active ? .white : .white.opacity(0.85))
+                .padding(.vertical, 7).padding(.horizontal, 12)
+                .background(Capsule().fill(active ? tint : .clear))
+                .glassChip(tint: active ? tint : nil)
+                .foregroundColor(active ? .black : Theme.ink)
         }
         .buttonStyle(.plain)
     }

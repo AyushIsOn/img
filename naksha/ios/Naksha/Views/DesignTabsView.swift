@@ -9,12 +9,14 @@ struct DesignTabsView: View {
             DrawingTab(design: design)
                 .tabItem { Label("Drawing", systemImage: "doc.richtext") }
             ScheduleTab(design: design)
+                .scrollContentBackground(.hidden)
                 .tabItem { Label("Circuits", systemImage: "list.bullet.indent") }
             NavigationStack { ARWiringView(design: design) }
                 .tabItem { Label("AR", systemImage: "arkit") }
             NavigationStack { AsBuiltView(design: design) }
                 .tabItem { Label("As-built", systemImage: "checkmark.seal") }
             MaterialListView(design: design)
+                .scrollContentBackground(.hidden)
                 .tabItem { Label("Buy", systemImage: "cart") }
         }
         .navigationTitle(design.plan.name)
@@ -34,6 +36,11 @@ private struct DrawingTab: View {
             PlanCanvasView(design: design,
                            showCircuits: showCircuits,
                            highlighted: highlighted)
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(Brand.hairline, lineWidth: 0.8))
+                .padding(.horizontal, 12)
+                .padding(.top, 10)
                 .frame(maxHeight: .infinity)
 
             VStack(spacing: 10) {
@@ -52,11 +59,11 @@ private struct DrawingTab: View {
                                     .padding(.horizontal, 9)
                                     .background(Capsule().fill(
                                         highlighted == c.id
-                                        ? Theme.circuitColour(i)
-                                        : Theme.circuitColour(i).opacity(0.15)))
+                                        ? Theme.circuitAccent(i)
+                                        : Theme.circuitAccent(i).opacity(0.18)))
                                     .foregroundColor(highlighted == c.id
-                                                     ? .white
-                                                     : Theme.circuitColour(i))
+                                                     ? .black
+                                                     : Theme.circuitAccent(i))
                             }
                             .buttonStyle(.plain)
                         }
@@ -72,7 +79,9 @@ private struct DrawingTab: View {
                 }
             }
             .padding(14)
-            .background(Color.white)
+            .glassCard(20)
+            .padding(.horizontal, 12)
+            .padding(.bottom, 8)
         }
     }
 }
@@ -101,7 +110,7 @@ private struct ScheduleTab: View {
                 ForEach(Array(design.circuits.enumerated()), id: \.1.id) { i, c in
                     VStack(alignment: .leading, spacing: 5) {
                         HStack {
-                            Circle().fill(Theme.circuitColour(i))
+                            Circle().fill(Theme.circuitAccent(i))
                                 .frame(width: 8, height: 8)
                             Text(c.id).font(.subheadline.weight(.bold))
                             Text(c.kind.displayName)
@@ -148,7 +157,7 @@ private struct ScheduleTab: View {
     private func tag(_ text: String) -> some View {
         Text(text).font(.system(size: 10, weight: .medium))
             .padding(.vertical, 3).padding(.horizontal, 7)
-            .background(Capsule().fill(Color(white: 0.94)))
+            .glassChip()
             .foregroundColor(Theme.ink)
     }
 }

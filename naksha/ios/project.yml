@@ -10,8 +10,11 @@ name: Naksha
 
 options:
   bundleIdPrefix: com.d38n
+  # 18.0 is the floor for MeshGradient, which draws the animated backdrop.
+  # Liquid Glass is iOS 26 and is applied behind availability checks, so this
+  # still runs on 18 with a material fallback. Building it needs Xcode 26.
   deploymentTarget:
-    iOS: "17.0"
+    iOS: "18.0"
   createIntermediateGroups: true
 
 targets:

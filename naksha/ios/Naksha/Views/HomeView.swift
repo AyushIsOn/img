@@ -14,7 +14,7 @@ struct HomeView: View {
             VStack(alignment: .leading, spacing: 22) {
                 header
 
-                VStack(spacing: 12) {
+                GlassGroup(spacing: 12) {
                     NavigationLink {
                         RoomScanView()
                     } label: {
@@ -75,8 +75,7 @@ struct HomeView: View {
                         }
                     }
                     .padding(12)
-                    .background(RoundedRectangle(cornerRadius: 10)
-                        .fill(Color(white: 0.93)))
+                    .glassCard(14)
                 }
 
                 stateSection
@@ -84,7 +83,7 @@ struct HomeView: View {
             .padding(20)
         }
         .navigationTitle("NAKSHA")
-        .background(Color(white: 0.97).ignoresSafeArea())
+        
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { showingSettings = true } label: {
@@ -101,9 +100,8 @@ struct HomeView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Design the wiring, then order the wire.")
-                .font(.title3.weight(.semibold))
-                .foregroundColor(Theme.ink)
+            BrandText(text: "Design the wiring,\nthen order the wire.", size: 25)
+                .fixedSize(horizontal: false, vertical: true)
             Text("Lay out your lighting, sockets, water and gas points before "
                  + "the walls are closed. You get a drawing your electrician "
                  + "can build from, and a material list that adds up.")
@@ -135,8 +133,7 @@ struct HomeView: View {
                     .font(.caption.weight(.semibold))
             }
             .padding(14)
-            .background(RoundedRectangle(cornerRadius: 12)
-                .fill(Theme.warn.opacity(0.08)))
+            .glassCard(16)
 
         case .ready(let design):
             VStack(alignment: .leading, spacing: 12) {
@@ -163,8 +160,7 @@ struct HomeView: View {
                             .foregroundColor(Theme.ink)
                     }
                     .padding(14)
-                    .background(RoundedRectangle(cornerRadius: 14)
-                        .fill(Color.white))
+                    .glassCard(18, tinted: true)
                 }
                 .buttonStyle(.plain)
             }
@@ -202,6 +198,6 @@ struct Card: View {
             Spacer(minLength: 0)
         }
         .padding(16)
-        .background(RoundedRectangle(cornerRadius: 14).fill(Color.white))
+        .glassCard(18)
     }
 }

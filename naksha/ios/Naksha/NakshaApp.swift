@@ -6,11 +6,17 @@ struct NakshaApp: App {
 
     var body: some Scene {
         WindowGroup {
-            NavigationStack {
-                HomeView()
+            VGuardScreen {
+                NavigationStack {
+                    HomeView()
+                }
+                // The backdrop is the window's background, so navigation
+                // pushes slide over a continuous gradient instead of each
+                // screen carrying its own copy.
+                // Lists and forms show the backdrop instead of a system fill.
+                .scrollContentBackground(.hidden)
             }
             .environmentObject(store)
-            .tint(Theme.accent)
         }
     }
 }
