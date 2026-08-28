@@ -61,6 +61,24 @@ struct Room: Codable, Identifiable {
     var id: String { name }
     var cgPolygon: [CGPoint] { polygon.map { CGPoint(x: $0[0], y: $0[1]) } }
 
+    /// Even-odd point in polygon. Used to decide which conduit runs belong to
+    /// a room when the AR overlay is showing only one.
+    func contains(_ p: CGPoint) -> Bool {
+        let pts = cgPolygon
+        guard pts.count > 2 else { return false }
+        var inside = false
+        var j = pts.count - 1
+        for i in pts.indices {
+            let a = pts[i], b = pts[j]
+            if (a.y > p.y) != (b.y > p.y),
+               p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x {
+                inside.toggle()
+            }
+            j = i
+        }
+        return inside
+    }
+
     var center: CGPoint {
         let pts = cgPolygon
         guard !pts.isEmpty else { return .zero }

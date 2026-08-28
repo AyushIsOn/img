@@ -21,6 +21,8 @@ struct ARWiringView: View {
     @State private var isPlaced = false
     @State private var visibleCircuit: String? = nil
 
+    private var rooms: [Room] { design.plan.rooms }
+
     var body: some View {
         ZStack(alignment: .bottom) {
             ARContainer(design: design,
@@ -31,7 +33,11 @@ struct ARWiringView: View {
 
             VStack(spacing: 10) {
                 if !isPlaced {
-                    banner("Point at the floor, then tap to drop the plan origin.")
+                    VStack(spacing: 10) {
+                        banner("Which room are you standing in?")
+                        roomPicker
+                        banner("Now point at the floor and tap.")
+                    }
                 } else {
                     controls
                 }
@@ -52,8 +58,38 @@ struct ARWiringView: View {
             .glassChip()
     }
 
+    /// Chosen before the tap, because it decides what the tap means.
+    private var roomPicker: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(rooms) { room in
+                    chip(room.name,
+                         active: (placement.anchorRoom ?? rooms.first?.name)
+                                 == room.name,
+                         tint: Brand.amber) {
+                        placement.anchorRoom = room.name
+                    }
+                }
+            }
+            .padding(.horizontal, 2)
+        }
+    }
+
     private var controls: some View {
         VStack(spacing: 12) {
+            HStack {
+                Text("Standing in")
+                    .font(.caption).foregroundStyle(.white.opacity(0.8))
+                Spacer()
+                Text(placement.anchorRoom ?? rooms.first?.name ?? "?")
+                    .font(.caption.weight(.bold)).foregroundStyle(Brand.gold)
+                Toggle("", isOn: $placement.onlyAnchorRoom)
+                    .labelsHidden()
+                    .tint(Brand.amber)
+                Text(placement.onlyAnchorRoom ? "this room" : "whole floor")
+                    .font(.caption2).foregroundStyle(.white.opacity(0.7))
+                    .frame(width: 68, alignment: .leading)
+            }
             HStack {
                 Text("Rotate")
                     .font(.caption).foregroundColor(.white.opacity(0.8))
@@ -117,10 +153,24 @@ struct ARWiringView: View {
 // MARK: - Placement
 
 struct Placement {
-    /// World transform of the plan origin, set by the first tap.
+    /// World transform of the anchor, set by the first tap.
     var origin: simd_float4x4? = nil
     var headingDegrees: Double = 0
     var ceilingHeight: Double = 3.0
+
+    /// The room the user is standing in.
+    ///
+    /// This is the fix for the overlay appearing in the wrong place. The plan
+    /// is authored in floor coordinates whose origin is a corner of the whole
+    /// floor, so anchoring plan (0,0) to the tap put every other room as far
+    /// away as it sits on the drawing, frequently through a wall or outside the
+    /// building. Anchoring the chosen room's centre instead means the wiring
+    /// lands in the room you are actually standing in.
+    var anchorRoom: String? = nil
+
+    /// Show only the anchored room. The rest of the house is still correct
+    /// relative to it, but on site one room at a time is what you want.
+    var onlyAnchorRoom: Bool = true
 }
 
 // MARK: - ARView bridge
@@ -206,27 +256,49 @@ struct ARContainer: UIViewRepresentable {
             let spin = simd_quatf(angle: heading, axis: [0, 1, 0])
             let ceiling = Float(placement.ceilingHeight)
 
+            // The room the user says they are standing in. Its centre becomes
+            // the tap point, so the overlay lands here rather than wherever the
+            // floor plan happens to have its origin.
+            let room = design.plan.rooms.first {
+                $0.name == placement.anchorRoom
+            } ?? design.plan.rooms.first
+            let datum = room?.center ?? .zero
+            let onlyHere = placement.onlyAnchorRoom && room != nil
+
+            /// Plan metres to anchor-relative world metres. Plan y runs away
+            /// from the entry and ARKit z runs towards the camera, so the
+            /// vertical axis is negated exactly once, here.
+            func world(_ p: CGPoint, _ y: Float) -> SIMD3<Float> {
+                spin.act(SIMD3<Float>(Float(p.x - datum.x), y,
+                                      Float(-(p.y - datum.y))))
+            }
+
             for (i, circuit) in design.circuits.enumerated() {
                 if let only = visibleCircuit, only != circuit.id { continue }
                 let colour = Palette.uiColor(i)
 
                 for (a, b) in circuit.segments {
-                    let pa = SIMD3<Float>(Float(a.x), ceiling, Float(-a.y))
-                    let pb = SIMD3<Float>(Float(b.x), ceiling, Float(-b.y))
-                    if let run = Self.conduit(from: pa, to: pb, colour: colour) {
-                        run.transform.rotation = spin * run.transform.rotation
-                        run.position = spin.act(run.position)
+                    // A run crossing into another room is dropped when showing
+                    // one room, judged on its midpoint so a run that merely
+                    // clips a corner is not lost.
+                    if onlyHere, let room {
+                        let mid = CGPoint(x: (a.x + b.x) / 2,
+                                          y: (a.y + b.y) / 2)
+                        if !room.contains(mid) { continue }
+                    }
+                    if let run = Self.conduit(from: world(a, ceiling),
+                                              to: world(b, ceiling),
+                                              colour: colour) {
                         anchor.addChild(run)
                     }
                 }
 
                 let ids = Set(circuit.pointIDs)
                 for point in design.points where ids.contains(point.id) {
+                    if onlyHere, point.room != room?.name { continue }
                     let y = point.kind.isCeilingMounted
                         ? ceiling : Float(point.height)
-                    var pos = SIMD3<Float>(Float(point.point.x), y,
-                                           Float(-point.point.y))
-                    pos = spin.act(pos)
+                    let pos = world(point.point, y)
                     let marker = Self.marker(for: point.kind, colour: colour)
                     marker.position = pos
                     anchor.addChild(marker)
@@ -243,16 +315,19 @@ struct ARContainer: UIViewRepresentable {
                 }
             }
 
-            // the board itself
-            let boardPos = spin.act(SIMD3<Float>(Float(design.boardPoint.x),
-                                                 1.5,
-                                                 Float(-design.boardPoint.y)))
-            let board = ModelEntity(
-                mesh: .generateBox(size: [0.30, 0.40, 0.10], cornerRadius: 0.01),
-                materials: [SimpleMaterial(color: Palette.accent,
-                                           isMetallic: false)])
-            board.position = boardPos
-            anchor.addChild(board)
+            // The board, placed through the same transform. Shown only when it
+            // is in this room, or when the whole floor is on, otherwise it
+            // appears through a wall with nothing connecting it.
+            let boardHere = room?.contains(design.boardPoint) ?? true
+            if !onlyHere || boardHere {
+                let board = ModelEntity(
+                    mesh: .generateBox(size: [0.30, 0.40, 0.10],
+                                       cornerRadius: 0.01),
+                    materials: [SimpleMaterial(color: Palette.accent,
+                                               isMetallic: false)])
+                board.position = world(design.boardPoint, 1.5)
+                anchor.addChild(board)
+            }
 
             view.scene.addAnchor(anchor)
             root = anchor
