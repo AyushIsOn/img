@@ -15,7 +15,9 @@ from __future__ import annotations
 
 import re
 
-from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER, TA_LEFT
+from reportlab.lib import colors
+from reportlab.lib.enums import (TA_CENTER, TA_JUSTIFY, TA_LEFT,
+                                TA_RIGHT)
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
@@ -64,7 +66,28 @@ def styles() -> dict:
                         alignment=TA_LEFT, spaceBefore=5, spaceAfter=10),
         "ref": make("ref", alignment=TA_JUSTIFY, leftIndent=22,
                     firstLineIndent=-22, spaceAfter=6),
+        "docheading": make("docheading", fontName="Times-Bold", fontSize=20,
+                           leading=24, alignment=TA_CENTER, spaceAfter=14),
+        "compline": make("compline", fontName="Times-Bold", fontSize=14,
+                         leading=18, alignment=TA_CENTER,
+                         textColor=colors.HexColor("#C00000"), spaceAfter=6),
+        "tiny": make("tiny", fontSize=9.5, leading=12, alignment=TA_LEFT),
+        "boxline": make("boxline", leading=15),
+        "firstpage": make("firstpage", fontName="Times-Bold",
+                          alignment=TA_RIGHT),
+        "box": make("box", fontSize=10, leading=13.5, alignment=TA_JUSTIFY,
+                    spaceAfter=4),
+        "boxhead": make("boxhead", fontName="Times-Bold", leading=15,
+                        spaceAfter=3),
     }
+
+
+def total_words() -> int:
+    n = count_words(C.SYNOPSIS)
+    for kind, text in C.BODY:
+        if kind in ("p", "b", "h2", "box"):
+            n += count_words(text)
+    return n
 
 
 def count_words(text: str) -> int:
@@ -101,27 +124,61 @@ def build() -> None:
     story = []
 
     # ---------------------------------------------------------- front page
-    # Team name and participants only. No institution anywhere in the report.
+    # Reproduces the competition template.
+    words = total_words()
     story += [
-        Spacer(1, 4.5 * cm),
-        Paragraph(C.TITLE, s["title"]),
-        Paragraph(C.SUBTITLE, s["subtitle"]),
+        Paragraph("DETAILED REPORT", s["docheading"]),
+        Paragraph("V-GUARD INDUSTRIES LTD \u2013 BIG IDEA TECH DESIGN "
+                  "COMPETITION 2026", s["compline"]),
         Spacer(1, 0.5 * cm),
-        Paragraph(C.TRACK, s["subtitle"]),
-        Spacer(1, 3 * cm),
-        Paragraph("Team Name", s["frontlabel"]),
-        Paragraph(C.TEAM, s["front"]),
-        Paragraph("Participant", s["frontlabel"]),
+        Paragraph("The first page of the report must adhere to the format "
+                  "given below:", s["tiny"]),
+        Spacer(1, 0.25 * cm),
     ]
-    for m in C.MEMBERS:
-        story.append(Paragraph(m, s["front"]))
-    story += [NextPageTemplate("body"), PageBreak()]
+
+    rows = [[Paragraph(f"<b>Team Name: {C.TEAM}</b>", s["boxline"])],
+            [Paragraph("<b>Team Members</b> <i>(Full Name)</i>",
+                       s["boxline"])]]
+    for i in range(1, 4):
+        name = C.MEMBERS[i - 1] if i <= len(C.MEMBERS) else ""
+        rows.append([Paragraph(f"<b>&nbsp;&nbsp;&nbsp;&nbsp;{i}) {name}</b>",
+                               s["boxline"])])
+    rows.append([Paragraph(
+        f"<b>Number of words: {words}</b>"
+        f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+        f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+        f"<b>Date of Submission: {C.DATE}</b>", s["boxline"])])
+
+    box = Table(rows, colWidths=[doc.width])
+    box.setStyle(TableStyle([
+        ("BOX", (0, 0), (-1, -1), 1.1, (0, 0, 0)),
+        ("TOPPADDING", (0, 0), (-1, -1), 3),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+        ("LEFTPADDING", (0, 0), (-1, -1), 9),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 9),
+        ("TOPPADDING", (0, 0), (0, 0), 9),
+        ("BOTTOMPADDING", (0, -1), (0, -1), 14),
+    ]))
+    story += [
+        box,
+        Spacer(1, 0.9 * cm),
+        Paragraph(f"<i>{C.TITLE}: {C.SUBTITLE}</i>", s["subtitle"]),
+        Spacer(1, 5.2 * cm),
+        Paragraph("<b>(First Page)</b>", s["firstpage"]),
+        NextPageTemplate("body"), PageBreak(),
+    ]
 
     # ------------------------------------------------------------ synopsis
     syn_words = count_words(C.SYNOPSIS)
     story.append(Paragraph("Synopsis", s["h1"]))
     for para in C.SYNOPSIS.strip().split("\n\n"):
         story.append(Paragraph(para.replace("\n", " "), s["p"]))
+    story += [
+        Spacer(1, 0.3 * cm),
+        Paragraph("<b>Demonstration video</b>", s["p"]),
+        Paragraph(f'<link href="{C.DRIVE_LINK}" color="#0B4FA0">'
+                  f'{C.DRIVE_LINK}</link>', s["tiny"]),
+    ]
     story.append(PageBreak())
 
     # --------------------------------------------------------------- toc
@@ -155,6 +212,24 @@ def build() -> None:
                 Image(path, width=w, height=w * ih / iw, hAlign="CENTER"),
                 Paragraph(f"Exhibit {exhibit_no}. {caption}", s["caption"]),
             ]))
+            continue
+
+        if kind == "box":
+            head, *rest = text.split("\n")
+            inner = [Paragraph(head, s["boxhead"])]
+            for block in rest:
+                inner.append(Paragraph(block, s["box"]))
+                body_words += count_words(block)
+            body_words += count_words(head)
+            tbl = Table([[inner]], colWidths=[doc.width])
+            tbl.setStyle(TableStyle([
+                ("BOX", (0, 0), (-1, -1), 0.9, (0, 0, 0)),
+                ("LEFTPADDING", (0, 0), (-1, -1), 10),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+                ("TOPPADDING", (0, 0), (-1, -1), 8),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+            ]))
+            story += [Spacer(1, 4), tbl, Spacer(1, 10)]
             continue
 
         if kind == "t":
