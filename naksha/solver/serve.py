@@ -196,14 +196,15 @@ class Handler(BaseHTTPRequestHandler):
 
         try:
             if os.environ.get("NAKSHA_ASBUILT") and len(rooms) == 1:
-                # One room scanned and the surveyed room is switched on, so use
-                # the measured fittings rather than generated ones.
+                # One room scanned and the survey is switched on, so the
+                # measured fittings and the existing MCB box are used instead of
+                # generated positions. Circuits, routing and sizing are
+                # unchanged.
                 from naksha import asbuilt
-                design = design_floor(
-                    asbuilt.floor_plan(),
-                    asbuilt.requirements(
-                        overrides=body.get("requirements") or {}),
-                    points=asbuilt.device_points())
+                design = asbuilt.design(
+                    overrides=body.get("requirements") or {})
+                print(f"  as-built survey: {len(design.points)} measured "
+                      f"points, {len(design.circuits)} circuits")
             else:
                 design = design_from_request(body)
         except Exception as exc:                     # noqa: BLE001
