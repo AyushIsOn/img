@@ -20,6 +20,8 @@ struct ARWiringView: View {
     @State private var placement = Placement()
     @State private var isPlaced = false
     @State private var visibleCircuit: String? = nil
+    /// Controls collapse to a single pill, so the overlay can be filmed clean.
+    @State private var showControls = true
 
     private var rooms: [Room] { design.plan.rooms }
 
@@ -38,12 +40,27 @@ struct ARWiringView: View {
                         roomPicker
                         banner("Now point at the floor and tap.")
                     }
-                } else {
+                } else if showControls {
                     controls
+                        .transition(.move(edge: .bottom)
+                            .combined(with: .opacity))
+                } else {
+                    Button { showControls = true } label: {
+                        Label("Controls", systemImage: "slider.horizontal.3")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Theme.ink)
+                            .padding(.vertical, 9)
+                            .padding(.horizontal, 14)
+                            .glassChip()
+                    }
+                    .buttonStyle(.plain)
+                    .transition(.opacity)
                 }
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 20)
+            .animation(.spring(response: 0.38, dampingFraction: 0.85),
+                       value: showControls)
         }
         .navigationTitle("AR overlay")
         .navigationBarTitleDisplayMode(.inline)
@@ -143,15 +160,26 @@ struct ARWiringView: View {
                     }
                 }
             }
-            Button {
-                isPlaced = false
-                placement.origin = nil
-            } label: {
-                Label("Reposition", systemImage: "arrow.counterclockwise")
-                    .font(.caption.weight(.semibold))
+            HStack(spacing: 10) {
+                Button {
+                    isPlaced = false
+                    placement.origin = nil
+                } label: {
+                    Label("Reposition", systemImage: "arrow.counterclockwise")
+                        .font(.caption.weight(.semibold))
+                }
+                .buttonStyle(.bordered)
+                .tint(.white)
+
+                // Everything is aligned by the time it is being filmed, so the
+                // panel gets out of the way.
+                Button { showControls = false } label: {
+                    Label("Hide", systemImage: "chevron.down")
+                        .font(.caption.weight(.semibold))
+                }
+                .buttonStyle(.bordered)
+                .tint(.white)
             }
-            .buttonStyle(.bordered)
-            .tint(.white)
         }
         .padding(14)
         .glassOverlay(24)
