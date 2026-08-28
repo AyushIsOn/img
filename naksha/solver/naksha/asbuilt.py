@@ -33,8 +33,8 @@ import networkx as nx
 
 from .design import (Design, build_route_graph, group_circuits,
                      route_circuits, size_circuits)
-from .model import (CABLE_TABLE, DevicePoint, Door, FloorPlan, Point,
-                    Requirements, Room, RoomRequirement,
+from .model import (CABLE_TABLE, DevicePoint, Door, Fixture, FloorPlan, Point,
+                    Requirements, Room, RoomRequirement, Window,
                     voltage_drop_percent)
 
 FEET = 0.3048
@@ -59,7 +59,14 @@ ROOM: Dict = {
         {"wall": 4, "along": 2.55, "width": 0.90, "label": "Door 1"},
     ],
     "windows": [
-        {"wall": 2, "along": 1.50, "width": 1.20},
+        {"wall": 2, "along": 1.50, "width": 1.20, "sill": 0.95},
+    ],
+
+    # Built-in joinery. Not electrical, but the scan sees it and it belongs on
+    # the drawing: you cannot chase a wall behind a fitted wardrobe.
+    "fixtures": [
+        {"name": "Cupboard", "wall": 4, "from": 0.15, "to": 2.10,
+         "depth": 0.60},
     ],
 
     # The distribution board is the existing MCB box on Wall 1.
@@ -129,6 +136,18 @@ def _on_wall(wall: int, along: float, width: float,
     return (0.0, round(along, 3))       # wall 4, left, x = 0
 
 
+def _against_wall(wall: int, start: float, end: float, depth: float,
+                  w: float, d: float) -> List[Point]:
+    """A rectangle sitting against a wall, running from `start` to `end`."""
+    if wall == 1:                       # far wall, grows downward
+        return [(start, d), (end, d), (end, d - depth), (start, d - depth)]
+    if wall == 2:                       # right wall, grows left
+        return [(w, start), (w, end), (w - depth, end), (w - depth, start)]
+    if wall == 3:                       # near wall, grows upward
+        return [(start, 0.0), (end, 0.0), (end, depth), (start, depth)]
+    return [(0.0, start), (0.0, end), (depth, end), (depth, start)]
+
+
 def floor_plan(survey: Optional[Dict] = None) -> FloorPlan:
     s = survey or ROOM
     w, d = float(s["width"]), float(s["depth"])
@@ -140,7 +159,20 @@ def floor_plan(survey: Optional[Dict] = None) -> FloorPlan:
              is_entry=(door.get("label") == "Door 1"))
         for door in s["doors"]
     ]
+    windows = [
+        Window(position=_on_wall(win["wall"], win["along"], w, d),
+               room=s["name"], width=float(win["width"]),
+               sill=float(win.get("sill") or 0.9))
+        for win in s.get("windows", [])
+    ]
+    fixtures = [
+        Fixture(name=f["name"],
+                polygon=_against_wall(f["wall"], float(f["from"]),
+                                      float(f["to"]), float(f["depth"]), w, d))
+        for f in s.get("fixtures", [])
+    ]
     return FloorPlan(name="Scanned floor", rooms=[room], doors=doors,
+                     windows=windows, fixtures=fixtures,
                      ceiling_height=float(s["ceiling"]))
 
 

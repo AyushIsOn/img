@@ -33,10 +33,24 @@ struct Plan: Codable {
     let ceilingHeight: Double
     let rooms: [Room]
     let doors: [Door]
+    let windows: [Window]
+    let fixtures: [Fixture]
 
     enum CodingKeys: String, CodingKey {
-        case name, rooms, doors
+        case name, rooms, doors, windows, fixtures
         case ceilingHeight = "ceiling_height"
+    }
+
+    /// Absent from older payloads, so both default to empty rather than
+    /// failing the whole decode.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        name = try c.decode(String.self, forKey: .name)
+        ceilingHeight = try c.decode(Double.self, forKey: .ceilingHeight)
+        rooms = try c.decode([Room].self, forKey: .rooms)
+        doors = (try? c.decode([Door].self, forKey: .doors)) ?? []
+        windows = (try? c.decode([Window].self, forKey: .windows)) ?? []
+        fixtures = (try? c.decode([Fixture].self, forKey: .fixtures)) ?? []
     }
 
     /// Bounding box of the whole floor, used to fit the drawing to a view.
@@ -103,6 +117,25 @@ struct Door: Codable {
     }
 
     var point: CGPoint { CGPoint(x: position[0], y: position[1]) }
+}
+
+struct Window: Codable {
+    let position: [Double]
+    let room: String
+    let width: Double
+    let sill: Double
+
+    var point: CGPoint { CGPoint(x: position[0], y: position[1]) }
+}
+
+/// Built-in joinery. Not electrical, but it belongs on the drawing: you cannot
+/// chase a wall that has a fitted wardrobe against it.
+struct Fixture: Codable, Identifiable {
+    let name: String
+    let polygon: [[Double]]
+
+    var id: String { name }
+    var cgPolygon: [CGPoint] { polygon.map { CGPoint(x: $0[0], y: $0[1]) } }
 }
 
 // MARK: - Electrical

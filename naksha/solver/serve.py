@@ -66,6 +66,12 @@ def design_payload(d) -> dict:
             "doors": [{"position": list(dr.position), "room_a": dr.room_a,
                        "room_b": dr.room_b, "width": dr.width,
                        "is_entry": dr.is_entry} for dr in d.plan.doors],
+            "windows": [{"position": list(wn.position), "room": wn.room,
+                         "width": wn.width, "sill": wn.sill}
+                        for wn in getattr(d.plan, "windows", [])],
+            "fixtures": [{"name": fx.name,
+                          "polygon": [list(p) for p in fx.polygon]}
+                         for fx in getattr(d.plan, "fixtures", [])],
         },
         "board": list(d.board),
         "points": [{"id": p.id, "kind": p.kind, "room": p.room,

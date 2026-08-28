@@ -127,10 +127,31 @@ class Room:
 
 
 @dataclass
+@dataclass
+class Window:
+    """An opening that admits light. Suppresses sockets beneath it."""
+    position: Point
+    room: str
+    width: float = 1.2
+    sill: float = 0.9
+
+
+@dataclass
+class Fixture:
+    """Built-in joinery. Not electrical, but the scan sees it and an
+    electrician needs it on the drawing: you cannot chase a wall behind a
+    fitted wardrobe."""
+    name: str
+    polygon: List[Point]
+
+
+@dataclass
 class FloorPlan:
     name: str
     rooms: List[Room]
     doors: List[Door] = field(default_factory=list)
+    windows: List["Window"] = field(default_factory=list)
+    fixtures: List["Fixture"] = field(default_factory=list)
     ceiling_height: float = 3.0
 
     def room(self, name: str) -> Room:
