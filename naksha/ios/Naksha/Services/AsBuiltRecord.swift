@@ -215,7 +215,7 @@ struct AsBuiltView: View {
                     }
                 } header: {
                     HStack {
-                        Circle().fill(Theme.circuitColour(i))
+                        Circle().fill(Theme.circuitAccent(i))
                             .frame(width: 8, height: 8)
                         Text("\(c.id)  \(c.kind.displayName)")
                         Spacer()
@@ -228,6 +228,7 @@ struct AsBuiltView: View {
                 }
             }
         }
+        .scrollContentBackground(.hidden)
         .navigationTitle("As-built record")
         .onAppear {
             store.load(planName: design.plan.name)

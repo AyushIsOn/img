@@ -59,6 +59,8 @@ struct SolverSettingsView: View {
                              + "tap Design the installation")
                 } header: { Text("Setting it up") }
             }
+            .scrollContentBackground(.hidden)
+            .background(VGuardBackdrop())
             .navigationTitle("Solver")
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
