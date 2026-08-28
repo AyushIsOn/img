@@ -1,19 +1,23 @@
 # Exhibit images
 
-`build_report.py` embeds these if present and skips them with a warning if not,
-so the report always builds.
+Three placeholders are committed here so the layout is already correct. Each is
+at the aspect ratio of the intended picture, so swapping it does not reflow the
+document.
 
-Save the three images here with exactly these names, then rebuild:
-
-| File | What it shows |
+| File | Should show |
 |---|---|
-| `berger-express-painting.jpg` | Berger Express Painting crew at work in a room |
+| `berger-express-painting.jpg` | Berger Express Painting crew working in a room |
 | `laser-projector.jpg` | 360 degree line laser with tripod and wall mount |
-| `dusty-robotics.jpg` | Dusty Robotics printing a layout onto a slab |
+| `dusty-robotics.jpg` | Dusty Robotics FieldPrinter printing a layout on a slab |
+
+## Replacing them
+
+In Word, right click the picture and choose **Change Picture**. Size and caption
+stay as they are. This is the quickest route and needs no rebuild.
+
+Or overwrite the files here and rebuild both formats:
 
 ```bash
-cd vguard-bigidea && python3 build_report.py
+python3 build_docx.py     # editable submission
+python3 build_report.py   # pdf
 ```
-
-Any common raster format works, jpg or png. Widths are set per exhibit in
-`report_content.py`; aspect ratio is preserved automatically.
