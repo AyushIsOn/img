@@ -90,8 +90,54 @@ struct RequirementsView: View {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
+            .disabled(isWorking)
 
-            if case .ready(let design) = store.state {
+            designState
+        }
+        .padding(16)
+        .background(RoundedRectangle(cornerRadius: 14).fill(Color.white))
+    }
+
+    private var isWorking: Bool {
+        if case .working = store.state { return true }
+        return false
+    }
+
+    /// The outcome of pressing Design has to appear on this screen. Only the
+    /// ready case used to render here, so a solver that was unreachable left
+    /// the button looking inert and the reason was visible only after
+    /// navigating back to the home screen.
+    @ViewBuilder private var designState: some View {
+        switch store.state {
+        case .idle:
+            EmptyView()
+
+        case .working(let message):
+            HStack(spacing: 10) {
+                ProgressView()
+                Text(message).font(.caption).foregroundColor(Theme.muted)
+            }
+
+        case .failed(let message):
+            VStack(alignment: .leading, spacing: 5) {
+                Label("Could not design this", systemImage:
+                        "exclamationmark.triangle")
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(Theme.warn)
+                Text(message)
+                    .font(.caption2).foregroundColor(Theme.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(10)
+            .background(RoundedRectangle(cornerRadius: 8)
+                .fill(Theme.warn.opacity(0.08)))
+
+        case .ready(let design):
+            VStack(alignment: .leading, spacing: 8) {
+                Text("\(design.points.count) points  \u{00B7}  "
+                     + "\(design.circuits.count) circuits  \u{00B7}  "
+                     + String(format: "%.0f m conduit", design.summary.conduitM))
+                    .font(.caption).foregroundColor(Theme.muted)
                 NavigationLink {
                     DesignTabsView(design: design)
                 } label: {
@@ -102,8 +148,6 @@ struct RequirementsView: View {
                 .controlSize(.large)
             }
         }
-        .padding(16)
-        .background(RoundedRectangle(cornerRadius: 14).fill(Color.white))
     }
 
     private var collected: some View {
