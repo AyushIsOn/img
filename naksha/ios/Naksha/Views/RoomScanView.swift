@@ -205,28 +205,28 @@ struct RoomScanView: View {
                 .buttonStyle(.vguard)
 
                 if !store.scannedRooms.isEmpty {
+                    // Three fixed questions per room, each carrying a
+                    // recommendation worked out from the measured area. The
+                    // interview covered the house; this covers each room.
+                    NavigationLink {
+                        RoomBriefView(rooms: store.scannedRooms)
+                    } label: {
+                        Label("Next, what goes in each room",
+                              systemImage: "arrow.right")
+                    }
+                    .buttonStyle(.vguard)
+
                     if store.profile != nil {
-                        // The interview already established what goes where,
-                        // so the room-by-room questionnaire is skipped.
                         Button {
                             Task { await store.requestDesign() }
                         } label: {
-                            Label("Design the installation",
+                            Label("Or design it straight away",
                                   systemImage: "wand.and.stars")
                         }
-                        .buttonStyle(.vguard)
+                        .buttonStyle(.vguardGlass)
                         .disabled(designing)
 
                         designState
-                    } else {
-                        NavigationLink {
-                            RequirementsView(rooms: store.scannedRooms)
-                        } label: {
-                            Label("Next, what goes in each room",
-                                  systemImage: "arrow.right")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.vguardGlass)
                     }
                 }
             }
