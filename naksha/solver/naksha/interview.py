@@ -126,20 +126,74 @@ PREFERRED_ROOMS = {
 
 
 # ------------------------------------------------------------ model access
+#
+# Everything except Anthropic speaks the OpenAI chat-completions shape, so one
+# code path covers Groq, Google, OpenRouter and OpenAI. Whichever key is present
+# is used, in this order. Free tiers first, because that is what a prototype
+# should run on.
+#
+#   GROQ_API_KEY        fastest free tier, no card required
+#   GEMINI_API_KEY      or GOOGLE_API_KEY, free tier
+#   OPENROUTER_API_KEY  free models, routed
+#   OPENAI_API_KEY      paid
+#   ANTHROPIC_API_KEY   paid, native API
+#
+# Any of it can be overridden:
+#   NAKSHA_MODEL     model id, if a default has been retired
+#   NAKSHA_BASE_URL  full chat-completions URL for any other compatible host
+#   NAKSHA_API_KEY   key to go with NAKSHA_BASE_URL
 
-def _provider() -> Optional[Tuple[str, str]]:
-    """Whichever key is present. Anthropic first, then OpenAI."""
+GEMINI_URL = ("https://generativelanguage.googleapis.com"
+              "/v1beta/openai/chat/completions")
+
+PROVIDERS = [
+    # env var,            label,        chat completions URL,                            default model
+    ("GROQ_API_KEY",       "groq",       "https://api.groq.com/openai/v1/chat/completions",
+     # The Llama ids most examples still use were retired in June 2026; this is
+     # where Groq now points new traffic.
+     "openai/gpt-oss-120b"),
+    ("GEMINI_API_KEY",     "gemini",     GEMINI_URL, "gemini-2.5-flash"),
+    ("GOOGLE_API_KEY",     "gemini",     GEMINI_URL, "gemini-2.5-flash"),
+    ("OPENROUTER_API_KEY", "openrouter", "https://openrouter.ai/api/v1/chat/completions",
+     # A router rather than a fixed id, because OpenRouter's free list churns
+     # constantly and it filters for models that support structured output.
+     "openrouter/free"),
+    ("OPENAI_API_KEY",     "openai",     "https://api.openai.com/v1/chat/completions",
+     "gpt-4o"),
+]
+
+
+def _provider() -> Optional[Dict]:
+    """The active provider, or None if no key is configured."""
+    override = os.environ.get("NAKSHA_BASE_URL")
+    if override:
+        key = os.environ.get("NAKSHA_API_KEY") or ""
+        return {"label": "custom", "url": override, "key": key,
+                "model": os.environ.get("NAKSHA_MODEL", "")}
+
+    for env, label, url, model in PROVIDERS:
+        key = os.environ.get(env)
+        if key:
+            return {"label": label, "url": url, "key": key,
+                    "model": os.environ.get("NAKSHA_MODEL", model)}
+
     key = os.environ.get("ANTHROPIC_API_KEY")
     if key:
-        return ("anthropic", key)
-    key = os.environ.get("OPENAI_API_KEY")
-    if key:
-        return ("openai", key)
+        return {"label": "anthropic",
+                "url": "https://api.anthropic.com/v1/messages",
+                "key": key,
+                "model": os.environ.get("NAKSHA_MODEL",
+                                        "claude-sonnet-4-5-20250929")}
     return None
 
 
 def available() -> bool:
     return _provider() is not None
+
+
+def provider_name() -> str:
+    p = _provider()
+    return f"{p['label']}:{p['model']}" if p else "none"
 
 
 def _post(url: str, payload: Dict, headers: Dict) -> Dict:
@@ -151,33 +205,45 @@ def _post(url: str, payload: Dict, headers: Dict) -> Dict:
 
 def _complete(transcript: List[Dict]) -> str:
     """One completion. Raises on any transport or auth problem."""
-    provider = _provider()
-    if provider is None:
+    p = _provider()
+    if p is None:
         raise RuntimeError("no model key configured")
-    kind, key = provider
 
-    if kind == "anthropic":
-        data = _post(
-            "https://api.anthropic.com/v1/messages",
-            {"model": os.environ.get("NAKSHA_MODEL",
-                                     "claude-sonnet-4-5-20250929"),
-             "max_tokens": 1200,
-             "system": SYSTEM,
-             "messages": transcript},
-            {"content-type": "application/json",
-             "x-api-key": key,
-             "anthropic-version": "2023-06-01"})
+    if p["label"] == "anthropic":
+        data = _post(p["url"],
+                     {"model": p["model"], "max_tokens": 1200,
+                      "system": SYSTEM, "messages": transcript},
+                     {"content-type": "application/json",
+                      "x-api-key": p["key"],
+                      "anthropic-version": "2023-06-01"})
         return "".join(b.get("text", "") for b in data.get("content", []))
 
-    data = _post(
-        "https://api.openai.com/v1/chat/completions",
-        {"model": os.environ.get("NAKSHA_MODEL", "gpt-4o"),
-         "max_tokens": 1200,
-         "response_format": {"type": "json_object"},
-         "messages": [{"role": "system", "content": SYSTEM}] + transcript},
-        {"content-type": "application/json",
-         "authorization": f"Bearer {key}"})
-    return data["choices"][0]["message"]["content"]
+    payload = {
+        "model": p["model"],
+        "max_tokens": 1200,
+        "messages": [{"role": "system", "content": SYSTEM}] + transcript,
+    }
+    headers = {"content-type": "application/json",
+               "authorization": f"Bearer {p['key']}"}
+    if p["label"] == "openrouter":
+        headers["HTTP-Referer"] = "https://github.com/AyushIsOn/img"
+        headers["X-Title"] = "NAKSHA"
+
+    # JSON mode where it is supported. Not every free model accepts the
+    # parameter, and a rejected request is indistinguishable from a bad key
+    # unless we retry without it, so that is exactly what happens.
+    try:
+        data = _post(p["url"],
+                     dict(payload, response_format={"type": "json_object"}),
+                     headers)
+    except urllib.error.HTTPError as exc:
+        if exc.code not in (400, 404, 415, 422):
+            raise
+        data = _post(p["url"], payload, headers)
+
+    choice = data["choices"][0]["message"]
+    # Reasoning models put the answer in content and their working elsewhere.
+    return choice.get("content") or choice.get("reasoning_content") or ""
 
 
 def _extract_json(text: str) -> Dict:
@@ -218,7 +284,8 @@ def next_turn(answers: List[Dict], profile: Optional[Dict] = None) -> Dict:
                 reply["question"] = None
             return reply
         except Exception as exc:               # noqa: BLE001
-            print(f"  interview: model unavailable ({exc}), using the script")
+            print(f"  interview: {provider_name()} unavailable ({exc}), "
+                  f"falling back to the script")
 
     return _scripted(answers, profile or {})
 

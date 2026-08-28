@@ -142,6 +142,49 @@ python3 -m pip install -r requirements.txt
 python3 serve.py
 ```
 
+#### Turning on the AI interview
+
+The intake questions can be written by a language model. It runs here, on this
+machine, so no key is ever shipped in the app or held on the phone. A free tier
+is plenty for a demo.
+
+| Provider | Key | Cost | Notes |
+|---|---|---|---|
+| **Groq** | `GROQ_API_KEY` | free, no card | Fastest. Recommended |
+| **Google** | `GEMINI_API_KEY` | free tier | Also accepts `GOOGLE_API_KEY` |
+| **OpenRouter** | `OPENROUTER_API_KEY` | free models | Routed, survives model delistings |
+| OpenAI | `OPENAI_API_KEY` | paid | |
+| Anthropic | `ANTHROPIC_API_KEY` | paid | |
+
+Export one and check it before you rely on it:
+
+```bash
+export GROQ_API_KEY=gsk_...
+python3 serve.py --check-llm
+```
+
+That makes one real request and prints the first question the model wrote. If it
+fails it says why rather than quietly carrying on.
+
+If the default model id has been retired, override it. Groq's older Llama ids
+were withdrawn in June 2026, which is the kind of thing that happens:
+
+```bash
+export NAKSHA_MODEL=openai/gpt-oss-20b
+```
+
+Any other OpenAI-compatible host works too:
+
+```bash
+export NAKSHA_BASE_URL=https://example.com/v1/chat/completions
+export NAKSHA_API_KEY=...
+```
+
+**With no key the app still works.** The server answers from a scripted set of
+questions and the flow is identical, so a demo cannot be lost to a missing key.
+The app labels which is running, "AI interview" or "Standard questions", so
+nothing is overclaimed.
+
 If pip refuses with `externally-managed-environment`, which Homebrew Python
 does, use a virtual environment:
 

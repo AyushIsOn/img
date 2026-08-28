@@ -32,7 +32,8 @@ warnings.filterwarnings("ignore")
 try:
     from naksha.design import bill_of_quantities, design_floor, maximum_demand, validate
     from naksha.ingest import design_from_request
-    from naksha.interview import available as interview_available, next_turn
+    from naksha.interview import (available as interview_available,
+                                  next_turn, provider_name)
     from naksha.plans import CATALOGUE
 except ModuleNotFoundError as exc:
     # A missing dependency is the single most likely first run problem, and a
@@ -134,7 +135,8 @@ class Handler(BaseHTTPRequestHandler):
                              "addresses": local_addresses(),
                              "plans": sorted(CATALOGUE),
                              "interview": "llm" if interview_available()
-                                          else "rules"})
+                                          else "rules",
+                             "model": provider_name()})
             return
         if self.path.startswith("/sample/"):
             key = self.path.rsplit("/", 1)[-1]
@@ -206,11 +208,54 @@ class Handler(BaseHTTPRequestHandler):
         self._send(200, design_payload(design))
 
 
+def check_llm() -> int:
+    """One real round trip, so a bad key is found now and not mid demo."""
+    print()
+    print("Interview model:", provider_name())
+    if not interview_available():
+        print()
+        print("  No key found. The interview will use the scripted questions,")
+        print("  which is a working demo but is not model driven. To enable it,")
+        print("  export one of these and run again:")
+        print()
+        print("    export GROQ_API_KEY=...          free, fastest")
+        print("    export GEMINI_API_KEY=...        free")
+        print("    export OPENROUTER_API_KEY=...    free models")
+        print("    export OPENAI_API_KEY=...")
+        print("    export ANTHROPIC_API_KEY=...")
+        print()
+        return 1
+
+    print("  asking for the first question ...")
+    turn = next_turn([], None)
+    if turn.get("source") != "llm":
+        print()
+        print("  FAILED. The key was found but the call did not succeed, so")
+        print("  the scripted questions answered instead. The reason is printed")
+        print("  above. If the model id was rejected, set NAKSHA_MODEL to a")
+        print("  current one from your provider's model list.")
+        print()
+        return 1
+
+    question = turn.get("question") or {}
+    print()
+    print("  OK, the model is answering.")
+    print(f"    first question : {question.get('prompt')}")
+    print(f"    control        : {question.get('kind')}")
+    print()
+    return 0
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="NAKSHA solver server")
     ap.add_argument("--port", type=int, default=8000)
     ap.add_argument("--host", default="0.0.0.0")
+    ap.add_argument("--check-llm", action="store_true",
+                    help="test the interview model and exit")
     args = ap.parse_args()
+
+    if args.check_llm:
+        raise SystemExit(check_llm())
 
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     addrs = local_addresses()
@@ -226,6 +271,9 @@ def main() -> None:
     print()
     print("  Check from the Mac:  curl http://localhost:%d/health" % args.port)
     print("  The phone must be on the same Wi-Fi network.")
+    print(f"  Interview model:     {provider_name()}"
+          + ("" if interview_available()
+             else "   (scripted questions, no key set)"))
     print("-" * 58)
     print()
     try:
