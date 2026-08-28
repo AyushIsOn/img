@@ -33,7 +33,7 @@ try:
     from naksha.design import bill_of_quantities, design_floor, maximum_demand, validate
     from naksha.ingest import design_from_request
     from naksha.interview import (available as interview_available,
-                                  next_turn, provider_name)
+                                  next_turn, provider_name, save_key)
     from naksha.plans import CATALOGUE
 except ModuleNotFoundError as exc:
     # A missing dependency is the single most likely first run problem, and a
@@ -252,7 +252,15 @@ def main() -> None:
     ap.add_argument("--host", default="0.0.0.0")
     ap.add_argument("--check-llm", action="store_true",
                     help="test the interview model and exit")
+    ap.add_argument("--set-key", metavar="KEY",
+                    help="remember an API key for the interview, then exit")
     args = ap.parse_args()
+
+    if args.set_key:
+        path = save_key(args.set_key)
+        print(f"\n  Key saved to {path}")
+        print("  It is git ignored. Now run:  python3 serve.py --check-llm\n")
+        raise SystemExit(0)
 
     if args.check_llm:
         raise SystemExit(check_llm())

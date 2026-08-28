@@ -18,76 +18,69 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 import urllib.error
 import urllib.request
 from typing import Dict, List, Optional, Tuple
 
 TIMEOUT = 45
 
-# Reasoning models bill their thinking against this, so it is not a cap on the
-# question length. Too small and `content` comes back empty.
-MAX_OUTPUT_TOKENS = 4096
+# Reasoning models bill their thinking against this, so it is not purely a cap
+# on the reply. It is kept tight because hosts reserve it against a
+# tokens-per-minute allowance: Groq's free tier is 8000 TPM, so a 4096
+# reservation allowed barely one question per minute. One turn needs roughly 250
+# tokens of json plus a little reasoning at low effort.
+MAX_OUTPUT_TOKENS = 900
+
+# A hard stop. Left to itself the model will keep finding one more thing to ask
+# and never set done, and an interview that does not end is worse than one that
+# ends slightly early. Everything essential is covered in seven.
+MAX_QUESTIONS = 8
 
 # --------------------------------------------------------------- the brief
 
 SYSTEM = """\
-You are the intake interviewer for NAKSHA, an app that designs the electrical \
-installation for a home in India before the walls are closed.
+You are the intake interviewer for NAKSHA, which designs the electrical \
+installation for an Indian home before the walls are closed.
 
-Your job is to build a picture of what this household will plug in and how they \
-live. A separate rule engine sizes cables and groups circuits against Indian \
-standards. You must never suggest a cable size, an MCB rating, a circuit count \
-or any wiring decision.
+Build a picture of what this household will plug in and how they live. A \
+separate rule engine sizes cables and groups circuits against Indian standards. \
+Never suggest a cable size, an MCB rating, a circuit count or any wiring \
+decision.
 
-Ask ONE question at a time. Adapt to what you already know: never ask something \
-already answered, and follow up when an answer implies more. A family of six \
-implies different socket pressure from a couple. Three air conditioners against \
-a 3 kW sanctioned load is worth a gentle flag, phrased as a question about \
-their plan rather than as advice.
+Ask ONE question at a time. The input names every id you have already asked and \
+how many questions remain; never repeat one, and never ask again about something \
+already present in the profile. Follow up when an answer implies more: six occupants means different socket pressure from two, and \
+three air conditioners on a 3 kW sanction is worth asking about. Keep prompts \
+under 90 characters, warm and specific. No jargon, no greeting after the first \
+question, never mention being an AI.
 
-Keep prompts under 90 characters, plain, warm and specific. No jargon, no \
-greetings after the first question, never mention that you are an AI.
+Cover in roughly this order, then stop: name; sanctioned load in kW; bedrooms \
+and occupants; air conditioners and which rooms; bathrooms needing water \
+heating; kitchen appliances; anything unusual such as a home office, EV \
+charging, a pump or inverter backup.
 
-Cover, roughly in this order, and stop once you have enough:
-1. Their name.
-2. Sanctioned load from the electricity bill, in kW.
-3. How many bedrooms, and how many people will live there.
-4. Air conditioners: how many, and which rooms.
-5. Water heating: how many bathrooms need it.
-6. Kitchen: chimney, induction, refrigerator, purifier.
-7. Anything unusual: home office, EV charging, water pump, inverter backup.
+Reply with one json object, no prose, no code fence:
 
-Reply with JSON only, no prose and no code fence:
+{"question":{"id":"snake_case","prompt":"...","helper":"one line or null",
+"kind":"text|number|count|choice|multi","unit":"kW or null","min":null,
+"max":null,"options":[]},
+"profile":{"name":null,"sanctioned_load_w":null,"bedrooms":null,
+"occupants":null,"appliances":[{"kind":"ac|geyser|chimney|induction|
+refrigerator|ro|pump|ev|washing_machine|tv","count":1,"rooms":[]}],
+"notes":["observations worth carrying into the design"],
+"summary":"two sentences about this household"}},
+"done":false}
 
-{
-  "question": {
-    "id": "short_snake_case_key",
-    "prompt": "the question",
-    "helper": "one short clarifying line, or null",
-    "kind": "text" | "number" | "count" | "choice" | "multi",
-    "unit": "kW" | null,
-    "min": number or null,
-    "max": number or null,
-    "options": ["..."]
-  },
-  "profile": {
-    "name": string or null,
-    "sanctioned_load_w": number or null,
-    "bedrooms": number or null,
-    "occupants": number or null,
-    "appliances": [{"kind": "ac|geyser|chimney|induction|refrigerator|ro|pump|ev|washing_machine|tv", "count": number, "rooms": ["..."]}],
-    "notes": ["short observations worth carrying into the design"],
-    "summary": "two sentences describing this household"
-  },
-  "done": false
-}
+profile must always be the COMPLETE picture so far, not only the latest answer, \
+and every appliance any answer implied must appear in it with a count above \
+zero. Losing one, such as a water heater the user asked for, is the worst \
+failure here. \
+Set done true and question null once you can plan the installation, usually \
+after seven to nine questions.
 
-"appliances" and "profile" must always be the COMPLETE picture so far, not just \
-the newest answer. Set "done" true and "question" null when you have enough to \
-plan the installation, which is usually after seven to nine questions.
-
-Use "count" for small integers, "choice" when there is a short fixed list, \
-"multi" when several options can apply, "number" for a measured quantity.
+Use count for small integers, choice for one of a short list, multi when several \
+apply, number for a measured quantity.
 """
 
 # Appliance wattages. The model states intent; the rule engine states load, so
@@ -150,6 +143,33 @@ PREFERRED_ROOMS = {
 GEMINI_URL = ("https://generativelanguage.googleapis.com"
               "/v1beta/openai/chat/completions")
 
+# Where the key is remembered between runs, so nothing has to be exported every
+# time. Written by `serve.py --set-key`, and git ignored: GitHub's push
+# protection rejects any commit containing a provider key, so committing one is
+# not an option even in a private repository.
+KEY_FILE = os.path.join(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__))), ".naksha-key")
+
+
+def _saved_key() -> Optional[str]:
+    try:
+        with open(KEY_FILE) as handle:
+            for line in handle:
+                line = line.strip()
+                if line and not line.startswith("#"):
+                    return line
+    except OSError:
+        pass
+    return None
+
+
+def save_key(key: str) -> str:
+    """Remember a key for future runs. Returns the path written."""
+    with open(KEY_FILE, "w") as handle:
+        handle.write(key.strip() + "\n")
+    os.chmod(KEY_FILE, 0o600)
+    return KEY_FILE
+
 PROVIDERS = [
     # env var,            label,        chat completions URL,                            default model
     ("GROQ_API_KEY",       "groq",       "https://api.groq.com/openai/v1/chat/completions",
@@ -188,6 +208,26 @@ def _provider() -> Optional[Dict]:
                 "key": key,
                 "model": os.environ.get("NAKSHA_MODEL",
                                         "claude-sonnet-4-5-20250929")}
+
+    # Nothing exported, so fall back to a key saved by --set-key. Prefixes
+    # identify the provider, so one file covers all of them.
+    saved = _saved_key()
+    if saved:
+        label, url, model = "groq", PROVIDERS[0][2], PROVIDERS[0][3]
+        if saved.startswith("sk-or-"):
+            label, url, model = "openrouter", PROVIDERS[3][2], PROVIDERS[3][3]
+        elif saved.startswith("AIza"):
+            label, url, model = "gemini", GEMINI_URL, PROVIDERS[1][3]
+        elif saved.startswith("sk-ant-"):
+            return {"label": "anthropic",
+                    "url": "https://api.anthropic.com/v1/messages",
+                    "key": saved,
+                    "model": os.environ.get("NAKSHA_MODEL",
+                                            "claude-sonnet-4-5-20250929")}
+        elif saved.startswith("sk-"):
+            label, url, model = "openai", PROVIDERS[4][2], PROVIDERS[4][3]
+        return {"label": label, "url": url, "key": saved,
+                "model": os.environ.get("NAKSHA_MODEL", model)}
     return None
 
 
@@ -200,9 +240,17 @@ def provider_name() -> str:
     return f"{p['label']}:{p['model']}" if p else "none"
 
 
+# Several of these hosts sit behind Cloudflare, which rejects the default
+# Python-urllib agent with a 403 and a bare "error code: 1010". That is
+# indistinguishable from a rejected key, so it is set explicitly.
+USER_AGENT = "NAKSHA/0.1 (+https://github.com/AyushIsOn/img)"
+
+
 def _post(url: str, payload: Dict, headers: Dict) -> Dict:
     body = json.dumps(payload).encode()
-    request = urllib.request.Request(url, data=body, headers=headers)
+    request = urllib.request.Request(
+        url, data=body, headers=dict(headers, **{"user-agent": USER_AGENT,
+                                                "accept": "application/json"}))
     with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
         return json.loads(response.read().decode())
 
@@ -259,17 +307,32 @@ def _complete(transcript: List[Dict]) -> str:
                               **extras),
                          headers)
         except urllib.error.HTTPError as exc:
-            # 400 class means the request shape was wrong, so try a plainer
-            # one. Anything else is auth, rate limiting or the network, and
-            # retrying with fewer parameters would not help.
-            if exc.code not in (400, 404, 415, 422):
+            # 429 means the allowance is spent, which a plainer request would
+            # not fix. Wait for the window the host names and try once more.
+            if exc.code == 429:
+                wait = exc.headers.get("retry-after")
+                pause = min(float(wait) if wait else 8.0, 20.0)
+                time.sleep(pause)
+                try:
+                    data = _post(p["url"],
+                                 dict({"model": p["model"],
+                                       "messages": messages}, **extras),
+                                 headers)
+                except urllib.error.HTTPError as again:
+                    last = again
+                    continue
+            elif exc.code not in (400, 404, 415, 422):
+                # auth or network; a different parameter set will not help
                 raise
-            last = exc
-            continue
+            else:
+                last = exc
+                continue
 
         choice = (data.get("choices") or [{}])[0].get("message", {})
-        text = (choice.get("content")
-                or choice.get("reasoning_content") or "").strip()
+        # Only `content` is the answer. `reasoning` and `reasoning_content`
+        # hold the model's working, and parsing that as the reply would produce
+        # confident nonsense rather than an honest failure.
+        text = (choice.get("content") or "").strip()
         if text:
             return text
         # Reasoning consumed the whole budget. A plainer request usually
@@ -301,21 +364,41 @@ def next_turn(answers: List[Dict], profile: Optional[Dict] = None) -> Dict:
     app renders, always including which source produced it so the interface can
     be honest about whether the model is running.
     """
+    # Enforced here rather than asked for in the prompt, because the model does
+    # not reliably stop on its own.
+    if len(answers) >= MAX_QUESTIONS:
+        return {"question": None, "profile": profile or {}, "done": True,
+                "source": "llm" if available() else "rules"}
+
     if available():
         try:
+            asked = [a.get("id") for a in answers if a.get("id")]
             transcript = [{
                 "role": "user",
                 "content": json.dumps({
                     "answers_so_far": answers,
                     "profile_so_far": profile or {},
+                    "already_asked_ids": asked,
+                    "questions_remaining": MAX_QUESTIONS - len(answers),
                 }),
             }]
             reply = _extract_json(_complete(transcript))
             reply["source"] = "llm"
             reply.setdefault("done", False)
             reply.setdefault("profile", profile or {})
-            if reply.get("done"):
+
+            question = reply.get("question") or {}
+            # The model does repeat itself. A duplicate is treated as it having
+            # run out of things to ask, which is the honest reading.
+            seen_ids = {a.get("id") for a in answers}
+            seen_prompts = {(a.get("prompt") or "").strip().lower()
+                            for a in answers}
+            repeated = (question.get("id") in seen_ids
+                        or (question.get("prompt") or "").strip().lower()
+                        in seen_prompts)
+            if reply.get("done") or not question or repeated:
                 reply["question"] = None
+                reply["done"] = True
             return reply
         except Exception as exc:               # noqa: BLE001
             print(f"  interview: {provider_name()} unavailable ({exc}), "

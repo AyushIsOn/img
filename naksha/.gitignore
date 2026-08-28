@@ -5,3 +5,6 @@ solver/out/
 build/
 *.xcuserstate
 xcuserdata/
+
+# API key for the interview model, written by: serve.py --set-key
+.naksha-key
