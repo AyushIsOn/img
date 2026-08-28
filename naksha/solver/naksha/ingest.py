@@ -45,41 +45,42 @@ def _rect(x0: float, y0: float, w: float, h: float) -> List[Point]:
             (round(x0 + w, 3), round(y0 + h, 3)), (round(x0, 3), round(y0 + h, 3))]
 
 
-def _dimensions(entry: Dict, label: str = "a room") -> Tuple[float, float]:
-    """Recover a sensible width and depth for one captured room.
+def _outline(entry: Dict, label: str = "a room"
+             ) -> Tuple[List[Point], float, float]:
+    """Recover one room's outline, moved to its own origin, plus its extent.
 
-    The traced area is trusted over the bounding box, because a hand traced
-    outline is more reliable in total size than in squareness. The bounding box
-    only supplies the aspect ratio.
+    The measured polygon is preferred and preserved. Earlier versions reduced
+    every room to a width and a depth, which meant a scanned outline was
+    rebuilt as a rectangle and all of the shape was thrown away.
 
     A room whose size cannot be established raises instead of falling back to
     an arbitrary default. Floor area drives the lighting count through the
-    lumen method and the socket rules, so inventing a size would produce a
-    schedule that looks authoritative and is wrong. Better to say which room
-    failed and let it be rescanned.
+    lumen method and feeds the socket rules, so inventing a size would produce
+    a schedule that looks authoritative and is wrong.
     """
     polygon = entry.get("polygon") or []
     if len(polygon) >= 3:
-        w, h = _bbox_of(polygon)
-        area = polygon_area([(p[0], p[1]) for p in polygon])
-        if w > 0 and h > 0 and area > 0:
-            aspect = w / h
-            depth = math.sqrt(area / aspect)
-            return round(area / depth, 2), round(depth, 2)
-        if w > 0 and h > 0:
-            return round(w, 2), round(h, 2)
+        pts = [(float(p[0]), float(p[1])) for p in polygon]
+        if abs(polygon_area(pts)) > 0.5:
+            x0 = min(p[0] for p in pts)
+            y0 = min(p[1] for p in pts)
+            moved = [(round(p[0] - x0, 3), round(p[1] - y0, 3)) for p in pts]
+            w, h = _bbox_of(moved)
+            if w > 0 and h > 0:
+                return moved, round(w, 2), round(h, 2)
 
     # No usable outline. Accept an explicit size if one was supplied, which is
     # how a sketched or manually entered room arrives.
     width = entry.get("width") or entry.get("widthM")
     depth = entry.get("depth") or entry.get("depthM") or entry.get("length")
     if width and depth and float(width) > 0 and float(depth) > 0:
-        return round(float(width), 2), round(float(depth), 2)
+        w, h = round(float(width), 2), round(float(depth), 2)
+        return _rect(0, 0, w, h), w, h
 
     area = entry.get("area") or entry.get("areaM2") or entry.get("floor_area")
     if area and float(area) > 0:
-        side = math.sqrt(float(area))     # square is the least wrong guess
-        return round(side, 2), round(side, 2)
+        side = round(math.sqrt(float(area)), 2)   # square is the least wrong
+        return _rect(0, 0, side, side), side, side
 
     raise ValueError(
         f"cannot establish the size of {label}: the scan produced no usable "
@@ -87,26 +88,31 @@ def _dimensions(entry: Dict, label: str = "a room") -> Tuple[float, float]:
 
 
 # ------------------------------------------------------------- shelf packing
-def _pack(rooms: List[Tuple[str, str, float, float]]
+def _pack(rooms: List[Tuple[str, str, List[Point], float, float]]
           ) -> List[Tuple[str, str, List[Point]]]:
-    """Lay rooms out in rows so they tile exactly and stay compact.
+    """Lay rooms out in rows so they tile compactly, keeping each room's shape.
 
-    A single long row would inflate every conduit run, so rows are closed once
-    they reach roughly the width of a square floor of the same total area.
+    Only the arrangement is invented here. The outline itself is the measured
+    one and is carried through untouched apart from a translation, so a room
+    that was scanned with a bay or an angled corner still has it.
+
+    Rows are closed once they reach roughly the width of a square floor of the
+    same total area, because a single long row inflates every conduit run.
     """
-    total_area = sum(w * h for _, _, w, h in rooms)
-    target_width = max(math.sqrt(total_area) * 1.25, max(
-        (w for _, _, w, _ in rooms), default=3.0))
+    total_area = sum(w * h for _, _, _, w, h in rooms)
+    target_width = max(math.sqrt(total_area) * 1.25,
+                       max((w for _, _, _, w, _ in rooms), default=3.0))
 
     placed: List[Tuple[str, str, List[Point]]] = []
     x = y = 0.0
     row_depth = 0.0
-    for name, kind, w, h in rooms:
+    for name, kind, poly, w, h in rooms:
         if x > 0 and x + w > target_width:
             y += row_depth          # close the row
             x = 0.0
             row_depth = 0.0
-        placed.append((name, kind, _rect(x, y, w, h)))
+        moved = [(round(px + x, 3), round(py + y, 3)) for px, py in poly]
+        placed.append((name, kind, moved))
         x += w
         row_depth = max(row_depth, h)
     return placed
@@ -206,12 +212,12 @@ def floorplan_from_scans(scanned: List[Dict],
         used[raw] = used.get(raw, 0) + 1
         label = raw if used[raw] == 1 else f"{raw} {used[raw]}"
         kind = (entry.get("kind") or "bedroom").lower()
-        w, h = _dimensions(entry, label)
-        prepared.append((label, kind, max(w, 1.0), max(h, 1.0)))
+        poly, w, h = _outline(entry, label)
+        prepared.append((label, kind, poly, max(w, 1.0), max(h, 1.0)))
 
     # living space first, so the front door lands somewhere sensible
     order = {"living": 0, "dining": 1, "passage": 2, "kitchen": 3}
-    prepared.sort(key=lambda r: (order.get(r[1], 5), -r[2] * r[3]))
+    prepared.sort(key=lambda r: (order.get(r[1], 5), -r[3] * r[4]))
 
     rooms = [Room(n, k, poly) for n, k, poly in _pack(prepared)]
     return FloorPlan(name, rooms, _connect(rooms), ceiling_height)
