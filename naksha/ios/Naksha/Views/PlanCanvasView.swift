@@ -1,5 +1,16 @@
 import SwiftUI
 
+/// A unit direction in the drawing.
+///
+/// Named to avoid `SwiftUI.Axis`, which is an enum of horizontal and vertical
+/// with no components. When this declaration was briefly lost, every `dx` and
+/// `dy` silently resolved against that instead and produced thirty errors that
+/// all pointed away from the real cause.
+private struct PlanAxis {
+    let dx: CGFloat
+    let dy: CGFloat
+}
+
 /// The drawing, rendered on device. Same model, same symbols and same circuit
 /// colours as the PNG sheets the solver produces, so what the owner sees in the
 /// app is what the electrician gets on paper.
@@ -177,7 +188,7 @@ struct PlanCanvasView: View {
     /// test is done in plan space, where there is no flipped axis to reason
     /// about, and only the result is converted.
     private func wallAxes(at plan: CGPoint)
-        -> (along: Axis, normal: Axis)? {
+        -> (along: PlanAxis, normal: PlanAxis)? {
         var best: (dist: CGFloat, a: CGPoint, b: CGPoint)?
         for room in design.plan.rooms {
             let pts = room.cgPolygon
@@ -204,7 +215,8 @@ struct PlanCanvasView: View {
 
         // Screen y runs the other way to plan y, so both are negated on the y
         // component and nowhere else.
-        return (Axis(dx: dx / len, dy: -dy / len), Axis(dx: nx, dy: -ny))
+        return (PlanAxis(dx: dx / len, dy: -dy / len),
+                PlanAxis(dx: nx, dy: -ny))
     }
 
     private func roomCentroid() -> CGPoint {
