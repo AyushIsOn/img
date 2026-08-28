@@ -55,7 +55,11 @@ three air conditioners on a 3 kW sanction is worth asking about. Keep prompts \
 under 90 characters, warm and specific. No jargon, no greeting after the first \
 question, never mention being an AI.
 
-Cover in roughly this order, then stop: name; sanctioned load in kW; bedrooms \
+The name has already been asked, so never ask it again. Address the person \
+directly as "you", never in the third person: "How many bedrooms do you have", \
+not "How many bedrooms does the house have".
+
+Cover in roughly this order, then stop: sanctioned load in kW; bedrooms \
 and occupants; air conditioners and which rooms; bathrooms needing water \
 heating; kitchen appliances; anything unusual such as a home office, EV \
 charging, a pump or inverter backup.
@@ -378,6 +382,13 @@ def next_turn(answers: List[Dict], profile: Optional[Dict] = None) -> Dict:
         return {"question": None, "profile": profile or {}, "done": True,
                 "source": "llm" if available() else "rules"}
 
+    # The first question is fixed. It needs no model, and asking a model for it
+    # produced "What is the name of the homeowner?", which reads like a form.
+    if not answers:
+        return {"question": dict(SCRIPT[0]), "profile": profile or {},
+                "done": False,
+                "source": "llm" if available() else "rules"}
+
     if available():
         try:
             asked = [a.get("id") for a in answers if a.get("id")]
@@ -418,8 +429,8 @@ def next_turn(answers: List[Dict], profile: Optional[Dict] = None) -> Dict:
 # ------------------------------------------------------- scripted fallback
 
 SCRIPT = [
-    {"id": "name", "prompt": "What should we call you?",
-     "helper": "This goes on the drawing.", "kind": "text"},
+    {"id": "name", "prompt": "What's your name?",
+     "helper": "It goes on the drawing.", "kind": "text"},
     {"id": "sanctioned_load", "prompt": "What is your sanctioned load?",
      "helper": "On your electricity bill. Most homes start at 3 to 5 kW.",
      "kind": "number", "unit": "kW", "min": 1, "max": 20},
