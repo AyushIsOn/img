@@ -187,13 +187,38 @@ struct InterviewView: View {
 
     // MARK: Controls
 
+    /// What to actually render, which is not always what the model asked for.
+    ///
+    /// A model will happily send `choice` or `multi` with no options. That drew
+    /// no control at all and left Continue permanently disabled, with no way
+    /// forward and no way back: a dead end on a screen the user cannot leave.
+    /// Free text always accepts an answer, so it is the safe floor.
+    private func effectiveKind(
+        _ question: InterviewQuestion) -> InterviewQuestion.Kind {
+        switch question.kind {
+        case .choice, .multi:
+            return (question.options?.isEmpty ?? true) ? .text : question.kind
+        case .count, .number:
+            // A question wanting two things at once, "how many and which
+            // rooms", cannot be answered with a stepper. If the model supplied
+            // options for it, honour those instead.
+            return question.kind
+        case .text:
+            return .text
+        }
+    }
+
     @ViewBuilder
     private func control(for question: InterviewQuestion) -> some View {
-        switch question.kind {
+        switch effectiveKind(question) {
         case .text:
-            TextField("", text: $text, prompt: Text("Type your answer")
-                .foregroundColor(Theme.muted))
-                .textInputAutocapitalization(.words)
+            TextField("", text: $text,
+                      prompt: Text("Type your answer")
+                        .foregroundColor(Theme.muted),
+                      axis: .vertical)
+                .textInputAutocapitalization(.sentences)
+                .submitLabel(.done)
+                .lineLimit(1...3)
                 .font(.title3.weight(.semibold))
                 .foregroundStyle(Theme.ink)
                 .padding(.vertical, 14)
@@ -277,7 +302,7 @@ struct InterviewView: View {
     }
 
     private func isAnswerable(_ question: InterviewQuestion) -> Bool {
-        switch question.kind {
+        switch effectiveKind(question) {
         case .text: return !text.trimmingCharacters(in: .whitespaces).isEmpty
         case .choice, .multi: return !picked.isEmpty
         case .number, .count: return true
@@ -286,7 +311,7 @@ struct InterviewView: View {
 
     private func submit(_ question: InterviewQuestion) async {
         let value: AnswerValue
-        switch question.kind {
+        switch effectiveKind(question) {
         case .text:   value = .text(text.trimmingCharacters(in: .whitespaces))
         case .number: value = .text(String(format: "%g", number))
         case .count:  value = .text("\(count)")
