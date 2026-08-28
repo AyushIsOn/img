@@ -20,6 +20,8 @@ struct ARWiringView: View {
     @State private var placement = Placement()
     @State private var isPlaced = false
     @State private var visibleCircuit: String? = nil
+    /// Controls collapse to a single pill, so the overlay can be filmed clean.
+    @State private var showControls = true
 
     private var rooms: [Room] { design.plan.rooms }
 
@@ -38,12 +40,27 @@ struct ARWiringView: View {
                         roomPicker
                         banner("Now point at the floor and tap.")
                     }
-                } else {
+                } else if showControls {
                     controls
+                        .transition(.move(edge: .bottom)
+                            .combined(with: .opacity))
+                } else {
+                    Button { showControls = true } label: {
+                        Label("Controls", systemImage: "slider.horizontal.3")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Theme.ink)
+                            .padding(.vertical, 9)
+                            .padding(.horizontal, 14)
+                            .glassChip()
+                    }
+                    .buttonStyle(.plain)
+                    .transition(.opacity)
                 }
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 20)
+            .animation(.spring(response: 0.38, dampingFraction: 0.85),
+                       value: showControls)
         }
         .navigationTitle("AR overlay")
         .navigationBarTitleDisplayMode(.inline)
@@ -143,15 +160,26 @@ struct ARWiringView: View {
                     }
                 }
             }
-            Button {
-                isPlaced = false
-                placement.origin = nil
-            } label: {
-                Label("Reposition", systemImage: "arrow.counterclockwise")
-                    .font(.caption.weight(.semibold))
+            HStack(spacing: 10) {
+                Button {
+                    isPlaced = false
+                    placement.origin = nil
+                } label: {
+                    Label("Reposition", systemImage: "arrow.counterclockwise")
+                        .font(.caption.weight(.semibold))
+                }
+                .buttonStyle(.bordered)
+                .tint(.white)
+
+                // Everything is aligned by the time it is being filmed, so the
+                // panel gets out of the way.
+                Button { showControls = false } label: {
+                    Label("Hide", systemImage: "chevron.down")
+                        .font(.caption.weight(.semibold))
+                }
+                .buttonStyle(.bordered)
+                .tint(.white)
             }
-            .buttonStyle(.bordered)
-            .tint(.white)
         }
         .padding(14)
         .glassOverlay(24)
@@ -336,6 +364,18 @@ struct ARContainer: UIViewRepresentable {
                     marker.position = pos
                     anchor.addChild(marker)
 
+                    // A floating caption per fitting. Without these the
+                    // overlay is a set of coloured blocks; with them it reads
+                    // as a drawing standing in the room.
+                    let caption = point.watts > 0
+                        ? "\(point.label)  ·  \(Int(point.watts)) W"
+                        : point.label
+                    if let tag = Self.caption(caption, colour: colour) {
+                        tag.position = pos + SIMD3<Float>(0, 0.14, 0)
+                        tag.transform.rotation = spin
+                        anchor.addChild(tag)
+                    }
+
                     // drop from the ceiling to a wall device, so the run reads
                     // as a real chase rather than a floating line
                     if !point.kind.isCeilingMounted {
@@ -357,8 +397,17 @@ struct ARContainer: UIViewRepresentable {
                     mesh: .generateBox(size: [0.30, 0.40, 0.10],
                                        cornerRadius: 0.01),
                     materials: [Self.glow(Palette.accent)])
-                board.position = world(design.boardPoint, 1.5)
+                let boardPos = world(design.boardPoint, 1.5)
+                board.position = boardPos
                 anchor.addChild(board)
+
+                if let tag = Self.caption(
+                    "DB  ·  \(design.circuits.count) ways",
+                    colour: Palette.accent) {
+                    tag.position = boardPos + SIMD3<Float>(0, 0.30, 0)
+                    tag.transform.rotation = spin
+                    anchor.addChild(tag)
+                }
             }
 
             view.scene.addAnchor(anchor)
@@ -413,6 +462,29 @@ struct ARContainer: UIViewRepresentable {
                 mesh = .generateBox(size: [0.15, 0.15, 0.045], cornerRadius: 0.010)
             }
             return ModelEntity(mesh: mesh, materials: [Self.glow(colour)])
+        }
+
+        /// A caption floating beside a fitting.
+        ///
+        /// Text meshes are laid out from a baseline at the left, so the entity
+        /// is recentred on its own bounds. Without that every label sits
+        /// progressively further right the longer it is.
+        static func caption(_ text: String, colour: UIColor) -> ModelEntity? {
+            guard !text.isEmpty else { return nil }
+            let mesh = MeshResource.generateText(
+                text,
+                extrusionDepth: 0.0008,
+                font: .systemFont(ofSize: 0.052, weight: .semibold),
+                containerFrame: .zero,
+                alignmentMode: .center,
+                lineBreakMode: .byTruncatingTail)
+            let glyphs = ModelEntity(mesh: mesh, materials: [glow(colour)])
+            // The centring offset lives on the child, so the caller is free to
+            // position and rotate the holder without undoing it.
+            glyphs.position = -glyphs.visualBounds(relativeTo: nil).center
+            let holder = ModelEntity()
+            holder.addChild(glyphs)
+            return holder
         }
 
         /// Unlit, so the overlay reads at full strength regardless of the room.

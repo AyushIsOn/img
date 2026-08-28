@@ -670,8 +670,15 @@ def bill_of_quantities(d: Design) -> Dict:
 
 
 # ============================================================ orchestration
-def design_floor(plan: FloorPlan, reqs: Requirements) -> Design:
-    points = place_points(plan, reqs)
+def design_floor(plan: FloorPlan, reqs: Requirements,
+                 points: Optional[List[DevicePoint]] = None) -> Design:
+    """Design an installation.
+
+    `points` lets already-measured fittings be supplied instead of generated.
+    Everything after placement is unchanged, so a surveyed room still gets real
+    circuit grouping, board siting, Steiner routing, cable sizing and checks.
+    """
+    points = points if points is not None else place_points(plan, reqs)
     circuits = group_circuits(points, plan)
     g, _ = build_route_graph(plan)
     board = choose_board(plan, circuits, g, points)

@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import socket
 import sys
 import traceback
@@ -194,7 +195,18 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         try:
-            design = design_from_request(body)
+            if os.environ.get("NAKSHA_ASBUILT") and len(rooms) == 1:
+                # One room scanned and the survey is switched on, so the
+                # measured fittings and the existing MCB box are used instead of
+                # generated positions. Circuits, routing and sizing are
+                # unchanged.
+                from naksha import asbuilt
+                design = asbuilt.design(
+                    overrides=body.get("requirements") or {})
+                print(f"  as-built survey: {len(design.points)} measured "
+                      f"points, {len(design.circuits)} circuits")
+            else:
+                design = design_from_request(body)
         except Exception as exc:                     # noqa: BLE001
             # A malformed scan should return a readable reason, not a stack
             # trace on the phone, but the trace still belongs in the log.

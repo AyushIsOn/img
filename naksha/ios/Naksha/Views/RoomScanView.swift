@@ -216,18 +216,11 @@ struct RoomScanView: View {
                     }
                     .buttonStyle(.vguard)
 
-                    if store.profile != nil {
-                        Button {
-                            Task { await store.requestDesign() }
-                        } label: {
-                            Label("Or design it straight away",
-                                  systemImage: "wand.and.stars")
-                        }
-                        .buttonStyle(.vguardGlass)
-                        .disabled(designing)
-
-                        designState
-                    }
+                    // No shortcut past the questions. There used to be an
+                    // "or design it straight away" button here, directly under
+                    // the one that leads to the questions, and it was the one
+                    // that produced a visible result. Everybody skipped the
+                    // questions, which is a bug in the layout, not the user.
                 }
             }
             .padding(20)
