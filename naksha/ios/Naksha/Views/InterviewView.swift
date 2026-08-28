@@ -136,6 +136,12 @@ struct InterviewView: View {
         .padding(.horizontal, 18)
     }
 
+    /// Also the offline escape hatch.
+    ///
+    /// The interview needs the solver, so a network problem lands the user on
+    /// the very first screen with nowhere to go. The bundled sample is real
+    /// solver output, so every screen after this one still works from it and
+    /// there is always something to show.
     private func failure(_ message: String) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Label("Cannot reach the solver", systemImage:
@@ -146,8 +152,33 @@ struct InterviewView: View {
                 .font(.caption)
                 .foregroundStyle(Theme.muted)
                 .fixedSize(horizontal: false, vertical: true)
+
             Button("Try again") { Task { await store.advanceInterview() } }
                 .buttonStyle(.vguardGlass)
+
+            Divider().overlay(Brand.hairline)
+
+            if let design = store.design {
+                NavigationLink { DesignTabsView(design: design) } label: {
+                    Label("Open the sample drawings",
+                          systemImage: "doc.richtext")
+                }
+                .buttonStyle(.vguard)
+            } else {
+                Button {
+                    store.loadSample()
+                } label: {
+                    Label("Work offline from the sample",
+                          systemImage: "arrow.down.doc")
+                }
+                .buttonStyle(.vguardGlass)
+                Text("A finished 2 BHK from the design engine. Drawing, "
+                     + "circuits, AR and the material list all work from it "
+                     + "with no laptop on the network.")
+                    .font(.caption2)
+                    .foregroundStyle(Theme.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .padding(20)
         .glassCard(22)
