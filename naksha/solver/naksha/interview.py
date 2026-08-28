@@ -22,7 +22,11 @@ import urllib.error
 import urllib.request
 from typing import Dict, List, Optional, Tuple
 
-TIMEOUT = 30
+TIMEOUT = 45
+
+# Reasoning models bill their thinking against this, so it is not a cap on the
+# question length. Too small and `content` comes back empty.
+MAX_OUTPUT_TOKENS = 4096
 
 # --------------------------------------------------------------- the brief
 
@@ -218,32 +222,62 @@ def _complete(transcript: List[Dict]) -> str:
                       "anthropic-version": "2023-06-01"})
         return "".join(b.get("text", "") for b in data.get("content", []))
 
-    payload = {
-        "model": p["model"],
-        "max_tokens": 1200,
-        "messages": [{"role": "system", "content": SYSTEM}] + transcript,
-    }
+    messages = [{"role": "system", "content": SYSTEM}] + transcript
     headers = {"content-type": "application/json",
                "authorization": f"Bearer {p['key']}"}
     if p["label"] == "openrouter":
         headers["HTTP-Referer"] = "https://github.com/AyushIsOn/img"
         headers["X-Title"] = "NAKSHA"
 
-    # JSON mode where it is supported. Not every free model accepts the
-    # parameter, and a rejected request is indistinguishable from a bad key
-    # unless we retry without it, so that is exactly what happens.
-    try:
-        data = _post(p["url"],
-                     dict(payload, response_format={"type": "json_object"}),
-                     headers)
-    except urllib.error.HTTPError as exc:
-        if exc.code not in (400, 404, 415, 422):
-            raise
-        data = _post(p["url"], payload, headers)
+    # The budget is deliberately generous. gpt-oss and the Qwen 3 family are
+    # reasoning models whose thinking is billed against the same limit, so a
+    # tight cap returns an empty `content` and looks exactly like a failure.
+    # reasoning_effort is set low because this is one short structured question,
+    # not a problem that needs deliberation.
+    #
+    # Hosts disagree about parameter names and about which extras they accept,
+    # and a rejected parameter is indistinguishable from a bad key unless the
+    # request is retried. So the variants are tried in order, most capable
+    # first, falling back to the plainest request any host must accept.
+    variants: List[Dict] = [
+        {"max_completion_tokens": MAX_OUTPUT_TOKENS,
+         "response_format": {"type": "json_object"},
+         "reasoning_effort": "low"},
+        {"max_completion_tokens": MAX_OUTPUT_TOKENS,
+         "response_format": {"type": "json_object"}},
+        {"max_tokens": MAX_OUTPUT_TOKENS,
+         "response_format": {"type": "json_object"}},
+        {"max_tokens": MAX_OUTPUT_TOKENS},
+        {},
+    ]
 
-    choice = data["choices"][0]["message"]
-    # Reasoning models put the answer in content and their working elsewhere.
-    return choice.get("content") or choice.get("reasoning_content") or ""
+    last: Optional[Exception] = None
+    for extras in variants:
+        try:
+            data = _post(p["url"],
+                         dict({"model": p["model"], "messages": messages},
+                              **extras),
+                         headers)
+        except urllib.error.HTTPError as exc:
+            # 400 class means the request shape was wrong, so try a plainer
+            # one. Anything else is auth, rate limiting or the network, and
+            # retrying with fewer parameters would not help.
+            if exc.code not in (400, 404, 415, 422):
+                raise
+            last = exc
+            continue
+
+        choice = (data.get("choices") or [{}])[0].get("message", {})
+        text = (choice.get("content")
+                or choice.get("reasoning_content") or "").strip()
+        if text:
+            return text
+        # Reasoning consumed the whole budget. A plainer request usually
+        # leaves room for an answer.
+        last = RuntimeError("model returned no content, budget exhausted "
+                            "by reasoning")
+
+    raise last or RuntimeError("no usable reply from the model")
 
 
 def _extract_json(text: str) -> Dict:

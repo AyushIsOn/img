@@ -166,8 +166,23 @@ python3 serve.py --check-llm
 That makes one real request and prints the first question the model wrote. If it
 fails it says why rather than quietly carrying on.
 
-If the default model id has been retired, override it. Groq's older Llama ids
-were withdrawn in June 2026, which is the kind of thing that happens:
+#### Which Groq model
+
+The default is `openai/gpt-oss-120b`, which is the right choice. Of what Groq
+hosts, only a few are general chat models at all:
+
+| Model | Use |
+|---|---|
+| `openai/gpt-oss-120b` | **Default.** Best at returning clean structured JSON |
+| `openai/gpt-oss-20b` | Fallback if rate limited. Faster, slightly looser |
+| `qwen/qwen3.8-27b` | Reasonable alternative |
+| `groq/compound`, `compound-mini` | Avoid. Agentic, with web search and code execution we do not want |
+| `openai/gpt-oss-safeguard-20b` | Avoid. Moderation classifier |
+| `meta-llama/llama-prompt-guard-2-*` | Avoid. Injection classifiers, not chat |
+| `canopylabs/orpheus-*`, `whisper-*` | Avoid. Speech, not text |
+
+If a default id has been retired, override it. Groq's older Llama ids were
+withdrawn in June 2026, which is the kind of thing that happens:
 
 ```bash
 export NAKSHA_MODEL=openai/gpt-oss-20b
