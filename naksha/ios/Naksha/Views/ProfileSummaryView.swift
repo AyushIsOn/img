@@ -16,7 +16,7 @@ struct ProfileSummaryView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: 22) {
                 greeting
                 summaryCard
                 if !profile.appliances.isEmpty { applianceCard }
@@ -38,7 +38,7 @@ struct ProfileSummaryView: View {
         VStack(alignment: .leading, spacing: 6) {
             SectionLabel(text: "Your profile")
             BrandText(text: profile.name.map { "Thanks, \($0)." }
-                            ?? "Thanks.", size: 30)
+                            ?? "Thanks.", size: 34)
         }
     }
 
@@ -46,21 +46,29 @@ struct ProfileSummaryView: View {
         VStack(alignment: .leading, spacing: 16) {
             if !profile.summary.isEmpty {
                 Text(profile.summary)
-                    .font(.callout)
+                    .font(.title3.weight(.medium))
                     .foregroundStyle(Theme.ink)
+                    .lineSpacing(3)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            HStack(spacing: 0) {
-                metric(String(format: "%g", profile.sanctionKW), "kW sanction")
-                divider
-                metric(profile.bedrooms.map(String.init) ?? "?", "bedrooms")
-                divider
-                metric(profile.occupants.map(String.init) ?? "?", "people")
-                divider
-                metric(String(format: "%.1f",
-                              profile.indicativeConnectedW / 1000),
-                       "kW connected")
+            // Two by two rather than four across. Four columns on a phone left
+            // each label about 70 points wide, so "kW connected" and "bedrooms"
+            // were set at 9pt and still crowding each other.
+            VStack(spacing: 14) {
+                HStack(spacing: 14) {
+                    metric(String(format: "%g", profile.sanctionKW),
+                           "kW sanctioned")
+                    metric(String(format: "%.1f",
+                                  profile.indicativeConnectedW / 1000),
+                           "kW connected")
+                }
+                HStack(spacing: 14) {
+                    metric(profile.bedrooms.map(String.init) ?? "?",
+                           (profile.bedrooms == 1) ? "bedroom" : "bedrooms")
+                    metric(profile.occupants.map(String.init) ?? "?",
+                           (profile.occupants == 1) ? "person" : "people")
+                }
             }
 
             if overSanction {
@@ -77,21 +85,26 @@ struct ProfileSummaryView: View {
         .glassCard(22, tinted: true)
     }
 
-    private var divider: some View {
-        Rectangle().fill(Color.white.opacity(0.12))
-            .frame(width: 1, height: 30)
-    }
-
+    /// Each figure sits in its own tile. The value is the thing being read, so
+    /// it is set large, and the label under it is legible rather than a caption
+    /// squeezed into whatever space was left.
     private func metric(_ value: String, _ label: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(value)
-                .font(Brand.display(22))
+                .font(Brand.display(34))
                 .foregroundStyle(Brand.markGradient)
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
             Text(label)
-                .font(.system(size: 9, weight: .medium))
+                .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(Theme.muted)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 14)
+        .glassCard(14)
     }
 
     private var applianceCard: some View {
@@ -100,11 +113,11 @@ struct ProfileSummaryView: View {
             ForEach(profile.appliances) { item in
                 HStack(spacing: 12) {
                     Image(systemName: item.symbol)
-                        .font(.system(size: 14))
+                        .font(.system(size: 18))
                         .foregroundStyle(Brand.amber)
-                        .frame(width: 22)
+                        .frame(width: 26)
                     Text(item.display)
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundStyle(Theme.ink)
                     Spacer()
                     if item.count > 1 {
@@ -116,7 +129,7 @@ struct ProfileSummaryView: View {
             }
             Text("These are placed in the right rooms automatically once you "
                  + "scan, from the room type and its size.")
-                .font(.caption2)
+                .font(.caption)
                 .foregroundStyle(Theme.muted)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 2)

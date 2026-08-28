@@ -96,13 +96,6 @@ struct PlanCanvasView: View {
             ctx.stroke(path, with: .color(Theme.paperMuted),
                        style: StrokeStyle(lineWidth: 0.9, dash: [3, 2]))
 
-            let box = path.boundingRect
-            if box.width > 26 || box.height > 26 {
-                ctx.draw(Text(fixture.name.uppercased())
-                            .font(.system(size: 6, weight: .semibold))
-                            .foregroundColor(Theme.paperMuted),
-                         at: CGPoint(x: box.midX, y: box.midY))
-            }
         }
     }
 
@@ -125,25 +118,28 @@ struct PlanCanvasView: View {
             ctx.stroke(gap, with: .color(Theme.paper),
                        style: StrokeStyle(lineWidth: 3.4, lineCap: .butt))
 
-            // leaf, then the swing
+            // Leaf and swing, drawn into the room. Kept to two thirds of the
+            // opening: a true full-width arc is correct on a large-format
+            // drawing but dominates the sheet at phone size.
+            let reach = half * 1.3
             let hinge = CGPoint(x: c.x - along.dx * half,
                                 y: c.y - along.dy * half)
-            let leafEnd = CGPoint(x: hinge.x + normal.dx * half * 2,
-                                  y: hinge.y + normal.dy * half * 2)
+            let leafEnd = CGPoint(x: hinge.x + normal.dx * reach,
+                                  y: hinge.y + normal.dy * reach)
             var leaf = Path()
             leaf.move(to: hinge)
             leaf.addLine(to: leafEnd)
-            ctx.stroke(leaf, with: .color(Theme.wall), lineWidth: 1.0)
+            ctx.stroke(leaf, with: .color(Theme.wall), lineWidth: 0.9)
 
             var arc = Path()
             arc.move(to: leafEnd)
             arc.addQuadCurve(
-                to: CGPoint(x: hinge.x + along.dx * half * 2,
-                            y: hinge.y + along.dy * half * 2),
-                control: CGPoint(x: hinge.x + (along.dx + normal.dx) * half * 1.7,
-                                 y: hinge.y + (along.dy + normal.dy) * half * 1.7))
+                to: CGPoint(x: hinge.x + along.dx * reach,
+                            y: hinge.y + along.dy * reach),
+                control: CGPoint(x: hinge.x + (along.dx + normal.dx) * reach * 0.78,
+                                 y: hinge.y + (along.dy + normal.dy) * reach * 0.78))
             ctx.stroke(arc, with: .color(Theme.paperMuted),
-                       style: StrokeStyle(lineWidth: 0.7, dash: [2.5, 2]))
+                       style: StrokeStyle(lineWidth: 0.6, dash: [2, 2]))
         }
 
         for window in design.plan.windows {
@@ -173,9 +169,13 @@ struct PlanCanvasView: View {
         }
     }
 
-    /// Which way the wall runs at a point on the perimeter, and its inward
-    /// normal, both in screen space. Found from the nearest room edge, so it
-    /// works for any wall direction rather than assuming an axis.
+    /// Which way the wall runs at a point on the perimeter, and the normal
+    /// pointing into the room, both in screen space.
+    ///
+    /// Derived from the nearest room edge rather than assuming the wall is axis
+    /// aligned, so it holds for a rotated or non rectangular plan. The inward
+    /// test is done in plan space, where there is no flipped axis to reason
+    /// about, and only the result is converted.
     private func wallAxes(at plan: CGPoint)
         -> (along: Axis, normal: Axis)? {
         var best: (dist: CGFloat, a: CGPoint, b: CGPoint)?
@@ -192,16 +192,26 @@ struct PlanCanvasView: View {
         let dx = edge.b.x - edge.a.x, dy = edge.b.y - edge.a.y
         let len = hypot(dx, dy)
         guard len > 0 else { return nil }
-        // Screen y is flipped relative to plan y, hence the negation.
-        let along = Axis(dx: dx / len, dy: -dy / len)
-        return (along, Axis(dx: -along.dy, dy: along.dx))
+
+        // In plan space: the perpendicular has two directions, and the wrong
+        // one sends the door swinging out of the building. Take whichever
+        // points back towards the middle of the plan.
+        var nx = -dy / len, ny = dx / len
+        let centre = roomCentroid()
+        if nx * (centre.x - plan.x) + ny * (centre.y - plan.y) < 0 {
+            nx = -nx; ny = -ny
+        }
+
+        // Screen y runs the other way to plan y, so both are negated on the y
+        // component and nowhere else.
+        return (Axis(dx: dx / len, dy: -dy / len), Axis(dx: nx, dy: -ny))
     }
 
-    /// A unit direction in screen space. Declared here rather than reaching
-    /// for CGVector, whose availability is not worth depending on.
-    struct Axis {
-        let dx: CGFloat
-        let dy: CGFloat
+    private func roomCentroid() -> CGPoint {
+        let pts = design.plan.rooms.flatMap { $0.cgPolygon }
+        guard !pts.isEmpty else { return .zero }
+        return CGPoint(x: pts.reduce(0) { $0 + $1.x } / CGFloat(pts.count),
+                       y: pts.reduce(0) { $0 + $1.y } / CGFloat(pts.count))
     }
 
     private func distance(from p: CGPoint, toSegment a: CGPoint,
