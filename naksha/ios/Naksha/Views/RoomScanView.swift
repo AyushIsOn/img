@@ -337,45 +337,153 @@ final class RoomCaptureCoordinator: NSObject, RoomCaptureViewDelegate {
 
 enum RoomConverter {
 
-    /// Reduces a captured room to the floor polygon and doorway positions the
-    /// solver needs. Wall transforms are projected onto the floor plane and
-    /// their footprints combined into an axis aligned outline, which is
-    /// adequate for the rectilinear rooms this is aimed at and honest about
-    /// not handling curved or slanted walls.
+    /// Reduces a captured room to the floor outline and doorways the solver
+    /// needs.
+    ///
+    /// The outline is taken from RoomPlan's floor surface, which carries the
+    /// true polygon including bays, returns and non square corners. The
+    /// previous version took the bounding box of the wall endpoints, so a
+    /// carefully scanned room arrived at the solver as a plain rectangle no
+    /// matter what shape it actually was.
     static func convert(_ room: CapturedRoom, name: String,
                         kind: String) -> ScannedRoom {
-        var xs: [Float] = []
-        var zs: [Float] = []
+        let outline = floorOutline(room) ?? wallOutline(room)
+        let doorways: [[Double]] = room.doors.map { door in
+            let t = door.transform
+            // plan y runs opposite to ARKit z
+            return [Double(t.columns.3.x), Double(-t.columns.3.z)]
+        }
+        return ScannedRoom(name: name, kind: kind,
+                           polygon: outline, doorways: doorways)
+    }
+
+    // MARK: Outline recovery
+
+    /// Preferred source. `polygonCorners` is the measured floor boundary, so
+    /// concave rooms survive. Corners are in the surface's own space and are
+    /// lifted to world space through its transform.
+    private static func floorOutline(_ room: CapturedRoom) -> [[Double]]? {
+        let floor = room.floors.max {
+            $0.dimensions.x * $0.dimensions.y < $1.dimensions.x * $1.dimensions.y
+        }
+        guard let floor, floor.polygonCorners.count >= 3 else { return nil }
+        let projected: [SIMD2<Double>] = floor.polygonCorners.map { corner in
+            let world = floor.transform * SIMD4<Float>(corner.x, corner.y,
+                                                       corner.z, 1)
+            return SIMD2(Double(world.x), Double(-world.z))
+        }
+        let cleaned = simplify(ensureCounterClockwise(projected))
+        return cleaned.count >= 3 ? cleaned.map { [$0.x, $0.y] } : nil
+    }
+
+    /// Fallback for captures with no usable floor surface. Takes the convex
+    /// hull of the wall endpoints, which at least keeps slanted and angled
+    /// walls. It cannot represent a concave room, so it is second choice.
+    private static func wallOutline(_ room: CapturedRoom) -> [[Double]] {
+        var pts: [SIMD2<Double>] = []
         for wall in room.walls {
             let t = wall.transform
-            let centre = SIMD3<Float>(t.columns.3.x, t.columns.3.y,
-                                      t.columns.3.z)
+            let centre = SIMD3<Float>(t.columns.3.x, 0, t.columns.3.z)
             let half = wall.dimensions.x / 2
             let axis = SIMD3<Float>(t.columns.0.x, 0, t.columns.0.z)
             let unit = simd_length(axis) > 0 ? simd_normalize(axis)
                                              : SIMD3<Float>(1, 0, 0)
-            let a = centre - unit * half
-            let b = centre + unit * half
-            xs.append(contentsOf: [a.x, b.x])
-            zs.append(contentsOf: [a.z, b.z])
+            for end in [centre - unit * half, centre + unit * half] {
+                pts.append(SIMD2(Double(end.x), Double(-end.z)))
+            }
         }
-        guard let minX = xs.min(), let maxX = xs.max(),
-              let minZ = zs.min(), let maxZ = zs.max() else {
-            return ScannedRoom(name: name, kind: kind,
-                               polygon: [], doorways: [])
+        guard pts.count >= 3 else { return [] }
+        let hull = convexHull(pts)
+        let cleaned = simplify(ensureCounterClockwise(hull))
+        return cleaned.count >= 3 ? cleaned.map { [$0.x, $0.y] } : []
+    }
+
+    // MARK: Geometry helpers
+
+    private static func signedArea(_ poly: [SIMD2<Double>]) -> Double {
+        guard poly.count > 2 else { return 0 }
+        var sum = 0.0
+        for i in poly.indices {
+            let a = poly[i], b = poly[(i + 1) % poly.count]
+            sum += a.x * b.y - b.x * a.y
         }
-        // plan y runs opposite to ARKit z
-        let polygon: [[Double]] = [
-            [Double(minX), Double(-maxZ)],
-            [Double(maxX), Double(-maxZ)],
-            [Double(maxX), Double(-minZ)],
-            [Double(minX), Double(-minZ)],
-        ]
-        let doorways: [[Double]] = room.doors.map { door in
-            let t = door.transform
-            return [Double(t.columns.3.x), Double(-t.columns.3.z)]
+        return sum / 2
+    }
+
+    /// The solver assumes a consistent winding for inside tests and for
+    /// walking the perimeter, so normalise it here rather than there.
+    private static func ensureCounterClockwise(
+        _ poly: [SIMD2<Double>]) -> [SIMD2<Double>] {
+        signedArea(poly) < 0 ? poly.reversed() : poly
+    }
+
+    /// Drops duplicate and near collinear corners.
+    ///
+    /// A scanned outline can carry dozens of corners a few millimetres apart.
+    /// Routing happens on a 0.5 m ceiling grid, so anything finer is noise
+    /// that only enlarges the Steiner problem without changing the answer.
+    private static func simplify(_ poly: [SIMD2<Double>],
+                                 tolerance: Double = 0.08) -> [SIMD2<Double>] {
+        guard poly.count > 3 else { return poly }
+
+        var deduped: [SIMD2<Double>] = []
+        for p in poly {
+            if let last = deduped.last,
+               hypot(p.x - last.x, p.y - last.y) < tolerance { continue }
+            deduped.append(p)
         }
-        return ScannedRoom(name: name, kind: kind,
-                           polygon: polygon, doorways: doorways)
+        if let first = deduped.first, let last = deduped.last,
+           deduped.count > 1,
+           hypot(first.x - last.x, first.y - last.y) < tolerance {
+            deduped.removeLast()
+        }
+        guard deduped.count > 3 else { return deduped }
+
+        var kept: [SIMD2<Double>] = []
+        for i in deduped.indices {
+            let prev = deduped[(i - 1 + deduped.count) % deduped.count]
+            let here = deduped[i]
+            let next = deduped[(i + 1) % deduped.count]
+            let ax = next.x - prev.x, ay = next.y - prev.y
+            let span = hypot(ax, ay)
+            guard span > 1e-9 else { continue }
+            // perpendicular distance from `here` to the line prev->next
+            let deviation = abs(ax * (prev.y - here.y)
+                                - ay * (prev.x - here.x)) / span
+            if deviation > tolerance { kept.append(here) }
+        }
+        return kept.count >= 3 ? kept : deduped
+    }
+
+    /// Andrew's monotone chain.
+    private static func convexHull(
+        _ points: [SIMD2<Double>]) -> [SIMD2<Double>] {
+        let pts = points.sorted { $0.x == $1.x ? $0.y < $1.y : $0.x < $1.x }
+        guard pts.count > 2 else { return pts }
+
+        func cross(_ o: SIMD2<Double>, _ a: SIMD2<Double>,
+                   _ b: SIMD2<Double>) -> Double {
+            (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x)
+        }
+
+        var lower: [SIMD2<Double>] = []
+        for p in pts {
+            while lower.count >= 2,
+                  cross(lower[lower.count - 2], lower[lower.count - 1], p) <= 0 {
+                lower.removeLast()
+            }
+            lower.append(p)
+        }
+        var upper: [SIMD2<Double>] = []
+        for p in pts.reversed() {
+            while upper.count >= 2,
+                  cross(upper[upper.count - 2], upper[upper.count - 1], p) <= 0 {
+                upper.removeLast()
+            }
+            upper.append(p)
+        }
+        lower.removeLast()
+        upper.removeLast()
+        return lower + upper
     }
 }
