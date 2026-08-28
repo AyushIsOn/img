@@ -44,6 +44,9 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.d38n.naksha
         SWIFT_VERSION: "5.9"
-        TARGETED_DEVICE_FAMILY: "1,2"
+        # iPhone only. The app needs a LiDAR phone, and including
+        # iPad forces every orientation to be declared, which is
+        # wrong for a scanner held in portrait.
+        TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: NO
         ENABLE_USER_SCRIPT_SANDBOXING: NO

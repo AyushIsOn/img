@@ -476,12 +476,16 @@ struct ARContainer: UIViewRepresentable {
                 extrusionDepth: 0.0008,
                 font: .systemFont(ofSize: 0.052, weight: .semibold),
                 containerFrame: .zero,
-                alignmentMode: .center,
+                alignment: .center,
                 lineBreakMode: .byTruncatingTail)
             let glyphs = ModelEntity(mesh: mesh, materials: [glow(colour)])
-            // The centring offset lives on the child, so the caller is free to
-            // position and rotate the holder without undoing it.
-            glyphs.position = -glyphs.visualBounds(relativeTo: nil).center
+            // Text meshes are laid out from a baseline at the left, so without
+            // this every caption drifts further right the longer it is. Bounds
+            // are read from the mesh rather than from the entity's visualBounds,
+            // which takes an optional reference entity and needs annotating.
+            glyphs.position = -mesh.bounds.center
+            // The offset lives on the child, so the caller can position and
+            // rotate the holder without undoing the centring.
             let holder = ModelEntity()
             holder.addChild(glyphs)
             return holder
