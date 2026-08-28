@@ -19,9 +19,12 @@ from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
-from reportlab.platypus import (BaseDocTemplate, Frame, KeepTogether,
+import os
+
+from reportlab.platypus import (BaseDocTemplate, Frame, Image, KeepTogether,
                                 NextPageTemplate, PageBreak, PageTemplate,
                                 Paragraph, Spacer, Table, TableStyle)
+from reportlab.lib.utils import ImageReader
 
 import report_content as C
 
@@ -134,7 +137,26 @@ def build() -> None:
 
     # -------------------------------------------------------------- body
     body_words = 0
+    exhibit_no = 0
+    missing_images = []
     for kind, text in C.BODY:
+        if kind == "img":
+            path, caption, width_cm = [x.strip() for x in text.split("|")]
+            exhibit_no += 1
+            if not os.path.exists(path):
+                missing_images.append(path)
+                continue
+            # Scale to the requested width, preserving the aspect ratio, and
+            # never wider than the text block.
+            iw, ih = ImageReader(path).getSize()
+            w = min(float(width_cm) * cm, doc.width)
+            story.append(KeepTogether([
+                Spacer(1, 4),
+                Image(path, width=w, height=w * ih / iw, hAlign="CENTER"),
+                Paragraph(f"Exhibit {exhibit_no}. {caption}", s["caption"]),
+            ]))
+            continue
+
         if kind == "t":
             rows = [C.TABLE_HEADER] + [r.split("|") for r in text.split("\n")]
             table = Table(rows, hAlign="LEFT",
@@ -153,7 +175,7 @@ def build() -> None:
             ]))
             story.append(KeepTogether([
                 table,
-                Paragraph("Exhibit 1. Conduit length by routing method, "
+                Paragraph("Exhibit. Conduit length by routing method, "
                           "measured on three house types. Radial is one run "
                           "per point. Topology saving is the reduction from "
                           "sharing conduit as a Steiner tree. Board siting is "
@@ -190,6 +212,12 @@ def build() -> None:
     print(f"  references never cited: {missing or 'none'}")
     dangling = [n for n in used if n > len(C.REFERENCES)]
     print(f"  markers with no reference: {dangling or 'none'}")
+    print(f"  exhibits placed: {exhibit_no - len(missing_images)}"
+          f" of {exhibit_no}")
+    if missing_images:
+        print("  MISSING IMAGE FILES, exhibits skipped:")
+        for m in missing_images:
+            print(f"    {m}")
     print(f"  Times New Roman 11pt, {LEADING}pt leading (1.5), "
           f"{MARGIN / cm:.0f} cm margins")
 
