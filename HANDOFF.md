@@ -53,6 +53,10 @@ refactor the app unless asked.
 | 3 exhibit images | **Placeholders. Only the user can fix.** |
 | `NAKSHA-VIDEO-SCRIPT.md` | **Stale, contradicts the report. See section 10.** |
 | `VIDEO-SCRIPT.md` | **Belongs to a different project. See section 10.** |
+| `naksha/README.md` | **Stale. Carries the removed 42% claim AND the forbidden benchmark table. See 10.4.** |
+| `naksha/ios/README.md` | **Stale. Describes the old AR method and the old rectangle limitation. See 10.5.** |
+| `naksha/SETUP.md` | **Stale. Tells you to quote the forbidden benchmark table. See 10.6.** |
+| `naksha/docs/examples/benchmark.txt` | Contains the forbidden numbers. Harmless as a file, see 10.7. |
 
 ## 2.1 Open items, in priority order
 
@@ -77,12 +81,29 @@ unless asked.
 
 # 3. Repository map
 
+**The repo is not only NAKSHA.** 145 tracked files, of which about 74 are this project. The rest
+belong to unrelated work and should be left alone:
+
+| Path | Files | What it is |
+|---|---|---|
+| `naksha/` | 53 | **NAKSHA app and solver** |
+| `vguard-bigidea/` | 21 | **NAKSHA report and deliverables** |
+| `website/` | 34 | Unrelated. A quantum computing site, with university logos |
+| `Untitled (7)/`, `Untitled (8)/` | 16 | Unrelated design assets |
+| root | 21 | Unrelated SVGs, PNGs, `Desktop - 1.pdf`, `CEED_RESOURCES.md` (CEED exam link vault) |
+
+Two consequences. First, `git add -A` will sweep in unrelated files, so **always stage NAKSHA
+files by name**. Second, `website/assets/logos/manipal.png` exists in this repo. That is only an
+asset and it is not in the report, but the report rule is that no institution name appears in the
+deliverable, so do not let repo paths leak into a document.
+
 ```
 HANDOFF.md                       this file
-CEED_RESOURCES.md                unrelated to NAKSHA, ignore
+CEED_RESOURCES.md                unrelated, CEED exam prep link vault, ignore
 naksha/
   28_8_2026.glb                  LiDAR scan of the user's real room, dimensional ground truth
-  README.md, SETUP.md
+  README.md            161 ln    STALE, see 10.4. Has the 42% claim and the benchmark table
+  SETUP.md             358 ln    STALE in parts, see 10.6, but the only setup guide there is
   .gitignore                     line 10 ignores .naksha-key
   solver/
     serve.py           312 ln    HTTP server, the only thing the phone talks to
@@ -100,8 +121,8 @@ naksha/
       draw.py          371 ln    three drawing sheets
       plans.py         166 ln    sample 1/2/3 BHK plans
   ios/
-    project.yml                  XcodeGen spec. NO .xcodeproj in git, you must generate it
-    README.md
+    project.yml           52 ln  XcodeGen spec. NO .xcodeproj in git, you must generate it
+    README.md            122 ln  STALE, see 10.5. Wrong iOS version and wrong AR method
     Naksha/
       NakshaApp.swift         63 ln
       DesignSystem/
@@ -165,6 +186,7 @@ abandoned in favour of NAKSHA.
 cd /Users/izhu/Documents/img && git checkout main && git pull
 
 # iOS. There is no committed .xcodeproj, it is generated
+brew install xcodegen
 cd naksha/ios && xcodegen generate && open Naksha.xcodeproj
 #   Set your own signing team.
 #   Needs a LiDAR device, iPhone 12 Pro or later. RoomPlan and ARKit
@@ -195,9 +217,75 @@ cd vguard-bigidea && python3 make_diagram.py && python3 build_docx.py && python3
 cd naksha/solver && python3 run.py
 ```
 
-Environment variables: `NAKSHA_ASBUILT=1` serves the hardcoded real room. `NAKSHA_MODEL`
-overrides the model id if the default is retired. `GROQ_API_KEY` works as an alternative to the
-key file.
+## 4.1 Build settings, from `project.yml`
+
+These are authoritative. **Both in-repo READMEs state the wrong iOS version.**
+
+| Setting | Value |
+|---|---|
+| Deployment target | **iOS 18.0**, the floor for `MeshGradient` which draws the animated backdrop |
+| Xcode | **26** is needed to build, because Liquid Glass is iOS 26 API behind availability checks |
+| Swift | 5.9 |
+| Bundle id | `com.d38n.naksha`, prefix `com.d38n` |
+| Device family | `1`, **iPhone only**. iPad would force declaring every orientation, wrong for a scanner held in portrait |
+| Display name | NAKSHA |
+| Orientations | portrait, landscape left, landscape right |
+| Required capability | `arkit` |
+| `NSCameraUsageDescription` | set in `project.yml`, RoomPlan and ARKit both refuse to start without it |
+| `GENERATE_INFOPLIST_FILE` | NO, the Info.plist is generated from `project.yml` |
+| `ENABLE_USER_SCRIPT_SANDBOXING` | NO |
+
+Liquid Glass runs on iOS 18 with a material fallback, so the app degrades rather than failing.
+
+## 4.2 `run.py` outputs, five files per plan
+
+```bash
+python3 run.py 2bhk --out out       # also 1bhk, 3bhk
+```
+
+| File | Contents |
+|---|---|
+| `2bhk-sheet1-layout.png` | Layout plan, every device point, legend, load summary |
+| `2bhk-sheet2-circuits.png` | Circuit grouping, conduit routing, circuit schedule |
+| `2bhk-sheet3-schematic.png` | Single line diagram, bill of quantities, design checks |
+| `2bhk-boq.csv` | Bill of quantities, opens in Excel |
+| `2bhk-design.json` | **The full design. This is what the iOS app reads.** |
+
+Rendered copies of all of these for 1, 2 and 3 BHK are committed in
+`naksha/docs/examples/`. To use your own design in the app, replace
+`naksha/ios/Naksha/Resources/sample-2bhk.json` with any `*-design.json`; the schema is identical.
+
+## 4.3 Environment variables, complete list
+
+| Variable | Effect |
+|---|---|
+| `NAKSHA_ASBUILT=1` | Serve the hardcoded real room instead of a scan |
+| `NAKSHA_MODEL` | Override the model id if a default is retired |
+| `GROQ_API_KEY` | Groq, free, no card. **What is in use** |
+| `GEMINI_API_KEY` or `GOOGLE_API_KEY` | Google, free tier |
+| `OPENROUTER_API_KEY` | OpenRouter, free models, survives model delistings |
+| `OPENAI_API_KEY` | OpenAI, paid |
+| `ANTHROPIC_API_KEY` | Anthropic, paid |
+| `NAKSHA_BASE_URL` plus `NAKSHA_API_KEY` | Any other OpenAI compatible host |
+
+**With no key at all the app still works.** The server answers from a scripted question set, the
+flow is identical, and the app labels which is running, "AI interview" or "Standard questions", so
+nothing is overclaimed. A demo cannot be lost to a missing key.
+
+## 4.4 Dependency notes
+
+The server itself only needs `networkx`. `numpy` and `matplotlib` are only for the drawing sheets
+`run.py` produces, so `pip install networkx` is enough if you only want the app talking to the
+solver. Python 3.9 or newer.
+
+If pip refuses with `externally-managed-environment`, which Homebrew Python does:
+
+```bash
+cd naksha/solver && python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt && python3 serve.py
+```
+
+Every new terminal then needs `source .venv/bin/activate` before `serve.py`.
 
 ## 4.1 Server API, read from `serve.py`
 
@@ -403,6 +491,42 @@ is the name of the homeowner?". Prompt only fixes were tried and did not hold.
 
 `_extract_json` is defensive for a reason: it strips a ```json fence if present, otherwise takes
 the substring from the first `{` to the last `}`.
+
+## 7.2 Which Groq model, and what to avoid
+
+Of what Groq hosts, only a few are general chat models at all.
+
+| Model | Verdict |
+|---|---|
+| `openai/gpt-oss-120b` | **In use.** Best at returning clean structured JSON |
+| `openai/gpt-oss-20b` | **Not usable. 403, blocked at org level.** `SETUP.md` wrongly lists it as the rate limit fallback |
+| `qwen/qwen3.8-27b` | Untested here, listed as a reasonable alternative |
+| `groq/compound`, `compound-mini` | Avoid. Agentic, with web search and code execution that is not wanted |
+| `openai/gpt-oss-safeguard-20b` | Avoid. Moderation classifier, not chat |
+| `meta-llama/llama-prompt-guard-2-*` | Avoid. Injection classifiers, not chat |
+| `canopylabs/orpheus-*`, `whisper-*` | Avoid. Speech, not text |
+
+Groq retires model ids. Their older Llama ids were withdrawn in June 2026. If the default is
+rejected, set `NAKSHA_MODEL`. `serve.py --check-llm` makes one real request and prints the first
+question the model wrote, and says why if it fails rather than carrying on quietly.
+
+## 7.3 Troubleshooting, condensed from `SETUP.md`
+
+| Symptom | Cause and fix |
+|---|---|
+| `ModuleNotFoundError: No module named 'networkx'` | Dependencies not installed |
+| `externally-managed-environment` from pip | Homebrew Python. Use a venv, see 4.4 |
+| "sample-2bhk.json is missing from the app bundle" | Not in Copy Bundle Resources. Target, Build Phases, add it |
+| RoomPlan screen greyed out | No LiDAR on that device. Use the plan import or sketch path |
+| AR screen is black | `NSCameraUsageDescription` missing, or you are in the Simulator. AR needs a real device |
+| AR overlay in the wrong place | Expected. Registration is manual by design |
+| "No solver address set" | Expected with no address. Start `serve.py` and paste the address, or open the sample design |
+| Test connection fails but the server is running | Phone on a different Wi-Fi; or the network blocks device to device traffic, common on campus and hotel Wi-Fi, so use a personal hotspot; or the Mac firewall is asking to allow Python. Confirm with `curl http://localhost:8000/health` |
+| "could not design this plan" | A scan closed with a degenerate outline. The `serve.py` terminal prints the reason. Rescan that room |
+| Maximum demand exceeds sanctioned load | **Not an error, it is the finding.** Change `sanctioned_load_w` in `plans.py` to clear it |
+| matplotlib complains about a display | Backend is forced to Agg in `draw.py`. You imported matplotlib somewhere else first |
+
+The phone and the Mac must be on the same Wi-Fi. A phone hotspot with the Mac joined to it works.
 
 ---
 
@@ -773,7 +897,24 @@ deciding, at the one moment the decision is still open.
 
 ---
 
-# 10. Video, and two stale documents
+# 10. Stale documents in the repo. Read this before trusting any of them.
+
+**Five committed documents contradict the current state of the project.** They were written
+earlier and never updated. A fresh agent that trusts them will reintroduce claims the user
+already had removed. The most dangerous single line in the repo is in `SETUP.md`, which tells you
+to quote the exact table that rule 1 forbids.
+
+| Document | Trust it? |
+|---|---|
+| `vguard-bigidea/report_content.py` | **Yes.** This is the source of truth for all report content |
+| `HANDOFF.md` | Yes, this file |
+| `naksha/SETUP.md` | Setup steps yes, claims and AR description no. See 10.6 |
+| `naksha/README.md` | **No.** See 10.4 |
+| `naksha/ios/README.md` | **No.** See 10.5 |
+| `vguard-bigidea/NAKSHA-VIDEO-SCRIPT.md` | **No.** See 10.1 |
+| `vguard-bigidea/VIDEO-SCRIPT.md` | **No, different project.** See 10.2 |
+
+## 10.0 Video plan
 
 The user's plan: **a one minute demo video** recorded from the running app, uploaded to Google
 Drive, linked under the synopsis. "we are only gonna submit a video of this demo". The demo does
@@ -821,6 +962,89 @@ So: the interview, the scan, the drawing, then the AR overlay. The AR overlay is
 even though alignment is imperfect. The controls overlay is hideable so it can be cut cleanly.
 Run the server with `NAKSHA_ASBUILT=1` so the real surveyed room is served and the output is
 known good.
+
+## 10.4 `naksha/README.md`, stale and carries two forbidden items
+
+161 lines. Genuinely useful for the pipeline explanation, dangerous for its claims.
+
+**Wrong or forbidden:**
+- **Says "Roughly 42% of building fires in India are attributed to electrical short circuits".**
+  This is the claim removed from the report as unsourceable. See rule 3.
+- **Reproduces the full benchmark table**, 45.8% topology, 7.7% board, 50.1% total. See rule 1.
+  Note its numbers differ slightly from `benchmark.txt`, 49.7% and 57.9% versus 49.7% and 57.5%,
+  because they were generated from different runs. Neither belongs in the report.
+- Says Team **D38N**. The correct team name is **TI3405_D38N**.
+- Its repository layout omits `serve.py`, `interview.py`, `asbuilt.py` and `ingest.py`, all of
+  which exist and matter.
+- Says a floor "requires stitching several scans" as an open task, and describes `RoomConverter`
+  as reducing rooms to rectangles, which was fixed.
+
+**Worth keeping.** The pipeline table is the clearest statement of the engine anywhere, and these
+formulations are good enough to reuse:
+- Lumen method as a formula: `N = (E x A) / (lm x CU x LLF)`
+- Board siting described precisely: "facility location, 1-median over the routing graph using a
+  metric-closure MST cost"
+- Routing described precisely: "obstacle-avoiding rectilinear Steiner tree per circuit, on a
+  ceiling grid clipped to the rooms and linked at doorways"
+- The framing that house wiring is the same problem as printed circuit board routing, NP-hard in
+  general, solved by chip designers since the 1970s, and instant at 8 to 15 points per circuit
+- "A probabilistic model is never permitted to make a safety decision"
+- The finding that on every sample plan maximum demand exceeds the sanctioned load once diversity
+  is applied, and nothing in the current process tells the owner before the walls close
+
+## 10.5 `naksha/ios/README.md`, stale on four counts
+
+122 lines.
+
+| Says | Actually |
+|---|---|
+| Deployment target **iOS 17**, Xcode 15+ | **iOS 18.0**, and Xcode 26 to build Liquid Glass. See 4.1 |
+| AR: "user taps the floor to set the origin, then adjusts heading and ceiling with two sliders" | **Replaced.** The user taps **two floor corners**. The slider approach was explicitly rejected, see 12.1 |
+| "`RoomConverter` reduces each room to an axis aligned rectangle" | **Fixed.** It reads `polygonCorners`, so shapes are preserved. See 6.3 |
+| "The remote solver path is written but there is no server in this repo yet" | `serve.py` exists and is what the phone talks to |
+| "`QuestionEngine` is deterministic today, `LLMQuestionSource` is the seam where a model can take over" | The LLM **is** wired and live on Groq |
+
+Its screen table also omits `InterviewView`, `RoomBriefView`, `ProfileSummaryView`,
+`SolverSettingsView` and `PlanImportView`.
+
+Worth keeping: the data flow sketch, and the note that `DesignStore` is the only place that
+decides where a design comes from, so leaving `solverEndpoint` nil uses the bundled sample.
+
+## 10.6 `naksha/SETUP.md`, the setup steps are good, the claims are not
+
+358 lines, and **the only real setup guide in the repo.** Sections 4.1 through 4.4, 7.2 and 7.3 of
+this document were reconstructed from it. Use it for installation. Do not trust it on these:
+
+- **"This is the table to quote in the Feasibility section", about `benchmark.py`.** This is the
+  single most dangerous line in the repo. **Rule 1 forbids exactly that.** The user had those
+  numbers removed from the report on purpose.
+- **"No language model is connected. The question flow is deterministic ... do not claim it."**
+  No longer true. The LLM is live on Groq.
+- AR described as "tap the floor to drop the origin, then adjust heading and ceiling", and
+  "Reposition, tap the floor again at a known corner, then set heading with the slider". Both
+  describe the replaced method.
+- Step 7 of the manual Xcode route says set deployment target to **iOS 17**. It is 18.0.
+- "Traced and scanned rooms become axis aligned rectangles." Fixed.
+- Lists `openai/gpt-oss-20b` as the rate limit fallback. It returns 403, blocked at org level.
+- Its status table says the AI question flow is "Partial, rule driven". It is now real.
+
+Still accurate and worth keeping: the room packing explanation (rooms become rectangles of the
+measured area, packed into a connected layout with doorways inferred where two rooms share a
+wall, because area drives lighting and room type drives sockets, so schedule and quantities stay
+sound while absolute geometry does not), the 0.5 m ceiling routing grid, and that bill of
+quantities prices are indicative placeholders rather than a catalogue feed.
+
+## 10.7 `naksha/docs/examples/benchmark.txt`
+
+22 lines, the generated benchmark output. Contains the forbidden numbers. It is fine as a
+committed artefact of the engine; the rule is about the report, not the repo. It also carries a
+caveat worth understanding: pure radial is the worst case, experienced electricians already loop
+lighting points in and out which recovers part of the topology saving, so the topology figure is
+an upper bound and the board siting figure is the clean result because it holds topology constant.
+
+The numbers, recorded here **only** so nobody re-derives them and assumes they are quotable:
+topology 45.8% mean, board 7.7% mean, total 50.1% mean, across 1 BHK 48 m², 2 BHK 84 m² and
+3 BHK 130 m². **Do not put these in the report.**
 
 ---
 
@@ -924,6 +1148,10 @@ switchboard, light, fan, socket, then others.
    house buy less wire argues against the proposal. The commercial case is which brand gets
    specified, not how much is consumed. A note at the top of `report_content.py` says so.
    Keeping it as feasibility proof was explicitly considered and rejected.
+   **Those numbers appear in three committed files: `benchmark.py` generates them,
+   `naksha/docs/examples/benchmark.txt` records them, and `naksha/README.md` reproduces the whole
+   table. Worse, `naksha/SETUP.md` explicitly instructs the reader to quote them in the
+   Feasibility section. Ignore that instruction.** See 10.6.
 2. **The Berger line is "To this day my father still curses Berger paint".** An earlier agent
    wrote "My father still complains about the price", which the user never said and called out:
    "dude you are halucinating a lot when did i say My father still complains about the price".
@@ -932,7 +1160,8 @@ switchboard, light, fan, socket, then others.
    incidents over five years, from The Hindu 2026, with Delhi Fire Service at over 80% alongside
    it. A previous "42% of building fires" claim was unsourceable and was removed. NCRB 2024 puts
    electrical causes near 17.5% nationally, so 42% matches neither end. Do not reintroduce it.
-   **It is still present in `NAKSHA-VIDEO-SCRIPT.md` and must be removed there too.**
+   **It survives in two committed files: `vguard-bigidea/NAKSHA-VIDEO-SCRIPT.md` as "forty-two
+   percent" and `naksha/README.md` as "Roughly 42%". Both need removing.**
 4. **No em dashes, and no hyphens used as sentence punctuation, in deliverables.** User
    preference.
 5. **The LLM never engineers.** Conversation to profile only. The rule engine does all sizing,
@@ -973,6 +1202,13 @@ switchboard, light, fan, socket, then others.
 15. **Add a two or three line brief of what you actually did** to the end of every response.
     Standing user instruction: "ALSO FROM NOW ON REMEMBER TO ADD A SHORT TWO THREE LINE BRIEF
     ABOUT WHAT YOU DID".
+16. **Do not trust the in-repo READMEs.** `naksha/README.md`, `naksha/ios/README.md` and
+    `naksha/SETUP.md` predate the current build and contradict it on the iOS version, the AR
+    method, whether the LLM is connected, whether room shapes are preserved, the team name, and
+    whether the benchmark table may be quoted. Section 10 lists every discrepancy. When this
+    document and a README disagree, **this document and the code win**. Ideally, fix the READMEs.
+17. **Stage NAKSHA files by name.** The repo contains three unrelated projects, so `git add -A`
+    will sweep in a quantum computing website and design assets. See section 3.
 
 ## 12.1 Rejected alternatives, so they are not re-proposed
 
@@ -1018,10 +1254,20 @@ switchboard, light, fan, socket, then others.
 - PDF export of the drawing sheets from the phone.
 - AR alignment, if the user reopens it.
 
+**Worth doing if there is time, to stop the next person being misled**
+- Fix `naksha/README.md`: remove the 42% claim, remove or caveat the benchmark table, correct the
+  team name to `TI3405_D38N`, add the missing solver files to the layout listing.
+- Fix `naksha/ios/README.md`: iOS 18.0 not 17, Xcode 26, two corner AR registration, polygon room
+  shapes, the server exists, the LLM is wired.
+- Fix `naksha/SETUP.md`: delete the instruction to quote the benchmark table, update the LLM
+  status, correct the AR description and the iOS version, drop `gpt-oss-20b` as a fallback.
+- Delete or clearly archive the INVIDIA CORE files so they cannot be confused for NAKSHA material.
+
 **Never**
 - Re-add the saving figures.
 - Re-add the 42% fire claim.
 - Let INVIDIA CORE material into NAKSHA deliverables.
+- Trust a README over the code.
 
 ---
 
